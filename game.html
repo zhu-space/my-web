@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>跳一跳 · 躲避大师</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1119;
+    --accent: #39c5cf;
+    --danger: #ff5252;
+    --gold: #ffd740;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .game-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 3 / 5;
+    background: linear-gradient(180deg, #1a1d2e 0%, #131620 100%);
+    border: 1px solid #252a3a;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(57, 197, 207, 0.08);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 覆盖层 */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .overlay.active { pointer-events: auto; }
+
+  .overlay-title {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), #7c5cfc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.04em;
+  }
+
+  .overlay-score {
+    font-size: 56px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+  }
+  .overlay-label {
+    font-size: 13px;
+    color: #546e7a;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    padding: 12px 36px;
+    border-radius: 999px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.25s;
+    font-family: inherit;
+  }
+  .btn-start {
+    background: var(--accent);
+    color: #0a0e14;
+    box-shadow: 0 4px 20px rgba(57, 197, 207, 0.3);
+  }
+  .btn-start:active { transform: scale(0.96); }
+
+  .btn-share {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn-share:active { background: rgba(57,197,207,0.1); }
+
+  .btn-row { display: flex; gap: 10px; }
+
+  .best-score {
+    font-size: 13px;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tip {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #546e7a;
+    z-index: 2;
+    pointer-events: none;
+    animation: fadeInOut 2s ease-in-out infinite;
+  }
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="game-container" id="gameContainer">
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- 开始界面 -->
+  <div class="overlay active" id="startScreen">
+    <p class="overlay-title">躲避大师</p>
+    <p class="overlay-label">点击屏幕跳跃 · 躲避障碍物</p>
+    <button class="btn btn-start" id="btnStart">开始游戏</button>
+    <div class="best-score" id="bestDisplay">🏆 最高分 0</div>
+  </div>
+
+  <!-- 结束界面 -->
+  <div class="overlay hidden" id="endScreen">
+    <p class="overlay-label">本次得分</p>
+    <p class="overlay-score" id="finalScore">0</p>
+    <div class="best-score" id="bestEnd">🏆 最高分 0</div>
+    <div class="btn-row">
+      <button class="btn btn-share" id="btnShare">📤 分享成绩</button>
+      <button class="btn btn-start" id="btnRetry">再来一局</button>
+    </div>
+  </div>
+
+  <p class="tip" id="tip">👆 点击屏幕跳跃</p>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  const container = document.getElementById("gameContainer");
+
+  const startScreen = document.getElementById("startScreen");
+  const endScreen = document.getElementById("endScreen");
+  const finalScoreEl = document.getElementById("finalScore");
+  const bestDisplay = document.getElementById("bestDisplay");
+  const bestEnd = document.getElementById("bestEnd");
+  const tip = document.getElementById("tip");
+
+  // 画布实际分辨率
+  const W = 400, H = 666;
+  let scale = 1;
+
+  // 游戏状态
+  const STATE = { IDLE: 0, PLAYING: 1, OVER: 2 };
+  let state = STATE.IDLE;
+  let score = 0;
+  let bestScore = parseInt(localStorage.getItem("dodgeBest") || "0");
+
+  // 玩家
+  const PLAYER_W = 32, PLAYER_H = 32;
+  let player = { x: 80, y: 0, vy: 0, grounded: true };
+
+  const GRAVITY = 1800;
+  const JUMP_VEL = -680;
+  const GROUND_Y = H - 80;
+
+  // 障碍物
+  let obstacles = [];
+  let obstacleTimer = 0;
+  let obstacleInterval = 1.5;
+  let speed = 280;
+
+  // 粒子效果
+  let particles = [];
+
+  // 星空背景
+  let stars = [];
+  for (let i = 0; i < 60; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.5,
+      twinkle: Math.random() * Math.PI * 2,
+    });
+  }
+
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    const w = rect.width;
+    canvas.width = W;
+    canvas.height = H;
+    scale = w / W;
+  }
+
+  // ---- 游戏逻辑 ----
+  function reset() {
+    player.y = GROUND_Y - PLAYER_H;
+    player.vy = 0;
+    player.grounded = true;
+    obstacles = [];
+    particles = [];
+    obstacleTimer = 0;
+    obstacleInterval = 1.5;
+    speed = 280;
+    score = 0;
+  }
+
+  function jump() {
+    if (!player.grounded) return;
+    player.vy = JUMP_VEL;
+    player.grounded = false;
+  }
+
+  function spawnObstacle() {
+    const h = 28 + Math.random() * 36;
+    obstacles.push({
+      x: W + 20,
+      y: GROUND_Y - h,
+      w: 18 + Math.random() * 14,
+      h: h,
+      scored: false,
+    });
+  }
+
+  function spawnParticles(x, y) {
+    for (let i = 0; i < 8; i++) {
+      particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 120,
+        vy: (Math.random() - 0.8) * 180,
+        life: 0.5 + Math.random() * 0.4,
+        maxLife: 0.5 + Math.random() * 0.4,
+        r: 2 + Math.random() * 3,
+        color: Math.random() > 0.5 ? "#39c5cf" : "#7c5cfc",
+      });
+    }
+  }
+
+  function update(dt) {
+    if (state !== STATE.PLAYING) return;
+
+    const capped = Math.min(dt, 0.05);
+
+    // 玩家物理
+    player.vy += GRAVITY * capped;
+    player.y += player.vy * capped;
+    if (player.y >= GROUND_Y - PLAYER_H) {
+      player.y = GROUND_Y - PLAYER_H;
+      player.vy = 0;
+      player.grounded = true;
+    }
+
+    // 障碍物
+    obstacleTimer += capped;
+    if (obstacleTimer >= obstacleInterval) {
+      obstacleTimer = 0;
+      spawnObstacle();
+      obstacleInterval = Math.max(0.7, obstacleInterval - 0.008);
+      speed = Math.min(520, speed + 2);
+    }
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const obs = obstacles[i];
+      obs.x -= speed * capped;
+
+      // 碰撞检测
+      const px = player.x + 4, py = player.y + 4, pw = PLAYER_W - 8, ph = PLAYER_H - 8;
+      const ox = obs.x + 2, oy = obs.y + 2, ow = obs.w - 4, oh = obs.h - 4;
+      if (px < ox + ow && px + pw > ox && py < oy + oh && py + ph > oy) {
+        endGame();
+        return;
+      }
+
+      // 计分
+      if (!obs.scored && obs.x + obs.w < player.x) {
+        obs.scored = true;
+        score++;
+      }
+
+      // 移除
+      if (obs.x < -40) {
+        obstacles.splice(i, 1);
+      }
+    }
+
+    // 粒子
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life -= capped;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      p.x += p.vx * capped;
+      p.y += p.vy * capped;
+      p.vy += 400 * capped;
+    }
+  }
+
+  function endGame() {
+    state = STATE.OVER;
+    spawnParticles(player.x + PLAYER_W / 2, player.y + PLAYER_H / 2);
+    if (score > bestScore) {
+      bestScore = score;
+      localStorage.setItem("dodgeBest", bestScore);
+    }
+    finalScoreEl.textContent = score;
+    bestEnd.innerHTML = `&#127942; 最高分 ${bestScore}`;
+    endScreen.classList.remove("hidden");
+    endScreen.classList.add("active");
+    tip.classList.add("hidden");
+  }
+
+  // ---- 渲染 ----
+  function drawGround(ctx) {
+    // 地面
+    ctx.fillStyle = "#1a2030";
+    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+    // 地面线
+    ctx.strokeStyle = "#39c5cf";
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y);
+    ctx.lineTo(W, GROUND_Y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // 地面虚线
+    ctx.strokeStyle = "#252a3a";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([20, 30]);
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y + 3);
+    ctx.lineTo(W, GROUND_Y + 3);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawPlayer(ctx) {
+    const x = player.x, y = player.y;
+    // 光晕
+    const glow = ctx.createRadialGradient(x + PLAYER_W/2, y + PLAYER_H/2, 4, x + PLAYER_W/2, y + PLAYER_H/2, 28);
+    glow.addColorStop(0, "rgba(57,197,207,0.25)");
+    glow.addColorStop(1, "rgba(57,197,207,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(x - 10, y - 10, PLAYER_W + 20, PLAYER_H + 20);
+
+    // 身体
+    ctx.fillStyle = "#39c5cf";
+    ctx.beginPath();
+    ctx.roundRect(x, y, PLAYER_W, PLAYER_H, 8);
+    ctx.fill();
+
+    // 高光
+    ctx.fillStyle = "rgba(255,255,255,0.3)";
+    ctx.beginPath();
+    ctx.roundRect(x + 5, y + 4, 12, 8, 4);
+    ctx.fill();
+
+    // 眼睛
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(x + 22, y + 14, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#0a0e14";
+    ctx.beginPath();
+    ctx.arc(x + 24, y + 13, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawObstacles(ctx) {
+    for (const obs of obstacles) {
+      // 光晕
+      const glow = ctx.createRadialGradient(obs.x + obs.w/2, obs.y + obs.h/2, 2, obs.x + obs.w/2, obs.y + obs.h/2, obs.w);
+      glow.addColorStop(0, "rgba(255,82,82,0.2)");
+      glow.addColorStop(1, "rgba(255,82,82,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(obs.x - 8, obs.y - 8, obs.w + 16, obs.h + 16);
+
+      // 主体
+      ctx.fillStyle = "#ff5252";
+      ctx.beginPath();
+      ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 6);
+      ctx.fill();
+
+      // 条纹
+      ctx.fillStyle = "rgba(255,255,255,0.15)";
+      ctx.fillRect(obs.x + 3, obs.y + 6, obs.w - 6, 4);
+      ctx.fillRect(obs.x + 3, obs.y + obs.h - 12, obs.w - 6, 4);
+    }
+  }
+
+  function drawParticles(ctx) {
+    for (const p of particles) {
+      const alpha = p.life / p.maxLife;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * alpha, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawStars(ctx) {
+    for (const s of stars) {
+      s.twinkle += 0.02;
+      const alpha = 0.3 + Math.sin(s.twinkle) * 0.3;
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawScore(ctx) {
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.font = "bold 140px -apple-system, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(String(score), W / 2, H / 2 + 40);
+    ctx.textAlign = "start";
+
+    // 顶部小分数
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px -apple-system, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(String(score), W - 24, 40);
+    ctx.textAlign = "start";
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+
+    // 背景
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#1a1d2e");
+    bg.addColorStop(1, "#131620");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    drawStars(ctx);
+    drawGround(ctx);
+    drawObstacles(ctx);
+    drawPlayer(ctx);
+    drawParticles(ctx);
+    drawScore(ctx);
+  }
+
+  let lastTime = 0;
+  let animId;
+
+  function loop(time) {
+    const dt = lastTime ? (time - lastTime) / 1000 : 0;
+    lastTime = time;
+    update(dt);
+    render();
+    animId = requestAnimationFrame(loop);
+  }
+
+  // ---- 输入 ----
+  function handleInput(e) {
+    e.preventDefault();
+    if (state === STATE.IDLE) {
+      startGame();
+    } else if (state === STATE.PLAYING) {
+      jump();
+    }
+  }
+
+  canvas.addEventListener("pointerdown", handleInput);
+  canvas.addEventListener("touchstart", handleInput, { passive: false });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp") {
+      e.preventDefault();
+      if (state === STATE.IDLE) startGame();
+      else if (state === STATE.PLAYING) jump();
+    }
+  });
+
+  function startGame() {
+    reset();
+    state = STATE.PLAYING;
+    score = 0;
+    startScreen.classList.add("hidden");
+    startScreen.classList.remove("active");
+    endScreen.classList.add("hidden");
+    endScreen.classList.remove("active");
+    tip.classList.remove("hidden");
+  }
+
+  function showStart() {
+    state = STATE.IDLE;
+    reset();
+    startScreen.classList.remove("hidden");
+    startScreen.classList.add("active");
+    endScreen.classList.add("hidden");
+    endScreen.classList.remove("active");
+    bestDisplay.innerHTML = `&#127942; 最高分 ${bestScore}`;
+    tip.classList.add("hidden");
+    render();
+  }
+
+  document.getElementById("btnStart").addEventListener("click", (e) => {
+    e.stopPropagation();
+    startGame();
+  });
+  document.getElementById("btnRetry").addEventListener("click", (e) => {
+    e.stopPropagation();
+    startGame();
+  });
+  document.getElementById("btnShare").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const text = `🏆 我在「躲避大师」得了 ${score} 分！来挑战我吧！`;
+    // 尝试 Web Share API
+    if (navigator.share) {
+      navigator.share({ title: "躲避大师", text, url: location.href });
+    } else {
+      // 降级：复制到剪贴板
+      navigator.clipboard.writeText(text + " " + location.href).then(() => {
+        alert("分享文案已复制，粘贴到朋友圈即可！");
+      }).catch(() => {
+        prompt("复制这段分享到朋友圈吧：", text + " " + location.href);
+      });
+    }
+  });
+
+  // 初始化
+  resize();
+  window.addEventListener("resize", resize);
+  bestDisplay.innerHTML = `&#127942; 最高分 ${bestScore}`;
+  player.y = GROUND_Y - PLAYER_H;
+  lastTime = performance.now();
+  animId = requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
