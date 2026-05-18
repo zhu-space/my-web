@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>跳一跳 · 躲避大师</title>
+<title>莫桑</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -144,7 +144,7 @@
 
   <!-- 开始界面 -->
   <div class="overlay active" id="startScreen">
-    <p class="overlay-title">躲避大师</p>
+    <p class="overlay-title">莫桑</p>
     <p class="overlay-label">点击屏幕跳跃 · 躲避障碍物</p>
     <button class="btn btn-start" id="btnStart">开始游戏</button>
     <div class="best-score" id="bestDisplay">🏆 最高分 0</div>
@@ -540,10 +540,10 @@
   });
   document.getElementById("btnShare").addEventListener("click", (e) => {
     e.stopPropagation();
-    const text = `🏆 我在「躲避大师」得了 ${score} 分！来挑战我吧！`;
+    const text = `🏆 我在「莫桑」得了 ${score} 分！来挑战我吧！`;
     // 尝试 Web Share API
     if (navigator.share) {
-      navigator.share({ title: "躲避大师", text, url: location.href });
+      navigator.share({ title: "莫桑", text, url: location.href });
     } else {
       // 降级：复制到剪贴板
       navigator.clipboard.writeText(text + " " + location.href).then(() => {
