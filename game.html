@@ -173,11 +173,27 @@
     </div>
   </div>
 
+  <!-- 域名锁 -->
+  <div class="overlay hidden" id="lockScreen" style="gap:20px;">
+    <p class="overlay-title" style="font-size:22px;">此游戏仅在原站运行</p>
+    <p class="overlay-sub">请访问 zhu-space.github.io 体验</p>
+    <p class="overlay-sub" style="font-size:12px;opacity:0.6;">搬运代码不招待哦</p>
+  </div>
+
   <p class="charge-hint" id="chargeHint">按住蓄力 · 松手起跳 · 空中点按再跳</p>
 </div>
 
 <script>
 (function () {
+  // --- 域名锁 ---
+  var _a=atob("emh1LXNwYWNlLmdpdGh1Yi5pbw==");
+  var _h=location.hostname;
+  if (_h && _h!==_a && _h!=="localhost" && _h!=="127.0.0.1" && _h.indexOf("github.dev")===-1) {
+    document.getElementById("lockScreen").classList.remove("hidden");
+    document.getElementById("lockScreen").classList.add("active");
+    return;
+  }
+
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const container = document.getElementById("gameContainer");
