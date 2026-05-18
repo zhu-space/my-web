@@ -140,7 +140,7 @@
   <!-- 开始 -->
   <div class="overlay active" id="startScreen">
     <p class="overlay-title">莫 桑</p>
-    <p class="overlay-sub">按住蓄力 · 松手跳跃 · 空中再跳</p>
+    <p class="overlay-sub">点击跳跃 · 空中再点腾跃 · 可多次点按</p>
     <button class="btn btn-primary" id="btnStart">开始游戏</button>
     <p class="best-text" id="bestDisplay"></p>
   </div>
@@ -149,6 +149,7 @@
   <div class="overlay hidden" id="levelUpScreen">
     <p class="overlay-sub" id="levelUpLabel">第 1 关 通过</p>
     <p class="level-up-name" id="levelUpName"></p>
+    <p class="overlay-poem" id="levelUpPoem"></p>
   </div>
 
   <!-- 通关 -->
@@ -156,6 +157,7 @@
     <p class="overlay-sub">恭喜通关</p>
     <p class="overlay-title" style="font-size:22px;">行尽青山，长宁以至</p>
     <p class="overlay-poem" id="victoryPoem"></p>
+    <p class="overlay-sub" style="font-size:13px;max-width:260px;line-height:1.8;">人生关卡往复不停，但守住本心，一切难关终会渡过去。</p>
     <div class="btn-row">
       <button class="btn" id="btnShare">分享成绩</button>
       <button class="btn btn-primary" id="btnReplay">再次出发</button>
@@ -164,9 +166,10 @@
 
   <!-- 失败 -->
   <div class="overlay hidden" id="endScreen">
-    <p class="overlay-sub">止于 第 <span id="endLevel">1</span> 关</p>
+    <p class="overlay-sub">止于 <span id="endLevelName">初霁</span> · 第 <span id="endLevel">1</span> 关</p>
     <p class="overlay-score" id="finalScore">0</p>
-    <p class="overlay-sub">掠过 <span id="endDodged">0</span> 处风景 · 萤火 <span id="endFirefly">0</span> 只</p>
+    <p class="overlay-sub">掠过 <span id="endDodged">0</span> 处风景 · 萤火 <span id="endFirefly">0</span> 只 · 余命 <span id="endLives">0</span></p>
+    <p class="overlay-poem" id="endPoem"></p>
     <div class="btn-row" style="margin-top:8px;">
       <button class="btn" id="btnShareEnd">分享成绩</button>
       <button class="btn btn-primary" id="btnRetry">再次出发</button>
@@ -180,7 +183,7 @@
     <p class="overlay-sub" style="font-size:12px;opacity:0.6;">搬运代码不招待哦</p>
   </div>
 
-  <p class="charge-hint" id="chargeHint">按住蓄力 · 松手起跳 · 空中点按再跳</p>
+  <p class="charge-hint" id="chargeHint">点击跳跃 · 空中点按腾跃</p>
 </div>
 
 <script>
@@ -206,6 +209,10 @@
   const endLevelEl = document.getElementById("endLevel");
   const endDodgedEl = document.getElementById("endDodged");
   const endFireflyEl = document.getElementById("endFirefly");
+  const endLivesEl = document.getElementById("endLives");
+  const endLevelNameEl = document.getElementById("endLevelName");
+  const endPoemEl = document.getElementById("endPoem");
+  const levelUpPoemEl = document.getElementById("levelUpPoem");
   const bestDisplay = document.getElementById("bestDisplay");
   const victoryPoem = document.getElementById("victoryPoem");
   const levelUpLabel = document.getElementById("levelUpLabel");
@@ -217,16 +224,18 @@
 
   // ---- 关卡 ----
   const LEVELS = [
-    { n:1, name:"初霁", target:8, speed:270, interval:1.6, types:["basic"] },
-    { n:2, name:"知途", target:9, speed:290, interval:1.5, types:["basic","tall"] },
-    { n:3, name:"随风", target:10, speed:320, interval:1.4, types:["basic","tall","fast"] },
-    { n:4, name:"安渡", target:10, speed:340, interval:1.3, types:["basic","tall","fast","floating"] },
-    { n:5, name:"观聚散", target:12, speed:360, interval:1.2, types:["basic","tall","fast","floating","moving"] },
-    { n:6, name:"执经纬", target:12, speed:380, interval:1.15, types:["basic","tall","fast","floating","moving","spike"] },
-    { n:7, name:"晚晴", target:13, speed:410, interval:1.05, types:["basic","tall","fast","floating","moving","spike","double"] },
-    { n:8, name:"归行", target:14, speed:430, interval:1.0, types:["basic","tall","fast","floating","moving","spike","double","ghost"] },
-    { n:9, name:"澄心", target:15, speed:460, interval:0.95, types:["basic","tall","fast","floating","moving","spike","double","ghost"] },
-    { n:10, name:"长宁", target:20, speed:490, interval:0.9, types:["basic","tall","fast","floating","moving","spike","double","ghost"] },
+    { n:1,  name:"初霁",   target:5,  speed:200, interval:2.0, types:["basic"], poem:"雨落终会逢初霁，前路漫漫皆可期。" },
+    { n:2,  name:"知途",   target:6,  speed:220, interval:1.9, types:["basic","tall"], poem:"眼下纵有迷雾阻，行至深处自知途。" },
+    { n:3,  name:"随风",   target:7,  speed:240, interval:1.8, types:["basic","tall","fast"], poem:"得失聚散皆随风，收拾心绪再赴程。" },
+    { n:4,  name:"安渡",   target:7,  speed:260, interval:1.7, types:["basic","tall","fast","floating"], poem:"此番风雨从容渡，他日山海皆可赴。" },
+    { n:5,  name:"观聚散", target:8,  speed:280, interval:1.6, types:["basic","tall","fast","floating","moving"], poem:"看透浮生离合意，重整行囊向前行。" },
+    { n:6,  name:"执经纬", target:8,  speed:300, interval:1.5, types:["basic","tall","fast","floating","moving","spike"], poem:"纵命浮沉有定数，本心经纬永不移。" },
+    { n:7,  name:"晚晴",   target:9,  speed:310, interval:1.4, types:["basic","tall","fast","floating","moving","spike","double"], poem:"历尽千山风雨苦，暮色温柔自有晴。" },
+    { n:8,  name:"归行",   target:9,  speed:320, interval:1.3, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"漂泊终有回头路，不忘初心踏归途。" },
+    { n:9,  name:"澄心",   target:10, speed:340, interval:1.2, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"涤尽浮生万千扰，灵台空净悟今朝。" },
+    { n:10, name:"听澜",   target:10, speed:360, interval:1.1, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"坐看尘世千帆过，胸中自有万里河。" },
+    { n:11, name:"枕月",   target:12, speed:380, interval:1.0, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"暂借清辉栖尘骨，养得心力再出发。" },
+    { n:12, name:"循归",   target:15, speed:400, interval:0.9, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"一轮尘路终行尽，归来仍是最初人。" },
   ];
 
   const POEMS = [
@@ -240,6 +249,8 @@
     "会当凌绝顶，一览众山小",
     "不畏浮云遮望眼，自缘身在最高层",
     "回首向来萧瑟处，归去，也无风雨也无晴",
+    "万缕千丝终不改，任他随聚随分",
+    "钱塘江上潮信来，今日方知我是我",
   ];
 
   // ---- 状态 ----
@@ -252,18 +263,18 @@
   const PW = 30, PH = 30;
   let player = { x:80, y:0, vy:0, grounded:true, airJumps:0, invincible:0 };
 
-  // 蓄力
-  let charging = false, chargeStart = 0;
-  const CHARGE_MAX = 0.7;
-  const JUMP_MIN = -380, JUMP_MAX = -820;
-  const DOUBLE_JUMP_VY = -560;
+  // 跳跃
+  const JUMP_VY = -560;
+  const AIR_BOOST_VY = -500;
+  const MAX_AIR_BOOSTS = 3;
 
-  // 萤火 + 护身
+  // 萤火 + 生命
   let fireflies = [];
   let fireflyCount = 0;
-  let shields = 0;
-  const FIREFLIES_PER_SHIELD = 5;
-  const MAX_SHIELDS = 3;
+  let lives = 3;
+  const FIREFLIES_PER_LIFE = 5;
+  const MAX_LIVES = 6;
+  const INITIAL_LIVES = 3;
 
   // 障碍物 & 环境
   let obstacles = [];
@@ -305,11 +316,10 @@
     player.grounded = true;
     player.airJumps = 0;
     player.invincible = 0;
-    charging = false; chargeStart = 0;
     obstacles = []; particles = []; fireflies = [];
     obstacleTimer = 0; fireflyTimer = 0;
     currentLevel = 0; dodgedInLevel = 0; totalDodged = 0;
-    fireflyCount = 0; shields = 0;
+    fireflyCount = 0; lives = INITIAL_LIVES;
     const c = getCfg(); speed = c.speed; obstacleInterval = c.interval;
     levelUpTimer = 0;
   }
@@ -338,7 +348,7 @@
     fireflies.push({
       x: W + 30 + Math.random() * 100,
       y: GROUND_Y - h,
-      r: 4 + Math.random() * 3,
+      r: 7 + Math.random() * 5,
       phase: Math.random() * Math.PI * 2,
       collected: false,
     });
@@ -358,7 +368,7 @@
   function doJump(vy) {
     player.vy = vy;
     player.grounded = false;
-    player.airJumps = 1;
+    player.airJumps = MAX_AIR_BOOSTS;
   }
 
   // ---- 更新 ----
@@ -397,14 +407,6 @@
       player.y = GROUND_Y - PH; player.vy = 0; player.grounded = true; player.airJumps = 0;
     }
 
-    // 蓄力计时
-    if (charging && player.grounded) {
-      const chargeLevel = Math.min((performance.now()/1000 - chargeStart) / CHARGE_MAX, 1);
-      // 满蓄粒子提示
-      if (chargeLevel >= 1 && Math.random() < cap * 8)
-        particles.push({ x:player.x+PW/2+(Math.random()-0.5)*20, y:player.y+PH, vx:(Math.random()-0.5)*30, vy:-20-Math.random()*30, life:0.4, maxLife:0.4, r:2, color:"#e8b896" });
-    }
-
     // 障碍物生成
     obstacleTimer += cap;
     if (obstacleTimer >= obstacleInterval) { obstacleTimer = 0; spawnObstacle(); }
@@ -435,11 +437,10 @@
           hit = px<ox+ow && px+pw>ox && py<oy+oh && py+ph>oy;
         }
         if (hit) {
-          if (shields > 0) {
-            shields--;
-            player.invincible = 1.2;
-            spawnFireflyParticles(player.x+PW/2, player.y+PH/2);
-          } else {
+          lives--;
+          player.invincible = 1.5;
+          spawnFireflyParticles(player.x+PW/2, player.y+PH/2);
+          if (lives <= 0) {
             endGame(); return;
           }
         }
@@ -460,7 +461,7 @@
         fireflies.splice(i,1);
         fireflyCount++;
         spawnFireflyParticles(fx, fy);
-        if (fireflyCount % FIREFLIES_PER_SHIELD === 0 && shields < MAX_SHIELDS) shields++;
+        if (fireflyCount % FIREFLIES_PER_LIFE === 0 && lives < MAX_LIVES) lives++;
       } else if (f.x < -30) {
         fireflies.splice(i,1);
       }
@@ -484,6 +485,7 @@
     const c = getCfg();
     levelUpLabel.textContent = `第 ${c.n} 关 通过`;
     levelUpName.textContent = c.name;
+    levelUpPoemEl.textContent = c.poem;
     levelUpScreen.classList.remove("hidden"); levelUpScreen.classList.add("active");
     chargeHint.classList.add("hidden");
     spawnPetals(player.x+PW/2, player.y, 16);
@@ -503,10 +505,14 @@
     spawnPetals(player.x+PW/2, player.y, 12);
     const rl = currentLevel+1;
     if (rl > bestLevel) { bestLevel = rl; localStorage.setItem("mosangBestLevel", bestLevel); }
+    const cfg = getCfg();
     finalScoreEl.textContent = totalDodged;
     endLevelEl.textContent = rl;
+    endLevelNameEl.textContent = cfg.name;
     endDodgedEl.textContent = totalDodged;
     endFireflyEl.textContent = fireflyCount;
+    endLivesEl.textContent = lives;
+    endPoemEl.textContent = cfg.poem;
     endScreen.classList.remove("hidden"); endScreen.classList.add("active");
     chargeHint.classList.add("hidden");
   }
@@ -568,19 +574,6 @@
     glow.addColorStop(0,"rgba(232,184,150,0.35)"); glow.addColorStop(1,"rgba(232,184,150,0)");
     ctx.fillStyle=glow; ctx.fillRect(x-12,y-12,PW+24,PH+24);
 
-    // 蓄力环
-    if (charging && player.grounded) {
-      const cl = Math.min((performance.now()/1000 - chargeStart)/CHARGE_MAX, 1);
-      ctx.strokeStyle=`rgba(232,184,150,${0.3+cl*0.7})`; ctx.lineWidth=2+cl*3;
-      ctx.beginPath(); ctx.arc(x+PW/2, y+PH, 8+cl*16, Math.PI, 0); ctx.stroke();
-
-      // 满蓄光圈
-      if (cl >= 1) {
-        ctx.strokeStyle="rgba(232,184,150,0.6)"; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.arc(x+PW/2, y+PH, 28, 0, Math.PI*2); ctx.stroke();
-      }
-    }
-
     // 身体
     ctx.fillStyle="#8b6f5e"; ctx.beginPath(); ctx.roundRect(x,y,PW,PH,8); ctx.fill();
     ctx.fillStyle="rgba(255,248,240,0.25)"; ctx.beginPath(); ctx.roundRect(x+4,y+3,10,8,4); ctx.fill();
@@ -597,14 +590,22 @@
   function drawFireflies(ctx) {
     for (const f of fireflies) {
       const pulse = 0.6 + Math.sin(f.phase)*0.4;
-      // 外光晕
-      const g = ctx.createRadialGradient(f.x, f.y, 1, f.x, f.y, f.r*3);
-      g.addColorStop(0, `rgba(255,248,200,${0.7*pulse})`);
-      g.addColorStop(1, "rgba(255,248,200,0)");
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(f.x, f.y, f.r*3, 0, Math.PI*2); ctx.fill();
-      // 核心
-      ctx.fillStyle=`rgba(255,250,220,${pulse})`;
-      ctx.beginPath(); ctx.arc(f.x, f.y, f.r*pulse, 0, Math.PI*2); ctx.fill();
+      const alpha = 0.7 * pulse;
+      // 樱花：5片花瓣
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+        const px = f.x + Math.cos(angle) * f.r * 0.7;
+        const py = f.y + Math.sin(angle) * f.r * 0.7;
+        ctx.fillStyle = `rgba(255,160,180,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(px, py, f.r * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // 花心
+      ctx.fillStyle = `rgba(255,210,220,${alpha})`;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -649,7 +650,7 @@
 
     // 关卡
     ctx.fillStyle="#5c4a3a"; ctx.font="14px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="left";
-    ctx.fillText(`第 ${lvl}/10 关 · ${c.name}`, 18, 34);
+    ctx.fillText(`第 ${lvl}/12 关 · ${c.name}`, 18, 34);
 
     // 进度条
     const bx=18, by=44, bw=W-36, bh=4;
@@ -659,11 +660,11 @@
     ctx.fillStyle="#8b7a62"; ctx.font="11px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="right";
     ctx.fillText(`${dodgedInLevel}/${c.target}`, W-18, by-4);
 
-    // 萤火 & 护身
+    // 萤火 & 生命
     ctx.textAlign="right";
     ctx.fillStyle="#8b7a62"; ctx.font="12px 'PingFang SC','Microsoft YaHei',serif";
     ctx.fillText(`萤火 ${fireflyCount}`, W-18, 74);
-    if (shields > 0) ctx.fillText(`护身 ${shields}`, W-18, 92);
+    ctx.fillText(`生命 ${lives}`, W-18, 92);
 
     ctx.textAlign="left";
   }
@@ -678,40 +679,23 @@
   function loop(ts) { const dt=lastTime?(ts-lastTime)/1000:0; lastTime=ts; update(dt); render(); animId=requestAnimationFrame(loop); }
 
   // ---- 输入 ----
-  function handleDown(e) {
+  function handleTap(e) {
     e.preventDefault();
     if (state === ST.IDLE) { startGame(); return; }
     if (state !== ST.PLAYING) return;
 
     if (player.grounded) {
-      charging = true;
-      chargeStart = performance.now() / 1000;
+      doJump(JUMP_VY);
+      spawnPetals(player.x+PW/2, player.y+PH, 4);
     } else if (player.airJumps > 0) {
-      // 空中二段跳
-      player.vy = DOUBLE_JUMP_VY;
-      player.airJumps = 0;
+      player.vy = AIR_BOOST_VY;
+      player.airJumps--;
       spawnPetals(player.x+PW/2, player.y+PH, 6);
     }
   }
 
-  function handleUp(e) {
-    e.preventDefault();
-    if (state !== ST.PLAYING) return;
-    if (!charging) return;
-    charging = false;
-    if (!player.grounded) return;
-    const held = performance.now()/1000 - chargeStart;
-    const cl = Math.min(held / CHARGE_MAX, 1);
-    const vy = JUMP_MIN + (JUMP_MAX - JUMP_MIN) * cl;
-    doJump(vy);
-  }
-
-  canvas.addEventListener("pointerdown", handleDown);
-  canvas.addEventListener("pointerup", handleUp);
-  canvas.addEventListener("pointerleave", handleUp);
-  canvas.addEventListener("touchstart", handleDown, { passive: false });
-  canvas.addEventListener("touchend", handleUp);
-  canvas.addEventListener("touchcancel", handleUp);
+  canvas.addEventListener("pointerdown", handleTap);
+  canvas.addEventListener("touchstart", handleTap, { passive: false });
 
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space" || e.code === "ArrowUp") {
@@ -719,20 +703,13 @@
       if (state === ST.IDLE) { startGame(); return; }
       if (state !== ST.PLAYING) return;
       if (player.grounded) {
-        // 键盘：按越久跳越高
-        if (!charging) { charging = true; chargeStart = performance.now()/1000; }
+        doJump(JUMP_VY);
+        spawnPetals(player.x+PW/2, player.y+PH, 4);
       } else if (player.airJumps > 0) {
-        player.vy = DOUBLE_JUMP_VY; player.airJumps = 0;
+        player.vy = AIR_BOOST_VY;
+        player.airJumps--;
         spawnPetals(player.x+PW/2, player.y+PH, 6);
       }
-    }
-  });
-  document.addEventListener("keyup", (e) => {
-    if ((e.code === "Space" || e.code === "ArrowUp") && charging && state === ST.PLAYING && player.grounded) {
-      charging = false;
-      const held = performance.now()/1000 - chargeStart;
-      const cl = Math.min(held/CHARGE_MAX, 1);
-      doJump(JUMP_MIN + (JUMP_MAX-JUMP_MIN)*cl);
     }
   });
 
@@ -748,7 +725,7 @@
   document.getElementById("btnReplay").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
 
   function doShare(){
-    const rl=state===ST.VICTORY?10:(currentLevel+1);
+    const rl=state===ST.VICTORY?12:(currentLevel+1);
     const extra=state===ST.VICTORY?`「${victoryPoem.textContent}」`:"";
     const text=`🏔️ 我在「莫桑」走到了第 ${rl} 关，收集 ${fireflyCount} 只萤火虫。${extra} 来山野间走一走吧！`;
     if(navigator.share) navigator.share({title:"莫桑",text,url:location.href});
@@ -762,7 +739,7 @@
   function res(){canvas.width=W;canvas.height=H;}
   res(); window.addEventListener("resize",res);
   generateMountains(); initClouds(); initBirds();
-  bestDisplay.textContent = bestLevel>0 ? `曾至 第 ${bestLevel} 关` : "按住蓄力 · 松手起跳";
+  bestDisplay.textContent = bestLevel>0 ? `曾至 第 ${bestLevel} 关` : "点击跳跃 · 空中点按腾跃";
   player.y = GROUND_Y - PH;
   lastTime = performance.now();
   animId = requestAnimationFrame(loop);
