@@ -169,6 +169,18 @@
     letter-spacing: 0.1em;
   }
 
+  .easter-frame {
+    border: 2px solid var(--sunset);
+    border-radius: 12px;
+    padding: 16px 20px;
+    max-width: 280px;
+    font-size: 14px;
+    color: #8b6f5e;
+    line-height: 2;
+    letter-spacing: 0.05em;
+    background: rgba(212,160,138,0.08);
+  }
+
   .charge-hint {
     position: absolute;
     bottom: 40px;
@@ -214,15 +226,27 @@
   <div class="overlay hidden" id="victoryScreen">
     <p class="overlay-sub">恭喜通关</p>
     <p class="overlay-title" style="font-size:22px;">行尽青山，长宁以至</p>
-    <p class="overlay-poem" id="victoryPoem"></p>
-    <p class="overlay-sub" style="font-size:13px;max-width:260px;line-height:1.8;">人生关卡往复不停，但守住本心，一切难关终会渡过去。</p>
     <div class="lb-save-row">
       <input class="lb-input" id="victoryNameInput" type="text" maxlength="8" placeholder="留个名字吧">
       <button class="btn btn-primary" id="btnSaveVictory">保存成绩</button>
     </div>
     <div class="btn-row">
       <button class="btn" id="btnShare">分享成绩</button>
-      <button class="btn btn-primary" id="btnReplay">再次出发</button>
+      <button class="btn btn-primary" id="btnShowEaster">彩蛋</button>
+      <button class="btn" id="btnReplay">再次出发</button>
+    </div>
+  </div>
+
+  <!-- 彩蛋 -->
+  <div class="overlay hidden" id="easterEggScreen">
+    <p class="overlay-sub">恭喜通关</p>
+    <p class="overlay-poem" id="easterPoem" style="font-size:19px;max-width:280px;"></p>
+    <div class="easter-frame">
+      <p>人生关卡往复不停，但守住本心，一切难关终会渡过去。</p>
+    </div>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn" id="btnShareEgg">分享成绩</button>
+      <button class="btn btn-primary" id="btnReplayEgg">再次出发</button>
     </div>
   </div>
 
@@ -288,6 +312,8 @@
   const leaderboardList = document.getElementById("leaderboardList");
   const endNameInput = document.getElementById("endNameInput");
   const victoryNameInput = document.getElementById("victoryNameInput");
+  const easterEggScreen = document.getElementById("easterEggScreen");
+  const easterPoem = document.getElementById("easterPoem");
 
   const W = 400, H = 666;
   const GROUND_Y = H - 80;
@@ -337,11 +363,46 @@
   const ST = { IDLE:0, PLAYING:1, LEVEL_UP:2, VICTORY:3, OVER:4 };
   let state = ST.IDLE;
   let currentLevel = 0, dodgedInLevel = 0, totalDodged = 0;
-  let bestLevel = parseInt(localStorage.getItem("mosangBestLevel") || "0");
+  let bestLevel = Math.min(parseInt(localStorage.getItem("mosangBestLevel") || "0"), LEVELS.length);
 
   // 玩家
   const PW = 30, PH = 30;
   let player = { x:80, y:0, vy:0, grounded:true, airJumps:0, invincible:0 };
+
+  // ---- 音效 ----
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playTone(freq, type, duration, vol = 0.08, ramp = true) {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, now);
+    if (ramp) gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    else gain.gain.linearRampToValueAtTime(0, now + duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now); osc.stop(now + duration);
+  }
+
+  function sfxJump() { playTone(440, "sine", 0.12, 0.06); playTone(660, "sine", 0.10, 0.04); }
+  function sfxBoost() { playTone(520, "sine", 0.1, 0.05); playTone(780, "sine", 0.08, 0.03); }
+  function sfxCollect() { playTone(880, "sine", 0.08, 0.05); setTimeout(() => playTone(1100, "sine", 0.1, 0.05), 60); }
+  function sfxHit() { playTone(80, "triangle", 0.25, 0.1); playTone(55, "sine", 0.3, 0.08); }
+  function sfxLevelUp() {
+    playTone(523, "sine", 0.12, 0.06); setTimeout(() => playTone(659, "sine", 0.12, 0.06), 100);
+    setTimeout(() => playTone(784, "sine", 0.12, 0.06), 200); setTimeout(() => playTone(1047, "sine", 0.2, 0.08), 300);
+  }
+  function sfxGameOver() { playTone(330, "sine", 0.2, 0.07); setTimeout(() => playTone(220, "sine", 0.3, 0.07), 150); }
+  function sfxVictory() {
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, "sine", 0.25, 0.07), i * 120));
+  }
 
   // 跳跃
   const JUMP_VY = -560;
@@ -521,6 +582,7 @@
         if (hit) {
           lives--;
           player.invincible = 1.5;
+          sfxHit();
           spawnFireflyParticles(player.x+PW/2, player.y+PH/2);
           if (lives <= 0) {
             endGame(); return;
@@ -542,6 +604,7 @@
       if (Math.abs(fx - (player.x+PW/2)) < 22 && Math.abs(fy - (player.y+PH/2)) < 22) {
         fireflies.splice(i,1);
         fireflyCount++;
+        sfxCollect();
         spawnFireflyParticles(fx, fy);
         if (fireflyCount % FIREFLIES_PER_LIFE === 0 && lives < MAX_LIVES) lives++;
       } else if (f.x < -30) {
@@ -587,6 +650,7 @@
   }
 
   function levelUp() {
+    sfxLevelUp();
     state = ST.LEVEL_UP;
     levelUpTimer = 1.8;
     const c = getCfg();
@@ -599,15 +663,23 @@
   }
 
   function completeGame() {
+    sfxVictory();
     state = ST.VICTORY;
-    if (currentLevel+1 > bestLevel) { bestLevel = currentLevel+1; localStorage.setItem("mosangBestLevel", bestLevel); }
-    victoryPoem.textContent = POEMS[Math.floor(Math.random()*POEMS.length)];
+    if (LEVELS.length > bestLevel) { bestLevel = LEVELS.length; localStorage.setItem("mosangBestLevel", bestLevel); }
+    easterPoem.textContent = POEMS[Math.floor(Math.random()*POEMS.length)];
     victoryScreen.classList.remove("hidden"); victoryScreen.classList.add("active");
     chargeHint.classList.add("hidden");
     spawnPetals(W/2, H/2, 40);
   }
 
+  function showEasterEgg() {
+    easterPoem.textContent = POEMS[Math.floor(Math.random()*POEMS.length)];
+    victoryScreen.classList.add("hidden"); victoryScreen.classList.remove("active");
+    easterEggScreen.classList.remove("hidden"); easterEggScreen.classList.add("active");
+  }
+
   function endGame() {
+    sfxGameOver();
     state = ST.OVER;
     spawnPetals(player.x+PW/2, player.y, 12);
     const rl = currentLevel+1;
@@ -742,20 +814,33 @@
         ctx.fillStyle = `rgba(240,160,130,${alpha})`;
         ctx.beginPath(); ctx.arc(cx, cy, f.r * 0.22, 0, Math.PI * 2); ctx.fill();
       } else if (type === "snowflake") {
-        // 雪花：六角形
-        const cx = f.x, cy = f.y;
-        ctx.fillStyle = `rgba(210,218,232,${alpha})`;
-        ctx.beginPath();
+        // 雪花：六角大雪花
+        const cx = f.x, cy = f.y, sz = f.r;
+        // 外层光晕，增强可见度
+        const g = ctx.createRadialGradient(cx, cy, sz * 0.3, cx, cy, sz * 1.6);
+        g.addColorStop(0, `rgba(255,255,255,${alpha * 0.5})`);
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, sz * 1.6, 0, Math.PI * 2); ctx.fill();
+        // 六条主臂
+        ctx.fillStyle = `rgba(240,244,255,${alpha})`;
         for (let i = 0; i < 6; i++) {
           const a = (i / 6) * Math.PI * 2;
-          const tx = cx + Math.cos(a) * f.r * 0.8;
-          const ty = cy + Math.sin(a) * f.r * 0.8;
-          if (i === 0) ctx.moveTo(tx, ty);
-          else { ctx.lineTo(cx, cy); ctx.lineTo(tx, ty); }
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
+          ctx.beginPath(); ctx.roundRect(-sz * 0.14, -sz * 1.05, sz * 0.28, sz * 1.05, sz * 0.14); ctx.fill();
+          ctx.restore();
         }
-        ctx.closePath(); ctx.fill();
-        ctx.fillStyle = `rgba(235,240,250,${alpha})`;
-        ctx.beginPath(); ctx.arc(cx, cy, f.r * 0.25, 0, Math.PI * 2); ctx.fill();
+        // 小分枝
+        ctx.fillStyle = `rgba(220,230,248,${alpha * 0.8})`;
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
+          ctx.translate(0, -sz * 0.55);
+          ctx.beginPath(); ctx.roundRect(-sz * 0.06, -sz * 0.28, sz * 0.12, sz * 0.28, sz * 0.06); ctx.fill();
+          ctx.restore();
+        }
+        // 花心
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath(); ctx.arc(cx, cy, sz * 0.22, 0, Math.PI * 2); ctx.fill();
       }
     }
   }
@@ -824,8 +909,7 @@
 
     // 关卡
     ctx.fillStyle="#5c4a3a"; ctx.font="14px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="left";
-    const t = getTheme(currentLevel);
-    ctx.fillText(`${t.label} ${c.name}`, 18, 34);
+    ctx.fillText(`第 ${lvl}/12 关 · ${c.name}`, 18, 34);
 
     // 进度条
     const bx=18, by=44, bw=W-36, bh=4;
@@ -861,10 +945,12 @@
 
     if (player.grounded) {
       doJump(JUMP_VY);
+      sfxJump();
       spawnPetals(player.x+PW/2, player.y+PH, 4);
     } else if (player.airJumps > 0) {
       player.vy = AIR_BOOST_VY;
       player.airJumps--;
+      sfxBoost();
       spawnPetals(player.x+PW/2, player.y+PH, 6);
     }
   }
@@ -879,10 +965,12 @@
       if (state !== ST.PLAYING) return;
       if (player.grounded) {
         doJump(JUMP_VY);
+        sfxJump();
         spawnPetals(player.x+PW/2, player.y+PH, 4);
       } else if (player.airJumps > 0) {
         player.vy = AIR_BOOST_VY;
         player.airJumps--;
+        sfxBoost();
         spawnPetals(player.x+PW/2, player.y+PH, 6);
       }
     }
@@ -891,7 +979,7 @@
   function startGame() {
     reset();
     state = ST.PLAYING;
-    [startScreen,endScreen,victoryScreen,levelUpScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
+    [startScreen,endScreen,victoryScreen,levelUpScreen,easterEggScreen,leaderboardScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
     chargeHint.classList.remove("hidden");
   }
 
@@ -901,7 +989,7 @@
 
   function doShare(){
     const rl=state===ST.VICTORY?12:(currentLevel+1);
-    const extra=state===ST.VICTORY?`「${victoryPoem.textContent}」`:"";
+    const extra=state===ST.VICTORY?`「${easterPoem.textContent}」`:"";
     const text=`🏔️ 我在「莫桑」走到了第 ${rl} 关，收集 ${fireflyCount} 只萤火虫。${extra} 来山野间走一走吧！`;
     if(navigator.share) navigator.share({title:"莫桑",text,url:location.href});
     else navigator.clipboard.writeText(text+" "+location.href).then(()=>alert("分享文案已复制！")).catch(()=>prompt("复制这段分享吧：",text+" "+location.href));
@@ -909,12 +997,18 @@
 
   document.getElementById("btnShare").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
   document.getElementById("btnShareEnd").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
+  document.getElementById("btnShowEaster").addEventListener("click",(e)=>{e.stopPropagation();showEasterEgg();});
+  document.getElementById("btnShareEgg").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
+  document.getElementById("btnReplayEgg").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
 
   // ---- 排行榜 ----
   const LB_KEY = "mosangLeaderboard";
 
   function loadLeaderboard() {
-    try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+    try {
+      const lb = JSON.parse(localStorage.getItem(LB_KEY)) || [];
+      return lb.map(e => ({...e, level: Math.min(e.level, 12)}));
+    }
     catch { return []; }
   }
 
@@ -943,7 +1037,7 @@
 
   function showLeaderboard() {
     renderLeaderboard();
-    [startScreen,endScreen,victoryScreen,levelUpScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
+    [startScreen,endScreen,victoryScreen,levelUpScreen,easterEggScreen,leaderboardScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
     leaderboardScreen.classList.remove("hidden"); leaderboardScreen.classList.add("active");
   }
 
