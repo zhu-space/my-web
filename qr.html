@@ -7,57 +7,166 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: "PingFang SC", "Microsoft YaHei", serif;
-    background: #f5efe0;
+    font-family: "PingFang SC", "Noto Serif SC", "STSong", "Microsoft YaHei", serif;
+    background: #e8d9c8;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
   }
-  .card {
+  .poster {
     background: #fffef9;
     border-radius: 20px;
-    padding: 40px 36px 32px;
+    padding: 0 0 28px 0;
     text-align: center;
-    box-shadow: 0 4px 24px rgba(139,111,94,0.1);
-    max-width: 320px;
+    box-shadow: 0 8px 40px rgba(139,111,94,0.15);
+    max-width: 340px;
+    width: 100%;
+    overflow: hidden;
   }
-  .card h2 {
-    font-size: 22px;
+  .scene { display: block; width: 100%; height: auto; }
+  .title {
+    font-size: 28px;
+    font-weight: 700;
     color: #5c4a3a;
-    margin-bottom: 4px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
+    margin-top: 18px;
   }
-  .card .sub {
+  .tagline {
     font-size: 13px;
     color: #8b7a62;
-    margin-bottom: 20px;
+    margin: 6px 0 18px;
+    letter-spacing: 0.06em;
+    line-height: 1.8;
   }
-  #qr { display: inline-block; }
-  .card .url {
-    margin-top: 16px;
-    font-size: 12px;
+  #qr { display: inline-block; margin-bottom: 12px; }
+  .url {
+    font-size: 11px;
     color: #a09080;
-    word-break: break-all;
   }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>莫 桑</h2>
-  <p class="sub">扫码即玩 · 黄昏山野闯关</p>
+<div class="poster">
+  <canvas class="scene" id="sceneCanvas"></canvas>
+  <p class="title">莫 桑</p>
+  <p class="tagline">山野之间，步步生花<br>扫码来闯十二关</p>
   <div id="qr"></div>
-  <p class="url">zhu-space.github.io/my-web/game.html</p>
+  <p class="url">zhu-space.github.io/my-web</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js">
 </script>
 <script>
+// 绘制游戏场景
+(function() {
+  const canvas = document.getElementById("sceneCanvas");
+  const ctx = canvas.getContext("2d");
+  const scale = 2;
+  const W = 340 * scale, H = 200 * scale;
+  const GROUND_Y = H - 55 * scale;
+  canvas.width = W;
+  canvas.height = H;
+
+  // 天空渐变（春天）
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#f5efe0"); bg.addColorStop(0.5, "#f0e4d0"); bg.addColorStop(1, "#eedac4");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // 太阳光晕
+  const sun = ctx.createRadialGradient(W * 0.65, H * 0.3, 15 * scale, W * 0.65, H * 0.3, 80 * scale);
+  sun.addColorStop(0, "rgba(255,242,230,0.45)"); sun.addColorStop(1, "rgba(255,242,230,0)");
+  ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H);
+
+  // 云
+  function drawCloud(cx, cy, cw, alpha) {
+    ctx.fillStyle = `rgba(255,252,248,${alpha})`;
+    ctx.beginPath(); ctx.ellipse(cx, cy, cw * 0.5, cw * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - cw * 0.2, cy - cw * 0.06, cw * 0.3, cw * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + cw * 0.25, cy - cw * 0.04, cw * 0.28, cw * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  drawCloud(W * 0.25, H * 0.18, 40 * scale, 0.35);
+  drawCloud(W * 0.7, H * 0.22, 35 * scale, 0.28);
+  drawCloud(W * 0.55, H * 0.12, 30 * scale, 0.22);
+
+  // 飞鸟
+  ctx.strokeStyle = "#c4b5a0"; ctx.lineWidth = 1 * scale; ctx.lineCap = "round";
+  function drawBird(bx, by, w) {
+    ctx.beginPath();
+    ctx.moveTo(bx - 6 * scale, by - w * 4 * scale);
+    ctx.quadraticCurveTo(bx - 3 * scale, by - 2 * scale - w * 4 * scale, bx, by - w * 4 * scale);
+    ctx.quadraticCurveTo(bx + 3 * scale, by - 2 * scale - w * 4 * scale, bx + 6 * scale, by - w * 4 * scale);
+    ctx.stroke();
+  }
+  drawBird(W * 0.3, H * 0.25, 0.3);
+  drawBird(W * 0.35, H * 0.28, -0.5);
+  drawBird(W * 0.8, H * 0.2, 0.2);
+
+  // 山脉
+  ctx.fillStyle = "#e2d2bd";
+  ctx.beginPath(); ctx.moveTo(-10 * scale, GROUND_Y + 10 * scale);
+  for (let x = 0; x <= W + 10 * scale; x += 15 * scale) {
+    ctx.lineTo(x, GROUND_Y - (20 * scale + Math.sin(x * 0.008) * 18 * scale + Math.sin(x * 0.019 + 1.3) * 13 * scale + Math.sin(x * 0.003) * 28 * scale));
+  }
+  ctx.lineTo(W + 10 * scale, GROUND_Y + 10 * scale); ctx.closePath(); ctx.fill();
+
+  // 前景山脉
+  ctx.fillStyle = "#eaddcb";
+  ctx.beginPath(); ctx.moveTo(-10 * scale, GROUND_Y + 10 * scale);
+  for (let x = -10 * scale; x <= W + 10 * scale; x += 15 * scale) {
+    ctx.lineTo(x, GROUND_Y - (13 * scale + Math.sin(x * 0.012 + 0.7) * 10 * scale + Math.sin(x * 0.025) * 8 * scale));
+  }
+  ctx.lineTo(W + 10 * scale, GROUND_Y + 10 * scale); ctx.closePath(); ctx.fill();
+
+  // 地面
+  ctx.fillStyle = "#c9a88c"; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+  ctx.fillStyle = "#bfa07a"; ctx.fillRect(0, GROUND_Y, W, 2 * scale);
+  ctx.strokeStyle = "rgba(139,111,94,0.3)"; ctx.lineWidth = 0.8 * scale;
+  ctx.setLineDash([3 * scale, 8 * scale]);
+  ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 6 * scale); ctx.lineTo(W, GROUND_Y + 6 * scale); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 樱花飘落
+  function drawSakuraPellet(x, y, r, alpha) {
+    ctx.fillStyle = `rgba(255,183,197,${alpha})`;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      ctx.beginPath(); ctx.arc(x + Math.cos(a) * r * 0.6, y + Math.sin(a) * r * 0.6, r * 0.45, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = `rgba(255,220,230,${alpha})`;
+    ctx.beginPath(); ctx.arc(x, y, r * 0.22, 0, Math.PI * 2); ctx.fill();
+  }
+  const petals = [
+    { x: W * 0.15, y: H * 0.45, r: 4 * scale, a: 0.55 },
+    { x: W * 0.3, y: H * 0.55, r: 3 * scale, a: 0.4 },
+    { x: W * 0.6, y: H * 0.4, r: 5 * scale, a: 0.5 },
+    { x: W * 0.75, y: H * 0.5, r: 3.5 * scale, a: 0.35 },
+    { x: W * 0.5, y: H * 0.6, r: 4.5 * scale, a: 0.45 },
+    { x: W * 0.85, y: H * 0.55, r: 3 * scale, a: 0.4 },
+    { x: W * 0.2, y: H * 0.65, r: 3.5 * scale, a: 0.3 },
+  ];
+  petals.forEach(p => drawSakuraPellet(p.x, p.y, p.r, p.a));
+
+  // 小人
+  const px = W * 0.22, py = GROUND_Y - 18 * scale, pw = 16 * scale, ph = 16 * scale;
+  // 光晕
+  const glow = ctx.createRadialGradient(px + pw / 2, py + ph / 2, 2 * scale, px + pw / 2, py + ph / 2, 16 * scale);
+  glow.addColorStop(0, "rgba(232,184,150,0.3)"); glow.addColorStop(1, "rgba(232,184,150,0)");
+  ctx.fillStyle = glow; ctx.fillRect(px - 6 * scale, py - 6 * scale, pw + 12 * scale, ph + 12 * scale);
+  // 身体
+  ctx.fillStyle = "#8b6f5e"; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 4 * scale); ctx.fill();
+  ctx.fillStyle = "rgba(255,248,240,0.25)"; ctx.beginPath(); ctx.roundRect(px + 2 * scale, py + 1.5 * scale, 5 * scale, 4 * scale, 2 * scale); ctx.fill();
+  ctx.fillStyle = "#fffef9"; ctx.beginPath(); ctx.arc(px + 10 * scale, py + 6 * scale, 2.5 * scale, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#3a2a1a"; ctx.beginPath(); ctx.arc(px + 10.5 * scale, py + 5.5 * scale, 1.2 * scale, 0, Math.PI * 2); ctx.fill();
+
+})();
+
+// 二维码
 new QRCode(document.getElementById("qr"), {
   text: "https://zhu-space.github.io/my-web/game.html",
-  width: 200,
-  height: 200,
+  width: 180,
+  height: 180,
   colorDark: "#5c4a3a",
   colorLight: "#ffffff",
   correctLevel: QRCode.CorrectLevel.M,

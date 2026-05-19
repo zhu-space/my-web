@@ -78,13 +78,63 @@
     line-height: 1;
   }
   .overlay-poem {
-    font-size: 16px;
+    font-size: 15px;
     color: #8b6f5e;
     text-align: center;
     line-height: 1.8;
     letter-spacing: 0.05em;
-    max-width: 260px;
+    max-width: 300px;
+    white-space: nowrap;
   }
+
+  .lb-list {
+    width: 100%;
+    max-width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0 8px;
+  }
+  .lb-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: rgba(255,255,255,0.5);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text);
+    gap: 6px;
+  }
+  .lb-item:nth-child(1) .lb-rank { color: #d4a08a; font-weight: 700; }
+  .lb-item:nth-child(2) .lb-rank { color: #c8a082; font-weight: 700; }
+  .lb-item:nth-child(3) .lb-rank { color: #bfa07a; font-weight: 700; }
+  .lb-rank { font-size: 16px; min-width: 24px; text-align: center; }
+  .lb-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-stats { font-size: 11px; color: #8b7a62; text-align: right; line-height: 1.4; }
+  .lb-empty { text-align: center; color: #8b7a62; font-size: 13px; padding: 20px; }
+
+  .lb-save-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .lb-input {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--ground);
+    font-size: 14px;
+    font-family: inherit;
+    background: rgba(255,255,255,0.7);
+    color: var(--text);
+    width: 120px;
+    text-align: center;
+    outline: none;
+  }
+  .lb-input:focus { border-color: var(--text); }
 
   .btn {
     padding: 12px 36px;
@@ -143,6 +193,14 @@
     <p class="overlay-sub">点击跳跃 · 空中再点腾跃 · 可多次点按</p>
     <button class="btn btn-primary" id="btnStart">开始游戏</button>
     <p class="best-text" id="bestDisplay"></p>
+    <button class="btn" id="btnShowLeaderboard" style="margin-top:4px;">排行榜</button>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="overlay hidden" id="leaderboardScreen">
+    <p class="overlay-title" style="font-size:20px;">排行榜</p>
+    <div class="lb-list" id="leaderboardList"></div>
+    <button class="btn btn-primary" id="btnLeaderboardBack">返回</button>
   </div>
 
   <!-- 过关 -->
@@ -158,6 +216,10 @@
     <p class="overlay-title" style="font-size:22px;">行尽青山，长宁以至</p>
     <p class="overlay-poem" id="victoryPoem"></p>
     <p class="overlay-sub" style="font-size:13px;max-width:260px;line-height:1.8;">人生关卡往复不停，但守住本心，一切难关终会渡过去。</p>
+    <div class="lb-save-row">
+      <input class="lb-input" id="victoryNameInput" type="text" maxlength="8" placeholder="留个名字吧">
+      <button class="btn btn-primary" id="btnSaveVictory">保存成绩</button>
+    </div>
     <div class="btn-row">
       <button class="btn" id="btnShare">分享成绩</button>
       <button class="btn btn-primary" id="btnReplay">再次出发</button>
@@ -170,6 +232,10 @@
     <p class="overlay-score" id="finalScore">0</p>
     <p class="overlay-sub">掠过 <span id="endDodged">0</span> 处风景 · 萤火 <span id="endFirefly">0</span> 只 · 余命 <span id="endLives">0</span></p>
     <p class="overlay-poem" id="endPoem"></p>
+    <div class="lb-save-row">
+      <input class="lb-input" id="endNameInput" type="text" maxlength="8" placeholder="留个名字吧">
+      <button class="btn btn-primary" id="btnSaveEnd">保存成绩</button>
+    </div>
     <div class="btn-row" style="margin-top:8px;">
       <button class="btn" id="btnShareEnd">分享成绩</button>
       <button class="btn btn-primary" id="btnRetry">再次出发</button>
@@ -218,25 +284,39 @@
   const levelUpLabel = document.getElementById("levelUpLabel");
   const levelUpName = document.getElementById("levelUpName");
   const chargeHint = document.getElementById("chargeHint");
+  const leaderboardScreen = document.getElementById("leaderboardScreen");
+  const leaderboardList = document.getElementById("leaderboardList");
+  const endNameInput = document.getElementById("endNameInput");
+  const victoryNameInput = document.getElementById("victoryNameInput");
 
   const W = 400, H = 666;
   const GROUND_Y = H - 80;
 
   // ---- 关卡 ----
   const LEVELS = [
-    { n:1,  name:"初霁",   target:5,  speed:200, interval:2.0, types:["basic"], poem:"雨落终会逢初霁，前路漫漫皆可期。" },
-    { n:2,  name:"知途",   target:6,  speed:220, interval:1.9, types:["basic","tall"], poem:"眼下纵有迷雾阻，行至深处自知途。" },
-    { n:3,  name:"随风",   target:7,  speed:240, interval:1.8, types:["basic","tall","fast"], poem:"得失聚散皆随风，收拾心绪再赴程。" },
-    { n:4,  name:"安渡",   target:7,  speed:260, interval:1.7, types:["basic","tall","fast","floating"], poem:"此番风雨从容渡，他日山海皆可赴。" },
-    { n:5,  name:"观聚散", target:8,  speed:280, interval:1.6, types:["basic","tall","fast","floating","moving"], poem:"看透浮生离合意，重整行囊向前行。" },
-    { n:6,  name:"执经纬", target:8,  speed:300, interval:1.5, types:["basic","tall","fast","floating","moving","spike"], poem:"纵命浮沉有定数，本心经纬永不移。" },
-    { n:7,  name:"晚晴",   target:9,  speed:310, interval:1.4, types:["basic","tall","fast","floating","moving","spike","double"], poem:"历尽千山风雨苦，暮色温柔自有晴。" },
-    { n:8,  name:"归行",   target:9,  speed:320, interval:1.3, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"漂泊终有回头路，不忘初心踏归途。" },
-    { n:9,  name:"澄心",   target:10, speed:340, interval:1.2, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"涤尽浮生万千扰，灵台空净悟今朝。" },
-    { n:10, name:"听澜",   target:10, speed:360, interval:1.1, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"坐看尘世千帆过，胸中自有万里河。" },
-    { n:11, name:"枕月",   target:12, speed:380, interval:1.0, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"暂借清辉栖尘骨，养得心力再出发。" },
-    { n:12, name:"循归",   target:15, speed:400, interval:0.9, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"一轮尘路终行尽，归来仍是最初人。" },
+    { n:1,  season:"春", name:"初霁",   target:5,  speed:200, interval:2.0, types:["basic"], poem:"雨落终会逢初霁，前路漫漫皆可期。" },
+    { n:2,  season:"春", name:"知途",   target:6,  speed:220, interval:1.9, types:["basic","tall"], poem:"眼下纵有迷雾阻，行至深处自知途。" },
+    { n:3,  season:"春", name:"随风",   target:7,  speed:240, interval:1.8, types:["basic","tall","fast"], poem:"得失聚散皆随风，收拾心绪再赴程。" },
+    { n:4,  season:"夏", name:"安渡",   target:7,  speed:260, interval:1.7, types:["basic","tall","fast","floating"], poem:"此番风雨从容渡，他日山海皆可赴。" },
+    { n:5,  season:"夏", name:"观聚散", target:8,  speed:280, interval:1.6, types:["basic","tall","fast","floating","moving"], poem:"看透浮生离合意，重整行囊向前行。" },
+    { n:6,  season:"夏", name:"执经纬", target:8,  speed:300, interval:1.5, types:["basic","tall","fast","floating","moving","spike"], poem:"纵命浮沉有定数，本心经纬永不移。" },
+    { n:7,  season:"秋", name:"晚晴",   target:9,  speed:310, interval:1.4, types:["basic","tall","fast","floating","moving","spike","double"], poem:"历尽千山风雨苦，暮色温柔自有晴。" },
+    { n:8,  season:"秋", name:"归行",   target:9,  speed:320, interval:1.3, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"漂泊终有回头路，不忘初心踏归途。" },
+    { n:9,  season:"秋", name:"澄心",   target:10, speed:340, interval:1.2, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"涤尽浮生万千扰，灵台空净悟今朝。" },
+    { n:10, season:"冬", name:"听澜",   target:10, speed:360, interval:1.1, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"坐看尘世千帆过，胸中自有万里河。" },
+    { n:11, season:"冬", name:"枕月",   target:12, speed:380, interval:1.0, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"暂借清辉栖尘骨，养得心力再出发。" },
+    { n:12, season:"冬", name:"循归",   target:15, speed:400, interval:0.9, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"一轮尘路终行尽，归来仍是最初人。" },
   ];
+
+  // ---- 四季主题 ----
+  const THEMES = {
+    "春": { skyTop:"#f5efe0", skyMid:"#f0e4d0", skyBot:"#eedac4", ground:"#c9a88c", groundTop:"#bfa07a", mountain1:"#e2d2bd", mountain2:"#eaddcb", sun:"rgba(255,242,230,0.5)", cloud:"rgba(255,252,248,{a})", bird:"#c4b5a0", player:"#8b6f5e", firefly:"sakura", ambient:"petal", label:"🌸" },
+    "夏": { skyTop:"#dee3d4", skyMid:"#d2d8c4", skyBot:"#c4cdb0", ground:"#a8ae92", groundTop:"#969c80", mountain1:"#c2c8ae", mountain2:"#b4ba9e", sun:"rgba(228,232,218,0.4)", cloud:"rgba(238,242,232,{a})", bird:"#9eaa8e", player:"#7e856a", firefly:"bamboo", ambient:"glow", label:"🎋" },
+    "秋": { skyTop:"#efe0ce", skyMid:"#e6d2bc", skyBot:"#dbc0a6", ground:"#be9878", groundTop:"#ae8868", mountain1:"#d6bfa6", mountain2:"#cab098", sun:"rgba(242,220,200,0.5)", cloud:"rgba(250,242,232,{a})", bird:"#c0a688", player:"#8b6f5e", firefly:"maple", ambient:"leaf", label:"🍂" },
+    "冬": { skyTop:"#e2e4ea", skyMid:"#d4d7de", skyBot:"#c4c7d0", ground:"#bcc0c8", groundTop:"#aab0b8", mountain1:"#cdd0d8", mountain2:"#c0c4cc", sun:"rgba(228,232,238,0.25)", cloud:"rgba(238,240,245,{a})", bird:"#b0b6be", player:"#787880", firefly:"snowflake", ambient:"snow", label:"❄️" },
+  };
+
+  function getTheme(lvl) { return THEMES[LEVELS[lvl].season]; }
 
   const POEMS = [
     "莫道桑榆晚，为霞尚满天",
@@ -286,6 +366,8 @@
   let speed = 280, obstacleInterval = 1.5;
   let levelUpTimer = 0;
   let time = 0;
+  let ambients = [];
+  let ambientTimer = 0;
   let mountainPoints = [];
 
   function generateMountains() {
@@ -316,8 +398,8 @@
     player.grounded = true;
     player.airJumps = 0;
     player.invincible = 0;
-    obstacles = []; particles = []; fireflies = [];
-    obstacleTimer = 0; fireflyTimer = 0;
+    obstacles = []; particles = []; fireflies = []; ambients = [];
+    obstacleTimer = 0; fireflyTimer = 0; ambientTimer = 0;
     currentLevel = 0; dodgedInLevel = 0; totalDodged = 0;
     fireflyCount = 0; lives = INITIAL_LIVES;
     const c = getCfg(); speed = c.speed; obstacleInterval = c.interval;
@@ -382,7 +464,7 @@
       if (levelUpTimer <= 0) {
         currentLevel++;
         if (currentLevel >= LEVELS.length) { completeGame(); return; }
-        dodgedInLevel = 0; obstacles = []; fireflies = []; obstacleTimer = 0; fireflyTimer = 0;
+        dodgedInLevel = 0; obstacles = []; fireflies = []; ambients = []; obstacleTimer = 0; fireflyTimer = 0; ambientTimer = 0;
         const c = getCfg(); speed = c.speed; obstacleInterval = c.interval;
         levelUpScreen.classList.add("hidden"); levelUpScreen.classList.remove("active");
         state = ST.PLAYING;
@@ -477,13 +559,38 @@
       if (p.life <= 0) { particles.splice(i,1); continue; }
       p.x += p.vx*cap; p.y += p.vy*cap; p.vy += 300*cap;
     }
+
+    // 环境粒子
+    ambientTimer += cap;
+    const theme = getTheme(currentLevel);
+    if (ambientTimer >= 1.8 + Math.random() * 2.5) {
+      ambientTimer = 0;
+      if (ambients.length < 12) {
+        ambients.push({
+          x: Math.random() * (W + 60) - 30,
+          y: -20,
+          vy: 20 + Math.random() * 30,
+          vx: (Math.random() - 0.5) * 20,
+          r: theme.ambient === "snow" ? 2 + Math.random() * 3 : 3 + Math.random() * 5,
+          phase: Math.random() * Math.PI * 2,
+          type: theme.ambient,
+        });
+      }
+    }
+    for (let i = ambients.length-1; i >= 0; i--) {
+      const a = ambients[i];
+      a.y += a.vy * cap;
+      a.x += a.vx * cap + Math.sin(a.phase + time * 0.5) * 10 * cap;
+      a.phase += cap * 1.5;
+      if (a.y > H + 40) { ambients.splice(i, 1); }
+    }
   }
 
   function levelUp() {
     state = ST.LEVEL_UP;
     levelUpTimer = 1.8;
     const c = getCfg();
-    levelUpLabel.textContent = `第 ${c.n} 关 通过`;
+    levelUpLabel.textContent = `${c.season} · ${c.name} 通过`;
     levelUpName.textContent = c.name;
     levelUpPoemEl.textContent = c.poem;
     levelUpScreen.classList.remove("hidden"); levelUpScreen.classList.add("active");
@@ -519,17 +626,19 @@
 
   // ---- 渲染 ----
   function drawSky(ctx) {
+    const t = getTheme(currentLevel);
     const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,"#f5efe0"); bg.addColorStop(0.5,"#f0e4d0"); bg.addColorStop(1,"#eedac4");
+    bg.addColorStop(0, t.skyTop); bg.addColorStop(0.5, t.skyMid); bg.addColorStop(1, t.skyBot);
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
     const sun = ctx.createRadialGradient(W*0.7,H*0.25,20,W*0.7,H*0.25,200);
-    sun.addColorStop(0,"rgba(255,242,230,0.5)"); sun.addColorStop(1,"rgba(255,242,230,0)");
+    sun.addColorStop(0, t.sun); sun.addColorStop(1,"rgba(255,242,230,0)");
     ctx.fillStyle=sun; ctx.fillRect(0,0,W,H);
   }
 
   function drawClouds(ctx) {
+    const t = getTheme(currentLevel);
     for (const c of clouds) {
-      ctx.fillStyle=`rgba(255,252,248,${c.alpha})`;
+      ctx.fillStyle = t.cloud.replace("{a}", c.alpha);
       ctx.beginPath(); ctx.ellipse(c.x, c.y, c.w*0.5, c.w*0.18, 0, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(c.x-c.w*0.2, c.y-c.w*0.06, c.w*0.3, c.w*0.13, 0, 0, Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(c.x+c.w*0.25, c.y-c.w*0.04, c.w*0.28, c.w*0.12, 0, 0, Math.PI*2); ctx.fill();
@@ -537,8 +646,9 @@
   }
 
   function drawBirds(ctx) {
+    const t = getTheme(currentLevel);
     for (const b of birds) {
-      ctx.strokeStyle="#c4b5a0"; ctx.lineWidth=1.2; ctx.lineCap="round";
+      ctx.strokeStyle=t.bird; ctx.lineWidth=1.2; ctx.lineCap="round";
       ctx.beginPath(); ctx.moveTo(b.x-8, b.y-Math.sin(b.wing)*6);
       ctx.quadraticCurveTo(b.x-4, b.y-3-Math.sin(b.wing)*6, b.x, b.y-Math.sin(b.wing)*6);
       ctx.quadraticCurveTo(b.x+4, b.y-3-Math.sin(b.wing)*6, b.x+8, b.y-Math.sin(b.wing)*6);
@@ -547,18 +657,20 @@
   }
 
   function drawMountains(ctx) {
+    const t = getTheme(currentLevel);
     if (mountainPoints.length===0) generateMountains();
-    ctx.fillStyle="#e2d2bd"; ctx.beginPath(); ctx.moveTo(mountainPoints[0].x,mountainPoints[0].y);
+    ctx.fillStyle=t.mountain1; ctx.beginPath(); ctx.moveTo(mountainPoints[0].x,mountainPoints[0].y);
     for (let i=1;i<mountainPoints.length;i++) ctx.lineTo(mountainPoints[i].x,mountainPoints[i].y);
     ctx.lineTo(W+20,GROUND_Y+20); ctx.lineTo(-20,GROUND_Y+20); ctx.closePath(); ctx.fill();
-    ctx.fillStyle="#eaddcb"; ctx.beginPath(); ctx.moveTo(-20,GROUND_Y+20);
+    ctx.fillStyle=t.mountain2; ctx.beginPath(); ctx.moveTo(-20,GROUND_Y+20);
     for (let x=-20;x<=W+20;x+=25) ctx.lineTo(x,GROUND_Y-(25+Math.sin(x*0.012+0.7)*20+Math.sin(x*0.025)*15));
     ctx.lineTo(W+20,GROUND_Y+20); ctx.closePath(); ctx.fill();
   }
 
   function drawGround(ctx) {
-    ctx.fillStyle="#c9a88c"; ctx.fillRect(0,GROUND_Y,W,H-GROUND_Y);
-    ctx.fillStyle="#bfa07a"; ctx.fillRect(0,GROUND_Y,W,4);
+    const t = getTheme(currentLevel);
+    ctx.fillStyle=t.ground; ctx.fillRect(0,GROUND_Y,W,H-GROUND_Y);
+    ctx.fillStyle=t.groundTop; ctx.fillRect(0,GROUND_Y,W,4);
     ctx.strokeStyle="rgba(139,111,94,0.3)"; ctx.lineWidth=1; ctx.setLineDash([4,12]);
     ctx.beginPath(); ctx.moveTo(0,GROUND_Y+10); ctx.lineTo(W,GROUND_Y+10); ctx.stroke(); ctx.setLineDash([]);
   }
@@ -575,7 +687,8 @@
     ctx.fillStyle=glow; ctx.fillRect(x-12,y-12,PW+24,PH+24);
 
     // 身体
-    ctx.fillStyle="#8b6f5e"; ctx.beginPath(); ctx.roundRect(x,y,PW,PH,8); ctx.fill();
+    const t = getTheme(currentLevel);
+    ctx.fillStyle=t.player; ctx.beginPath(); ctx.roundRect(x,y,PW,PH,8); ctx.fill();
     ctx.fillStyle="rgba(255,248,240,0.25)"; ctx.beginPath(); ctx.roundRect(x+4,y+3,10,8,4); ctx.fill();
     ctx.fillStyle="#fffef9"; ctx.beginPath(); ctx.arc(x+20,y+13,4.5,0,Math.PI*2); ctx.fill();
     ctx.fillStyle="#3a2a1a"; ctx.beginPath(); ctx.arc(x+21,y+12,2.2,0,Math.PI*2); ctx.fill();
@@ -588,24 +701,62 @@
   }
 
   function drawFireflies(ctx) {
+    const theme = getTheme(currentLevel);
+    const type = theme.firefly;
     for (const f of fireflies) {
       const pulse = 0.6 + Math.sin(f.phase)*0.4;
       const alpha = 0.7 * pulse;
-      // 樱花：5片花瓣
-      for (let i = 0; i < 5; i++) {
-        const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
-        const px = f.x + Math.cos(angle) * f.r * 0.7;
-        const py = f.y + Math.sin(angle) * f.r * 0.7;
-        ctx.fillStyle = `rgba(255,160,180,${alpha})`;
+      if (type === "sakura") {
+        // 樱花：5片粉色花瓣
+        for (let i = 0; i < 5; i++) {
+          const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+          const px = f.x + Math.cos(angle) * f.r * 0.7;
+          const py = f.y + Math.sin(angle) * f.r * 0.7;
+          ctx.fillStyle = `rgba(255,160,180,${alpha})`;
+          ctx.beginPath(); ctx.arc(px, py, f.r * 0.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = `rgba(255,210,220,${alpha})`;
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 0.25, 0, Math.PI * 2); ctx.fill();
+      } else if (type === "bamboo") {
+        // 竹叶：细长绿色叶片
+        ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(pulse * 0.4 - 0.2);
+        ctx.fillStyle = `rgba(140,162,120,${alpha})`;
+        ctx.beginPath(); ctx.ellipse(0, 0, f.r, f.r * 0.28, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(160,180,140,${alpha})`;
+        ctx.beginPath(); ctx.ellipse(0, 0, f.r * 0.5, f.r * 0.15, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (type === "maple") {
+        // 红枫：五角星形
+        const cx = f.x, cy = f.y;
+        ctx.fillStyle = `rgba(210,120,90,${alpha})`;
         ctx.beginPath();
-        ctx.arc(px, py, f.r * 0.5, 0, Math.PI * 2);
-        ctx.fill();
+        for (let i = 0; i < 5; i++) {
+          const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+          const ax = cx + Math.cos(a) * f.r * 0.9;
+          const ay = cy + Math.sin(a) * f.r * 0.9;
+          if (i === 0) ctx.moveTo(ax, ay); else ctx.lineTo(ax, ay);
+          const ba = a + Math.PI / 5;
+          ctx.lineTo(cx + Math.cos(ba) * f.r * 0.35, cy + Math.sin(ba) * f.r * 0.35);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = `rgba(240,160,130,${alpha})`;
+        ctx.beginPath(); ctx.arc(cx, cy, f.r * 0.22, 0, Math.PI * 2); ctx.fill();
+      } else if (type === "snowflake") {
+        // 雪花：六角形
+        const cx = f.x, cy = f.y;
+        ctx.fillStyle = `rgba(210,218,232,${alpha})`;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          const tx = cx + Math.cos(a) * f.r * 0.8;
+          const ty = cy + Math.sin(a) * f.r * 0.8;
+          if (i === 0) ctx.moveTo(tx, ty);
+          else { ctx.lineTo(cx, cy); ctx.lineTo(tx, ty); }
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = `rgba(235,240,250,${alpha})`;
+        ctx.beginPath(); ctx.arc(cx, cy, f.r * 0.25, 0, Math.PI * 2); ctx.fill();
       }
-      // 花心
-      ctx.fillStyle = `rgba(255,210,220,${alpha})`;
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r * 0.25, 0, Math.PI * 2);
-      ctx.fill();
     }
   }
 
@@ -644,13 +795,37 @@
     ctx.globalAlpha=1;
   }
 
+  function drawAmbients(ctx) {
+    for (const a of ambients) {
+      const pulse = 0.7 + Math.sin(a.phase) * 0.3;
+      if (a.type === "petal") {
+        ctx.fillStyle = `rgba(255,190,200,${pulse * 0.6})`;
+        ctx.beginPath(); ctx.ellipse(a.x, a.y, a.r, a.r * 0.5, Math.random(), 0, Math.PI * 2); ctx.fill();
+      } else if (a.type === "glow") {
+        const g = ctx.createRadialGradient(a.x, a.y, 1, a.x, a.y, a.r * 2);
+        g.addColorStop(0, `rgba(180,210,150,${pulse * 0.35})`);
+        g.addColorStop(1, "rgba(180,210,150,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 2, 0, Math.PI * 2); ctx.fill();
+      } else if (a.type === "leaf") {
+        ctx.fillStyle = `rgba(200,140,100,${pulse * 0.55})`;
+        ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.phase);
+        ctx.beginPath(); ctx.ellipse(0, 0, a.r, a.r * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (a.type === "snow") {
+        ctx.fillStyle = `rgba(220,225,240,${pulse * 0.55})`;
+        ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
   function drawHUD(ctx) {
     if (state !== ST.PLAYING && state !== ST.LEVEL_UP) return;
     const c = getCfg(), lvl = c.n;
 
     // 关卡
     ctx.fillStyle="#5c4a3a"; ctx.font="14px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="left";
-    ctx.fillText(`第 ${lvl}/12 关 · ${c.name}`, 18, 34);
+    const t = getTheme(currentLevel);
+    ctx.fillText(`${t.label} ${c.name}`, 18, 34);
 
     // 进度条
     const bx=18, by=44, bw=W-36, bh=4;
@@ -671,7 +846,7 @@
 
   function render() {
     ctx.clearRect(0,0,W,H);
-    drawSky(ctx); drawClouds(ctx); drawBirds(ctx); drawMountains(ctx); drawGround(ctx);
+    drawSky(ctx); drawClouds(ctx); drawBirds(ctx); drawAmbients(ctx); drawMountains(ctx); drawGround(ctx);
     drawFireflies(ctx); drawObstacles(ctx); drawPlayer(ctx); drawParticles(ctx); drawHUD(ctx);
   }
 
@@ -734,6 +909,62 @@
 
   document.getElementById("btnShare").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
   document.getElementById("btnShareEnd").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
+
+  // ---- 排行榜 ----
+  const LB_KEY = "mosangLeaderboard";
+
+  function loadLeaderboard() {
+    try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveScore(name, lvl, dodged, flies) {
+    const lb = loadLeaderboard();
+    lb.push({ name: name || "无名旅人", level: lvl, dodged: dodged, fireflies: flies, date: new Date().toLocaleDateString("zh-CN") });
+    lb.sort((a, b) => b.level !== a.level ? b.level - a.level : b.dodged - a.dodged);
+    const top = lb.slice(0, 20);
+    localStorage.setItem(LB_KEY, JSON.stringify(top));
+    return top;
+  }
+
+  function renderLeaderboard() {
+    const lb = loadLeaderboard();
+    if (lb.length === 0) {
+      leaderboardList.innerHTML = '<p class="lb-empty">还没有成绩记录<br>快去闯关吧！</p>';
+      return;
+    }
+    leaderboardList.innerHTML = lb.slice(0, 10).map((e, i) => `
+      <div class="lb-item">
+        <span class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)}</span>
+        <span class="lb-name">${e.name.replace(/</g,'&lt;')}</span>
+        <span class="lb-stats">第${e.level}关 · ${e.dodged}闪 · ${e.fireflies}萤</span>
+      </div>`).join("");
+  }
+
+  function showLeaderboard() {
+    renderLeaderboard();
+    [startScreen,endScreen,victoryScreen,levelUpScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
+    leaderboardScreen.classList.remove("hidden"); leaderboardScreen.classList.add("active");
+  }
+
+  document.getElementById("btnShowLeaderboard").addEventListener("click",(e)=>{e.stopPropagation();showLeaderboard();});
+  document.getElementById("btnLeaderboardBack").addEventListener("click",(e)=>{e.stopPropagation();leaderboardScreen.classList.add("hidden");leaderboardScreen.classList.remove("active");startScreen.classList.remove("hidden");startScreen.classList.add("active");});
+
+  document.getElementById("btnSaveEnd").addEventListener("click",(e)=>{
+    e.stopPropagation();
+    const name = endNameInput.value.trim();
+    saveScore(name, currentLevel + 1, totalDodged, fireflyCount);
+    endNameInput.value = "";
+    showLeaderboard();
+  });
+
+  document.getElementById("btnSaveVictory").addEventListener("click",(e)=>{
+    e.stopPropagation();
+    const name = victoryNameInput.value.trim();
+    saveScore(name, 12, totalDodged, fireflyCount);
+    victoryNameInput.value = "";
+    showLeaderboard();
+  });
 
   // 初始化
   function res(){canvas.width=W;canvas.height=H;}
