@@ -78,9 +78,9 @@ let currentArticle = 0;
 
 (async function init(){
   try{
-    data=await fetch('/ogden-data.json').then(r=>r.json());
-    articles=await fetch('/ogden-articles.json').then(r=>r.json());
-    phonicsData=await fetch('/phonics-data.json').then(r=>r.json());
+    data=await fetch('ogden-data.json').then(r=>r.json());
+    articles=await fetch('ogden-articles.json').then(r=>r.json());
+    phonicsData=await fetch('phonics-data.json').then(r=>r.json());
     renderAll();
   }
   catch(e){document.body.innerHTML='<div style="text-align:center;padding:60px;">加载失败 '+e.message+'</div>';}
