@@ -78,12 +78,19 @@ let currentArticle = 0;
 
 (async function init(){
   try{
-    data=await fetch('ogden-data.json').then(r=>r.json());
-    articles=await fetch('ogden-articles.json').then(r=>r.json());
-    phonicsData=await fetch('phonics-data.json').then(r=>r.json());
+    const base = location.href.replace(/\/[^\/]*$/,'/');
+    const dResp = await fetch(base+'ogden-data.json');
+    if(!dResp.ok) throw new Error('词库 '+dResp.status);
+    data = await dResp.json();
+    const aResp = await fetch(base+'ogden-articles.json');
+    if(!aResp.ok) throw new Error('文章 '+aResp.status);
+    articles = await aResp.json();
+    const pResp = await fetch(base+'phonics-data.json');
+    if(!pResp.ok) throw new Error('拼读 '+pResp.status);
+    phonicsData = await pResp.json();
     renderAll();
   }
-  catch(e){document.body.innerHTML='<div style="text-align:center;padding:60px;">加载失败 '+e.message+'</div>';}
+  catch(e){document.body.innerHTML='<div style="text-align:center;padding:60px;">加载失败: '+e.message+'</div>';}
 })();
 
 function renderAll(){
