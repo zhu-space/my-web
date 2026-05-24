@@ -1,0 +1,196 @@
+{
+  "stages": [
+    {
+      "name": "第一阶 · 短元音 CVC",
+      "desc": "辅音-元音-辅音结构，元音读短音。这是拼读的基础。",
+      "rules": [
+        {
+          "rule": "短 a /æ/",
+          "tip": "嘴巴张到最大，像汉语'啊'但更短促",
+          "words": ["cat","bad","bag","cap","fat","hat","map","rat","sad","bat","fan","jam","pan","tap","tax","back","band","hand","land","sand","bag","flag","flat","glad","plan","black"]
+        },
+        {
+          "rule": "短 e /e/",
+          "tip": "嘴角向两边拉开，舌头放平",
+          "words": ["bed","bell","bent","best","dress","egg","end","get","help","leg","let","net","pen","red","rest","self","send","step","ten","test","well","west","wet","yes","desk","edge","kept","left","neck","next"]
+        },
+        {
+          "rule": "短 i /ɪ/",
+          "tip": "舌头稍微抬起，像汉语'衣'但更松更短",
+          "words": ["big","bit","chin","dig","dish","fish","gift","hill","hit","kick","kiss","lift","lip","list","milk","mix","pig","pin","ring","ship","sit","six","slip","spit","stick","swim","thin","tip","trick","win"]
+        },
+        {
+          "rule": "短 o /ɒ/",
+          "tip": "嘴巴张圆，比汉语'哦'更开",
+          "words": ["box","clock","dog","dot","drop","fog","got","hot","job","lock","log","lot","mop","nod","not","on","ox","pop","pot","rock","rod","sock","soft","stop","top","cross","cloth","cotton","copper","bottle","bottom"]
+        },
+        {
+          "rule": "短 u /ʌ/",
+          "tip": "嘴巴微张，舌头在口腔中部，快速短促",
+          "words": ["bug","bun","bus","but","cup","cut","drum","duck","fun","gun","hug","jump","luck","mud","mug","nut","plug","pump","run","rug","sun","truck","tub","up","us","rub","shut","dust","gum","hut"]
+        }
+      ]
+    },
+    {
+      "name": "第二阶 · Magic E 长元音",
+      "desc": "词尾有不发音的 e，让前面的元音读字母本音（长音）",
+      "rules": [
+        {
+          "rule": "a_e /eɪ/",
+          "tip": "eɪ 类似汉语'诶'拖长。末尾 e 不发音",
+          "words": ["cake","game","gate","lake","late","made","make","name","page","place","plane","plate","safe","same","save","scale","shade","shake","shape","snake","space","stage","take","tale","tape","trade","wake","wave","brave","frame","gave","grade","grave","pale","sale","shame","state","whale"]
+        },
+        {
+          "rule": "i_e /aɪ/",
+          "tip": "aɪ 像汉语'爱'。i 读它自己的名字",
+          "words": ["bike","bite","drive","five","hide","ice","knife","life","like","line","mile","mine","nice","nine","pipe","price","rice","ride","rise","shine","side","size","slide","smile","time","white","wide","wife","wine","wise","write"]
+        },
+        {
+          "rule": "o_e /oʊ/",
+          "tip": "oʊ 像汉语'欧'拖长",
+          "words": ["bone","close","hole","home","hope","joke","nose","note","open","phone","pole","rope","rose","slope","smoke","stone","store","stove","those","whole"]
+        },
+        {
+          "rule": "u_e /juː/ 或 /uː/",
+          "tip": "juː 像'优'。有时只发 uː",
+          "words": ["cute","flute","huge","mule","mute","pure","rule","tube","tune","use"]
+        }
+      ]
+    },
+    {
+      "name": "第三阶 · 辅音组合",
+      "desc": "两个或三个辅音连在一起，每个音都还能听到",
+      "rules": [
+        {
+          "rule": "L 组合 bl, cl, fl, gl, pl, sl",
+          "tip": "辅音 + l，两个音都要清晰发出",
+          "words": ["black","blade","blue","blow","clean","clear","clock","close","cloth","cloud","flag","flame","flat","flight","floor","flower","fly","glass","glove","glue","place","plane","plant","plate","play","please","sleep","slide","slip","slow"]
+        },
+        {
+          "rule": "R 组合 br, cr, dr, fr, gr, pr, tr",
+          "tip": "辅音 + r，r 要卷舌",
+          "words": ["brain","branch","brave","bread","break","bridge","bring","broken","brown","brush","crack","credit","crime","cross","cry","drain","draw","dress","drink","drive","drop","dry","frame","free","frequent","friend","front","fruit","grain","grass","great","green","grey","grip","group","growth","present","price","print","prison","private","produce","profit","train","transport","tree","trick","trouble","true","try"]
+        },
+        {
+          "rule": "S 组合 sc, sk, sm, sn, sp, st, sw",
+          "tip": "s + 另一个辅音，s 要清楚地发出来",
+          "words": ["scale","school","science","skin","skirt","sky","sleep","slip","small","smash","smell","smile","smoke","smooth","snake","sneeze","snow","space","spade","special","sponge","spoon","spring","square","stamp","star","start","station","steam","steel","stem","step","stick","sticky","stiff","still","stitch","stocking","stomach","stone","stop","store","story","straight","strange","street","stretch","strong","structure","swim","sweet"]
+        }
+      ]
+    },
+    {
+      "name": "第四阶 · 辅音二合字母",
+      "desc": "两个字母合在一起发一个音",
+      "rules": [
+        {
+          "rule": "sh /ʃ/",
+          "tip": "像汉语'嘘'的口型",
+          "words": ["shade","shake","shame","sharp","she","sheep","shelf","ship","shirt","shock","shoe","short","shut"]
+        },
+        {
+          "rule": "ch /tʃ/",
+          "tip": "像汉语'吃'但轻一些",
+          "words": ["chain","chalk","chance","change","cheap","cheese","chemical","chest","chicken","chief","chin","church"]
+        },
+        {
+          "rule": "th 清音 /θ/",
+          "tip": "舌尖轻触上齿，吹气。最难的一个音！",
+          "words": ["thank","thick","thin","thing","think","third","thirsty","thirteen","thirty","thought","thread","three","throat","through","thumb","thunder"]
+        },
+        {
+          "rule": "th 浊音 /ð/",
+          "tip": "和上面一样但声带振动",
+          "words": ["than","that","the","their","them","then","there","these","they","this","those","though","together","weather"]
+        },
+        {
+          "rule": "wh /w/",
+          "tip": "嘴收圆吹气",
+          "words": ["what","wheel","when","where","which","while","whip","whistle","white","who","why"]
+        },
+        {
+          "rule": "ng /ŋ/",
+          "tip": "后鼻音，像汉语'eng'",
+          "words": ["angry","bring","hanging","king","long","morning","ring","sing","song","spring","sting","string","strong","swing","thing","tongue","wing","writing","young"]
+        }
+      ]
+    },
+    {
+      "name": "第五阶 · 元音组合",
+      "desc": "两个元音字母在一起，通常第一个发长音、第二个不发音：when two vowels go walking, the first one does the talking",
+      "rules": [
+        {
+          "rule": "ai, ay /eɪ/",
+          "tip": "像汉语'诶'",
+          "words": ["afraid","again","against","brain","chain","daily","fail","grain","mail","main","paint","rain","raise","sail","tail","train","wait","day","gray","lay","may","pay","play","ray","say","stay","today","way"]
+        },
+        {
+          "rule": "ea, ee /iː/",
+          "tip": "像汉语'衣'拖长",
+          "words": ["beach","bean","beat","clean","cream","deal","dream","each","east","easy","eat","heat","lead","leaf","lean","leave","meal","mean","meat","peace","please","reach","read","ready","reason","sea","seat","speak","steam","tea","teach","team","weak","bee","beef","deep","feed","feel","free","green","keep","knee","meet","need","see","seed","seem","seen","sheep","sleep","speed","steel","street","sweet","teen","three","tree","week"]
+        },
+        {
+          "rule": "oa, ow /oʊ/",
+          "tip": "像汉语'欧'",
+          "words": ["boat","coal","coat","goal","goat","load","loaf","oak","road","soap","throat","toast","blow","bowl","flow","grow","know","low","own","row","show","slow","snow","throw","window","yellow"]
+        },
+        {
+          "rule": "oi, oy /ɔɪ/",
+          "tip": "ɔɪ 像'哦衣'连读",
+          "words": ["boil","coin","join","noise","oil","point","soil","spoil","voice","boy","joy","toy"]
+        },
+        {
+          "rule": "ou, ow /aʊ/",
+          "tip": "aʊ 像'啊呜'，嘴巴从大变小",
+          "words": ["about","cloud","count","doubt","found","ground","hour","house","loud","mountain","mouth","out","round","shout","sound","south","thousand","brown","cow","crowd","down","flower","how","now","power","town","towel"]
+        }
+      ]
+    },
+    {
+      "name": "第六阶 · R 控元音",
+      "desc": "元音后面跟 r，元音发音被 r 改变",
+      "rules": [
+        {
+          "rule": "ar /ɑːr/",
+          "tip": "张大嘴巴发 a，然后卷舌。像'啊儿'",
+          "words": ["arm","art","bar","car","card","dark","far","farm","garden","hard","harm","large","mark","market","park","part","sharp","smart","star","start","war","warm","yard"]
+        },
+        {
+          "rule": "er, ir, ur /ɜːr/",
+          "tip": "三者发音相同！舌头卷起，嘴唇不动",
+          "words": ["her","term","serve","verb","bird","birth","circle","dirty","first","girl","shirt","skirt","third","thirteen","thirty","burn","church","curve","fur","hurt","nurse","purple","return","surprise","turn","turtle"]
+        },
+        {
+          "rule": "or /ɔːr/",
+          "tip": "像汉语'哦儿'",
+          "words": ["born","cord","corn","corner","fork","form","forty","horn","horse","lord","more","morning","north","or","order","organ","short","sort","sport","store","storm","story","sword","torn","word","work","world","worm"]
+        }
+      ]
+    },
+    {
+      "name": "第七阶 · 特殊规则",
+      "desc": "其他常见但不太规则的拼读现象",
+      "rules": [
+        {
+          "rule": "软 c /s/ (ce, ci, cy)",
+          "tip": "c 在 e, i, y 前面读 /s/，像 s",
+          "words": ["cent","center","certain","chance","circle","city","civil","dance","face","ice","nice","office","pencil","place","police","price","prince","race","rice","science","since","space","voice"]
+        },
+        {
+          "rule": "软 g /dʒ/ (ge, gi, gy)",
+          "tip": "g 在 e, i, y 前面有时读 /dʒ/",
+          "words": ["age","cage","change","charge","engine","general","gentle","giant","giraffe","gym","huge","image","judge","large","magic","orange","page","range","stage","strange","village","wage"]
+        },
+        {
+          "rule": "不发音字母",
+          "tip": "有些字母在特定组合中不发音",
+          "words": ["knife","knee","knot","know","knowledge","write","wrong","wrist","hour","honest","ghost","sign","island","listen","castle","often"]
+        },
+        {
+          "rule": "-le 结尾",
+          "tip": "词尾 -le 读 /əl/，l 承担音节",
+          "words": ["able","apple","bottle","bubble","candle","circle","example","gentle","handle","little","middle","needle","people","pickle","poodle","possible","puzzle","rifle","simple","single","table","title","trouble","uncle"]
+        }
+      ]
+    }
+  ]
+}

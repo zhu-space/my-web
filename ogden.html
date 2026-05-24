@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基础英语 850 词 — 读墨</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf6f0;--surface:#fffef9;--border:#e5d9c8;--text:#3a3226;--text2:#8b7a62;--accent:#c8a082;--accent2:#a0b4a8}
+body{font-family:"PingFang SC","Noto Serif SC","STSong","Microsoft YaHei",serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{position:sticky;top:0;z-index:10;background:rgba(250,246,240,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.header h1{font-size:20px;font-weight:700;letter-spacing:0.06em}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;color:var(--text2);transition:all 0.2s;white-space:nowrap}
+.tab:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.toolbar{display:flex;gap:8px;padding:8px 20px;align-items:center;font-size:12px;color:var(--text2)}
+.toolbar label{cursor:pointer;display:flex;align-items:center;gap:3px}
+.word-grid{display:flex;flex-wrap:wrap;gap:6px;padding:16px 20px;overflow-y:auto;flex:1;align-content:flex-start}
+.word-card{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all 0.15s;font-size:14px;user-select:none;min-width:120px}
+.word-card:hover{background:#f8f2e8;border-color:var(--accent);transform:translateY(-1px)}
+.word-card .en{font-weight:600}
+.word-card .cn{font-size:12px;color:var(--text2)}
+.word-card .cn.hidden{display:none}
+.word-card .play{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.word-card .play:hover{background:var(--accent);color:#fff}
+.flashcard-view{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:20px}
+.big-card{width:300px;aspect-ratio:1.4;perspective:800px;cursor:pointer}
+.big-card-inner{width:100%;height:100%;position:relative;transition:transform 0.5s;transform-style:preserve-3d}
+.big-card.flipped .big-card-inner{transform:rotateY(180deg)}
+.big-card-front,.big-card-back{position:absolute;inset:0;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;backface-visibility:hidden;border:2px solid var(--border)}
+.big-card-front{background:var(--surface);color:var(--text);flex-direction:column;gap:8px}
+.big-card-back{background:#f8f2e8;color:var(--text);transform:rotateY(180deg);font-size:24px}
+.big-card-hint{font-size:12px;color:var(--text2)}
+.flashcard-btns{display:flex;gap:8px}
+.flashcard-btns button{padding:10px 24px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:all 0.2s}
+.flashcard-btns button.primary{background:var(--accent);color:#fff;border:none}
+.flashcard-btns button:hover{transform:translateY(-1px)}
+.quiz-view{max-width:500px;margin:40px auto;padding:20px}
+.quiz-q{font-size:18px;font-weight:600;margin-bottom:16px;text-align:center}
+.quiz-opt{display:block;width:100%;text-align:left;padding:12px 16px;margin:6px 0;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:15px;transition:all 0.15s}
+.quiz-opt:hover{background:#f0e8d8}
+.quiz-opt.correct{background:#c8e6c9;border-color:#81c784}
+.quiz-opt.wrong{background:#ffcdd2;border-color:#e57373}
+.quiz-score{font-size:24px;font-weight:700;text-align:center;padding:16px;color:var(--accent)}
+.voice-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);cursor:pointer;font-family:inherit;font-size:13px;color:var(--accent);font-weight:600;margin-left:auto}
+.main-content{display:flex;flex-direction:column;flex:1;overflow:hidden}
+@media(max-width:600px){.word-card{min-width:100px;font-size:13px;padding:6px 10px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>基础英语 850 词</h1>
+  <span style="font-size:12px;color:var(--text2);">Ogden's Basic English</span>
+  <button class="voice-btn" onclick="speakAllWords()">📖 连续朗读</button>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="toolbar" id="toolbar">
+  <label><input type="checkbox" id="chkHideCN" onchange="toggleCN()"> 隐藏中文</label>
+  <span style="flex:1;"></span>
+  <button class="tab" onclick="switchMode('grid')" id="btnGrid">📋 列表</button>
+  <button class="tab" onclick="switchMode('flashcard')" id="btnFlash">🃏 闪卡</button>
+  <button class="tab" onclick="switchMode('quiz')" id="btnQuiz">📝 测验</button>
+</div>
+
+<div class="main-content" id="mainContent"></div>
+
+<script>
+let data = null, articles = [], phonicsData = null;
+let currentGroup = 0, currentTab = 'review'; // 'review' | 'words' | 'articles' | 'phonics'
+let currentMode = 'grid';
+let hideCN = false;
+let flashIdx = 0, flashWords = [];
+let quizWords = [], quizIdx = 0, quizCorrect = 0;
+let currentArticle = 0;
+
+(async function init(){
+  try{
+    data=await fetch('/ogden-data.json').then(r=>r.json());
+    articles=await fetch('/ogden-articles.json').then(r=>r.json());
+    phonicsData=await fetch('/phonics-data.json').then(r=>r.json());
+    renderAll();
+  }
+  catch(e){document.body.innerHTML='<div style="text-align:center;padding:60px;">加载失败 '+e.message+'</div>';}
+})();
+
+function renderAll(){
+  document.getElementById('tabs').innerHTML =
+    '<button class="tab'+(currentTab==='words'?' active':'')+'" onclick="switchTab(\'words\')">' + data.groups.map((g,i)=>`<button class="tab${currentTab==='words'&&i===currentGroup?' active':''}" onclick="event.stopPropagation();selectGroup(${i})">${g.name}</button>`).join('') + '</button>' +
+    '<button class="tab'+(currentTab==='review'?' active':'')+'" onclick="switchTab(\'review\')">🔁 复习 <span id="reviewBadge" style="font-size:10px;"></span></button>' +
+    '<button class="tab'+(currentTab==='articles'?' active':'')+'" onclick="switchTab(\'articles\')">📄 文章 (12篇)</button>' +
+    '<button class="tab'+(currentTab==='phonics'?' active':'')+'" onclick="switchTab(\'phonics\')">🔤 自然拼读</button>';
+  renderContent();
+}
+
+function switchTab(t){currentTab=t;renderAll();}
+
+function selectGroup(i){currentGroup=i;currentTab='words';flashIdx=0;renderAll();}
+function switchMode(m){currentMode=m;['btnGrid','btnFlash','btnQuiz'].forEach(id=>document.getElementById(id)?.classList.toggle('active',id==='btn'+m.charAt(0).toUpperCase()+m.slice(1)));renderContent();}
+function toggleCN(){hideCN=document.getElementById('chkHideCN')?.checked||false;renderContent();}
+
+function getGroupWords(){
+  const g = data.groups[currentGroup];
+  return g ? g.words : [];
+}
+
+function renderContent(){
+  const main = document.getElementById('mainContent');
+  updateReviewBadge();
+  if(currentTab==='review'){renderReview(main);return;}
+  if(currentTab==='phonics'){renderPhonics(main);return;}
+  if(currentTab==='articles'){renderArticles(main);return;}
+  const words = getGroupWords();
+  if(currentMode==='grid') renderGrid(main, words);
+  else if(currentMode==='flashcard') renderFlashcard(main, words);
+  else renderQuiz(main, words);
+}
+
+// ========== 复习系统 (费曼 + 间隔记忆) ==========
+const RV_KEY = 'ogden_review';
+const REVIEW_STAGES = [
+  {name:'新学', interval:1, desc:'明天复习'},
+  {name:'1天后', interval:3, desc:'3天后复习'},
+  {name:'3天后', interval:7, desc:'一周后复习'},
+  {name:'一周后', interval:14, desc:'两周后复习'},
+  {name:'两周后', interval:30, desc:'一个月后复习'},
+  {name:'已掌握', interval:-1, desc:'不再提醒'},
+];
+
+function loadReviews(){try{return JSON.parse(localStorage.getItem(RV_KEY))||[];}catch(e){return[];}}
+function saveReviews(arr){localStorage.setItem(RV_KEY,JSON.stringify(arr));}
+
+function addToReview(item){
+  const reviews = loadReviews();
+  if(reviews.find(r=>r.word===item.word)) return false;
+  reviews.push({...item, level:0, nextReview:Date.now()+86400000, addedAt:Date.now(), feynmanNote:'', reviewHistory:[]});
+  saveReviews(reviews);
+  return true;
+}
+
+function updateReviewBadge(){
+  const due = loadReviews().filter(r=>r.nextReview<=Date.now()).length;
+  const badge = document.getElementById('reviewBadge');
+  if(badge){badge.textContent=due>0?`(${due})`:'';badge.style.color=due>0?'#e04040':'';}
+}
+
+function renderReview(main){
+  const reviews = loadReviews();
+  const due = reviews.filter(r=>r.nextReview<=Date.now());
+  const mastered = reviews.filter(r=>r.level>=5);
+  const upcoming = reviews.filter(r=>r.nextReview>Date.now()&&r.level<5).sort((a,b)=>a.nextReview-b.nextReview);
+
+  main.innerHTML = `
+    <div style="max-width:650px;margin:0 auto;padding:24px;">
+      <div style="display:flex;gap:16px;margin-bottom:24px;text-align:center;">
+        <div style="flex:1;padding:16px;background:${due.length>0?'#fff0f0':'var(--surface)'};border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:28px;font-weight:700;color:${due.length>0?'#e04040':'var(--text)'};">${due.length}</div>
+          <div style="font-size:12px;color:var(--text2);">今日待复习</div>
+        </div>
+        <div style="flex:1;padding:16px;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:28px;font-weight:700;color:var(--text);">${reviews.length}</div>
+          <div style="font-size:12px;color:var(--text2);">学习总数</div>
+        </div>
+        <div style="flex:1;padding:16px;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:28px;font-weight:700;color:var(--accent2);">${mastered.length}</div>
+          <div style="font-size:12px;color:var(--text2);">已掌握</div>
+        </div>
+      </div>
+      ${due.length>0?`
+        <div style="margin-bottom:20px;">
+          <div style="font-size:16px;font-weight:700;margin-bottom:12px;">📋 今日复习任务 (${due.length} 项)</div>
+          ${due.slice(0,10).map((r,i)=>`
+            <div style="padding:12px 16px;margin:6px 0;background:var(--surface);border-radius:10px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all 0.15s;" onclick="startReviewItem(${reviews.indexOf(r)})">
+              <div>
+                <span style="font-weight:700;font-size:15px;">${r.word}</span>
+                <span style="font-size:12px;color:var(--text2);margin-left:8px;">${r.cn||''}</span>
+                <span style="font-size:11px;color:var(--accent);margin-left:4px;">${REVIEW_STAGES[r.level]?.name||''}</span>
+              </div>
+              <span style="font-size:12px;color:var(--accent);">开始复习 →</span>
+            </div>
+          `).join('')}
+          ${due.length>10?`<div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">还有 ${due.length-10} 项...</div>`:''}
+        </div>
+      `:`
+        <div style="text-align:center;padding:40px;color:var(--text2);">
+          <div style="font-size:40px;margin-bottom:8px;">🎉</div>
+          <div>今天没有待复习项</div>
+          <div style="font-size:12px;margin-top:4px;">去词汇页收录一些词开始学习吧</div>
+        </div>
+      `}
+      ${upcoming.length>0?`
+        <div style="margin-top:20px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text2);">📅 即将复习</div>
+          ${upcoming.slice(0,5).map(r=>`<span style="display:inline-block;margin:2px 4px;padding:3px 10px;background:var(--surface);border-radius:6px;font-size:12px;">${r.word} <span style="color:var(--text2);">${Math.ceil((r.nextReview-Date.now())/86400000)}天后</span></span>`).join('')}
+        </div>
+      `:''}
+      ${reviews.length>0?`<div style="text-align:center;margin-top:24px;"><button class="tab" onclick="if(confirm('确定清空所有复习记录？')){saveReviews([]);renderContent();}" style="font-size:11px;color:#d4a08a;">清空复习记录</button></div>`:''}
+    </div>
+  `;
+}
+
+let reviewItemIdx = -1;
+function startReviewItem(idx){
+  reviewItemIdx = idx;
+  const reviews = loadReviews();
+  const r = reviews[idx];
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div style="max-width:500px;margin:40px auto;padding:20px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:12px;color:var(--text2);">${REVIEW_STAGES[r.level]?.name||''} · 费曼复习法</div>
+      </div>
+      <div id="reviewStep"></div>
+    </div>
+  `;
+  showReviewStep(0);
+}
+
+let reviewStepIdx = 0;
+function showReviewStep(step){
+  reviewStepIdx = step;
+  const reviews = loadReviews();
+  const r = reviews[reviewItemIdx];
+  const div = document.getElementById('reviewStep');
+  const totalSteps = 4;
+  const stepLabels = ['回忆', '费曼', '测验', '评分'];
+  const progressBar = `<div style="display:flex;gap:4px;margin-bottom:20px;">${stepLabels.map((l,i)=>`<div style="flex:1;height:3px;border-radius:2px;background:${i<=step?'var(--accent)':'var(--border)'};"></div><span style="font-size:10px;color:${i<=step?'var(--accent)':'var(--border)'};">${l}</span>`).join('')}</div>`;
+
+  if(step===0){
+    // Step 1: 回忆 — 遮住答案，自己回想
+    div.innerHTML = progressBar + `
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:32px;font-weight:700;margin-bottom:8px;">${r.word}</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:24px;">努力回想这个词的意思，不要偷看👇</div>
+        <div style="padding:20px;background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;">
+          <div style="font-size:20px;color:var(--border);">${'?'.repeat(r.cn?.length||4)}</div>
+        </div>
+        <button class="tab" onclick="showReviewStep(1)" style="background:var(--accent);color:#fff;border-color:var(--accent);">我想起来了 / 看看答案</button>
+      </div>
+    `;
+  }else if(step===1){
+    // Step 2: 费曼 — 用自己的话解释
+    div.innerHTML = progressBar + `
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:32px;font-weight:700;">${r.word}</div>
+        <div style="font-size:18px;color:var(--accent);margin:8px 0;">${r.cn||''}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">📐 费曼技巧：用最简单的话解释这个词，假装在教一个孩子</div>
+        <textarea id="feynmanInput" placeholder="用你自己的话解释 '${r.word}' 是什么意思？比如：这个词是... 它的用法是..." style="width:100%;height:100px;padding:12px;border-radius:10px;border:1px solid var(--border);font-family:inherit;font-size:14px;resize:vertical;">${r.feynmanNote||''}</textarea>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
+          <button class="tab" onclick="showReviewStep(0)">◀ 上一步</button>
+          <button class="tab" onclick="const v=document.getElementById('feynmanInput').value;const rv=loadReviews();rv[reviewItemIdx].feynmanNote=v;saveReviews(rv);showReviewStep(2);" style="background:var(--accent);color:#fff;border-color:var(--accent);">保存解释 →</button>
+        </div>
+      </div>
+    `;
+  }else if(step===2){
+    // Step 3: 测验
+    const allDBWords = data.groups.flatMap(g=>g.words);
+    const opts = [r.cn||'(未知)'];
+    while(opts.length<4){const rand=allDBWords[Math.floor(Math.random()*allDBWords.length)].cn;if(rand&&!opts.includes(rand))opts.push(rand);}
+    const quizOpts = opts.sort(()=>Math.random()-0.5);
+    div.innerHTML = progressBar + `
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:12px;">小测验：确认你真的记住了</div>
+        <div class="quiz-q">"${r.word}" 的中文意思是？</div>
+        ${quizOpts.map(o=>`<button class="quiz-opt" onclick="answerReviewQuiz('${o}','${r.cn||''}',this)">${o}</button>`).join('')}
+        <div id="reviewQuizResult" style="margin-top:12px;"></div>
+        <div style="margin-top:12px;">
+          <button class="tab" onclick="showReviewStep(1)">◀ 上一步</button>
+        </div>
+      </div>
+    `;
+  }else if(step===3){
+    // Step 4: 自我评分
+    const lastResult = window._lastReviewCorrect ? '✅ 答对了！' : '❌ 答错了';
+    div.innerHTML = progressBar + `
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:18px;font-weight:700;margin-bottom:16px;">${lastResult}</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">诚实评价你对 "${r.word}" 的掌握程度</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="quiz-opt" onclick="finishReview('forgot')" style="text-align:center;">🔴 忘了 — 重新开始学</button>
+          <button class="quiz-opt" onclick="finishReview('hard')" style="text-align:center;">🟡 模糊 — 再巩固一下</button>
+          <button class="quiz-opt" onclick="finishReview('good')" style="text-align:center;background:var(--accent2);color:#fff;border-color:var(--accent2);">🟢 掌握 — 顺利进入下一阶段</button>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="tab" onclick="showReviewStep(2)">◀ 上一步</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function answerReviewQuiz(chosen,correct,btn){
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>{o.disabled=true;if(o.textContent===correct)o.classList.add('correct');});
+  if(chosen!==correct){btn.classList.add('wrong');window._lastReviewCorrect=false;}
+  else window._lastReviewCorrect=true;
+  document.getElementById('reviewQuizResult').innerHTML =
+    chosen===correct?'<span style="color:var(--accent2);">✅ 正确！</span>':`<span style="color:#d4a08a;">❌ 正确答案是: ${correct}</span>`;
+  setTimeout(()=>showReviewStep(3),1200);
+}
+
+function finishReview(rating){
+  const reviews = loadReviews();
+  const r = reviews[reviewItemIdx];
+  r.reviewHistory.push({date:Date.now(),rating,level:r.level});
+  if(rating==='forgot') r.level=0;
+  else if(rating==='hard'){/* stay same level */}
+  else r.level=Math.min(r.level+1, REVIEW_STAGES.length-1);
+  const stg = REVIEW_STAGES[r.level];
+  r.nextReview = stg.interval>0 ? Date.now()+stg.interval*86400000 : Infinity;
+  saveReviews(reviews);
+  renderContent();
+}
+
+// 从词汇页快速加到复习
+function addWordToReview(word, cn){
+  if(addToReview({word, cn:cn||(lookupWord(word)||{}).cn||''})){
+    const toast=document.createElement('div');
+    toast.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#fff;padding:8px 20px;border-radius:20px;font-size:14px;z-index:99;';
+    toast.textContent=`已加入复习: "${word}"`;
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),1500);
+    updateReviewBadge();
+    return true;
+  }
+  return false;
+}
+
+let phonicsStage = 0;
+function renderPhonics(main){
+  if(!phonicsData){main.innerHTML='<div style="text-align:center;padding:40px;">加载中...</div>';return;}
+  const stages = phonicsData.stages;
+  main.innerHTML = `
+    <div style="display:flex;height:100%;">
+      <div style="width:240px;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);flex-shrink:0;">
+        <div style="padding:12px 14px;font-weight:700;font-size:14px;border-bottom:1px solid var(--border);">拼读阶段</div>
+        ${stages.map((s,i)=>`<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;${i===phonicsStage?'background:#f0e8d8;border-left:3px solid var(--accent);':''}" onclick="phonicsStage=${i};renderContent()">
+          <div style="font-size:13px;font-weight:600;">${s.name}</div>
+          <div style="font-size:11px;color:var(--text2);">${s.rules.length} 个规则</div>
+        </div>`).join('')}
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:24px 28px;">
+        <div style="max-width:700px;margin:0 auto;">
+          <div style="font-size:22px;font-weight:700;margin-bottom:8px;">${stages[phonicsStage].name}</div>
+          <div style="font-size:14px;color:var(--text2);margin-bottom:24px;">${stages[phonicsStage].desc}</div>
+          ${stages[phonicsStage].rules.map(r=>`
+            <div style="margin-bottom:24px;padding:16px 20px;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+              <div style="font-size:18px;font-weight:700;color:var(--accent);margin-bottom:4px;">${r.rule}</div>
+              <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">💡 ${r.tip}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${r.words.map(w=>`<span class="phonics-word" style="padding:4px 10px;border-radius:6px;background:#f8f2e8;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.15s;" onclick="event.stopPropagation();speakWord('${w}');this.style.background='var(--accent)';this.style.color='#fff';setTimeout(()=>{this.style.background='#f8f2e8';this.style.color='';},800);">${w}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+          <div style="text-align:center;margin-top:24px;display:flex;gap:8px;justify-content:center;">
+            <button class="tab" onclick="phonicsStage=Math.max(0,phonicsStage-1);renderContent()" ${phonicsStage===0?'disabled':''}>◀ 上一阶</button>
+            <button class="tab" onclick="phonicsStage=Math.min(stages.length-1,phonicsStage+1);renderContent()" ${phonicsStage===stages.length-1?'disabled':''}>下一阶 ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderArticles(main){
+  if(articles.length===0){main.innerHTML='<div style="text-align:center;padding:40px;">加载文章中...</div>';return;}
+  const a = articles[currentArticle];
+  // 按句号拆成句子，配上译文
+  const sentences = a.text.match(/[^.!?]+[.!?]+(?:\s*"[^"]*")?/g) || [a.text];
+  const trans = a.trans || [];
+  const sentWithTrans = sentences.map((s, i) => ({
+    en: s.trim(),
+    cn: trans[i] || ''
+  }));
+
+  main.innerHTML = `
+    <div style="display:flex;height:100%;">
+      <div style="width:240px;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);flex-shrink:0;">
+        ${articles.map((art,i)=>`<div style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;${i===currentArticle?'background:#f0e8d8;border-left:3px solid var(--accent);':''}" onclick="selectArticle(${i})">
+          <div style="font-size:13px;font-weight:600;">${i+1}. ${art.title}</div>
+        </div>`).join('')}
+      </div>
+      <div style="flex:1;overflow-y:auto;">
+        <div style="max-width:750px;margin:0 auto;padding:24px 28px;">
+          <div style="font-size:22px;font-weight:700;margin-bottom:8px;text-align:center;color:var(--text);">${a.title}</div>
+          <div style="text-align:center;margin-bottom:20px;display:flex;gap:8px;justify-content:center;">
+            <button class="tab" onclick="readFullArticle()">🔊 朗读全文</button>
+            <button class="tab" onclick="stopSpeaking()" style="background:#e04040;color:#fff;border-color:#e04040;">⏹ 停止</button>
+            <button class="tab" onclick="startArticleQuiz()" style="background:var(--accent);color:#fff;border-color:var(--accent);">📝 课后练习</button>
+          </div>
+          <div id="articleSentences">
+            ${sentWithTrans.map((s,i)=>`
+              <div class="sent-row" style="margin-bottom:20px;padding:10px 14px;border-radius:10px;border:1px solid transparent;transition:all 0.15s;cursor:pointer;" data-idx="${i}" data-text="${s.en.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}">
+                <div class="sent-en" style="font-size:16px;line-height:2;letter-spacing:0.03em;margin-bottom:4px;">
+                  ${s.en.split(/(\s+)/).map(part=>{
+                    const w=part.replace(/[^a-zA-Z'-]/g,'');
+                    return w.length>1&&/^[a-zA-Z]/.test(w)
+                      ?`<span class="sent-word" data-word="${w.replace(/'/g,"\\'")}" style="cursor:pointer;border-bottom:1px dashed var(--accent);padding:0 1px;border-radius:3px;transition:all 0.15s;" onclick="event.stopPropagation();onArticleWordClick('${w.replace(/'/g,"\\'")}',this)">${part}</span>`
+                      :part.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                  }).join('')}
+                </div>
+                ${s.cn?`<div class="sent-cn" style="font-size:13px;color:var(--text2);line-height:1.6;">${s.cn}</div>`:''}
+              </div>
+            `).join('')}
+          </div>
+          <div style="max-width:700px;margin:24px auto 0;padding:20px;background:#f8f6f0;border-radius:12px;border-left:3px solid var(--accent);">
+            <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--accent);">📝 语法要点</div>
+            ${a.grammar.map(g=>`<div style="font-size:13px;color:var(--text2);line-height:2;padding:2px 0;">${g}</div>`).join('')}
+          </div>
+          <div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;">
+            <button class="tab" onclick="prevArticle()">◀ 上一篇</button>
+            <button class="tab" onclick="nextArticle()">下一篇 ▶</button>
+          </div>
+          <div id="articleRecStatus" style="text-align:center;margin-top:8px;font-size:12px;color:var(--text2);min-height:20px;"></div>
+          <div style="text-align:center;margin-top:4px;font-size:11px;color:var(--text2);">
+            💡 左键句子 → 朗读 · 右键句子 → 跟读 · 点单词 → 音标拼读
+          </div>
+        </div>
+      </div>
+      <div id="articleWordPanel" style="width:320px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface);display:none;">
+        <div style="padding:14px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;">📖 单词详情</div>
+        <div id="articleWordDetail" style="padding:14px;"></div>
+      </div>
+    </div>
+  `;
+  // 注入真人音频按钮
+  setTimeout(()=>{
+    const toolbar = main.querySelector('div[style*="margin-bottom:20px"]');
+    if(toolbar){
+      const btn = document.createElement('button');
+      btn.className='tab';
+      btn.textContent='🎙 真人音';
+      btn.style.cssText='background:var(--accent2);color:#fff;border-color:var(--accent2);';
+      btn.onclick=()=>document.getElementById('nativeAudioInput')?.click();
+      const input=document.createElement('input');
+      input.type='file';input.accept='audio/*';input.style.display='none';
+      input.id='nativeAudioInput';input.onchange=function(){loadNativeAudio(this);};
+      toolbar.appendChild(input);
+      toolbar.appendChild(btn);
+      const span=document.createElement('span');
+      span.id='nativeAudioStatus';span.style.cssText='font-size:11px;color:var(--text2);margin-left:6px;';
+      toolbar.parentNode.appendChild(span);
+    }
+  },100);
+
+  // 句子点击事件代理
+  const container = main.querySelector('#articleSentences');
+  if(container){
+    container.addEventListener('click', e => {
+      const row = e.target.closest('.sent-row');
+      if(!row) return;
+      const text = (row.dataset.text||'').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+      if(text){
+        document.querySelectorAll('.sent-row').forEach(r=>{r.style.background='';r.style.borderColor='transparent';});
+        row.style.background = '#f0e8d8';
+        row.style.borderColor = 'var(--accent)';
+        if(window._nativeAudio){window._nativeAudio.currentTime=0;window._nativeAudio.play();}
+        else speakText(text);
+      }
+    });
+    container.addEventListener('contextmenu', e => {
+      const row = e.target.closest('.sent-row');
+      if(!row) return;
+      e.preventDefault();
+      const text = (row.dataset.text||'').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+      if(text) shadowRecordByElem(row);
+    });
+  }
+}
+
+function onArticleWordClick(word, el){
+  const panel = document.getElementById('articleWordPanel');
+  const detail = document.getElementById('articleWordDetail');
+  panel.style.display = '';
+  const cn = (lookupWord(word)||{}).cn || '未知';
+  const phon = getPhonetics(word);
+  const examples = generateExamples(word, cn);
+  document.querySelectorAll('.sent-word').forEach(w=>w.style.background='');
+  el.style.background = '#ffe8d0';
+  detail.innerHTML = `
+    <div style="font-size:24px;font-weight:700;color:var(--text);">${word}</div>
+    <div style="font-size:16px;color:var(--accent);margin-bottom:2px;">${phon.ipa}</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:8px;">${cn}</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button onclick="speakWord('${word}')" style="padding:3px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:11px;">🔊 发音</button>
+      <button onclick="toggleRecord('${word}')" style="padding:3px 12px;border-radius:6px;border:1px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;font-family:inherit;font-size:11px;">🎤 跟读</button>
+    </div>
+    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px;">
+      ${phon.phonemes.map(p=>`<span style="padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;${p.type==='vowel'?'background:#ffe8d0;color:#c8a082;':p.type==='digraph'?'background:#d0e8e0;color:#5a8a7a;':'background:#e8e0d8;color:#8b7a62;'}">${p.text}<span style="font-size:9px;display:block;opacity:0.7;">${p.ipa}</span></span>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">音节: ${phon.syllables.join(' · ')}</div>
+    <div style="font-size:11px;color:var(--accent);margin-bottom:12px;line-height:1.8;">
+      ${phon.phonics.map(p=>`<span style="display:inline-block;margin:2px 3px 2px 0;padding:2px 7px;background:#f8f2e8;border-radius:5px;">${p}</span>`).join('')}
+    </div>
+    ${examples.slice(0,3).map((s,i)=>`
+      <div style="margin-bottom:8px;padding:8px 10px;background:#f8f6f0;border-radius:8px;border-left:2px solid var(--accent);cursor:pointer;" onclick="speakText('${s.en.replace(/'/g,"\\'")}')">
+        <div style="font-size:12px;">${s.en}</div>
+        <div style="font-size:11px;color:var(--text2);">${s.cn}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// 课后练习
+let articleQuizQuestions = [];
+function startArticleQuiz(){
+  const a = articles[currentArticle];
+  const sentences = a.text.match(/[^.!?]+[.!?]+/g) || [a.text];
+  const allDBWords = data.groups.flatMap(g=>g.words);
+  articleQuizQuestions = [];
+
+  // === 词汇题: 看英文选中文 ===
+  const allWords = sentences.join(' ').split(/\s+/).map(w=>w.replace(/[^a-zA-Z'-]/g,'')).filter(w=>w.length>3);
+  const unique = [...new Set(allWords)].sort(()=>Math.random()-0.5).slice(0,4);
+  unique.forEach(w=>{
+    const cn = (lookupWord(w)||{}).cn||'';
+    const opts = [cn||'(未知)'];
+    while(opts.length<4){const r=allDBWords[Math.floor(Math.random()*allDBWords.length)].cn;if(r&&!opts.includes(r))opts.push(r);}
+    articleQuizQuestions.push({type:'vocab', q:`"${w}" 的中文意思是？`, a:cn, opts:opts.sort(()=>Math.random()-0.5), note:`"${w}" = ${cn}。记这个词可以联想它的发音和用法。`});
+  });
+
+  // === 阅读理解: 细节题 ===
+  if(sentences.length>=4){
+    // 选一句有明确主语和动作的句子
+    for(let attempt=0;attempt<10;attempt++){
+      const si = Math.floor(Math.random()*sentences.length);
+      const s = sentences[si].trim();
+      const words = s.split(/\s+/);
+      // 找主语+动词
+      const subjIdx = words.findIndex(w=>/^[A-Z]/.test(w)||['I','He','She','They','We','It','The'].includes(w));
+      const verbIdx = subjIdx>=0 ? words.slice(subjIdx+1).findIndex(w=>/^(get|go|give|come|take|put|make|see|say|have|do|run|walk|eat|drink|sleep|read|write|play|work|live|start|stop|help|like|love|feel|find|keep|let|send|sit|stand|fall|grow|learn|teach|talk|tell|ask|call|bring|buy|catch|cut|hold|pull|push|wash|watch|turn|open|close|try|move|fly|swim|jump|is|are|was|were|has|had|will|can)/.test(w)) : -1;
+      if(subjIdx>=0 && verbIdx>=0){
+        const subj = words.slice(subjIdx, subjIdx+2).join(' ');
+        const verb = words[subjIdx+1+verbIdx];
+        const correct = s;
+        // 生成错误选项：改主语或动词
+        const wrongSubjs = ['The man','The woman','A boy','A girl','The dog','Someone','Nobody'];
+        const wrong1 = correct.replace(subj, wrongSubjs[Math.floor(Math.random()*wrongSubjs.length)]);
+        const wrong2 = '文中没有提到这件事';
+        const wrong3 = '恰好相反，文中说不是这样';
+        articleQuizQuestions.push({
+          type:'detail', q:'根据文章，哪一句是正确的？', a:correct,
+          opts:[correct, wrong1, wrong2, wrong3].sort(()=>Math.random()-0.5),
+          note:`原文是: "${correct}"。其余选项的信息在文章中没有出现或被修改了。仔细回原文找对应句子。`
+        });
+        break;
+      }
+    }
+  }
+
+  // === 语法题: 选正确的时态/形式 ===
+  if(sentences.length>=3){
+    const s = sentences[Math.floor(Math.random()*sentences.length)].trim();
+    const verbs = s.match(/\b(get|go|give|come|take|put|make|see|say|have|do|run|walk|eat|drink|sleep|read|write|play|work|live|start|stop|help|like|love|feel|find|keep|let|send|sit|stand|fall|grow|learn|teach|talk|tell|ask|call|bring|buy|catch|cut|hold|pull|push|wash|watch|turn|open|close|try|move|fly|swim|jump|is|are|was|were|has|had|will|can|goes|comes|takes|makes|sees|says|does|runs|lives|starts|stops|helps|likes|loves|feels|finds|keeps|lets|sends|talks|tells|asks|calls|brings|buys|holds|pulls|pushes|turns|opens|closes|tries|got|went|came|took|made|seen|said|done|kept|let|sent|sat|stood|fell|grew|learnt|taught|told|asked|called|brought|bought|caught|cut|held|put|read|set|shut|spoke|spent|stood|thought|threw|woke|won|wrote|given|taken|gone|been|had|done|found|known)\b/g);
+    if(verbs && verbs.length>=1){
+      const targetVerb = verbs[Math.floor(Math.random()*verbs.length)];
+      const correctForm = targetVerb;
+      // 生成错误形式
+      const wrongs = [];
+      if(/s$/.test(targetVerb)) wrongs.push(targetVerb.replace(/s$/,''));
+      else wrongs.push(targetVerb+'s');
+      if(/ed$/.test(targetVerb)) wrongs.push(targetVerb.replace(/ed$/,''));
+      else wrongs.push(targetVerb+'ed');
+      if(/ing$/.test(targetVerb)) wrongs.push(targetVerb.replace(/ing$/,''));
+      else wrongs.push(targetVerb+'ing');
+      const blanked = s.replace(targetVerb, '______');
+      articleQuizQuestions.push({
+        type:'grammar', q:blanked, a:correctForm,
+        opts:[correctForm, ...wrongs.slice(0,3)].sort(()=>Math.random()-0.5),
+        note:`正确答案是 "${correctForm}"。判断依据：看句子的主语和时态。主语是第几人称？事情发生在过去/现在/将来？根据上下文选择正确的动词形式。`
+      });
+    }
+  }
+
+  // === 中译英: 看翻译写英文(选择题) ===
+  const trans = a.trans || [];
+  if(trans.length>=2 && sentences.length>=2){
+    const ti = Math.floor(Math.random()*Math.min(trans.length, sentences.length));
+    const cnSent = trans[ti];
+    const enSent = sentences[ti];
+    if(cnSent && enSent && cnSent.length>3){
+      // 改一个词做干扰项
+      const enWords = enSent.split(' ');
+      const fakeEn = [...enWords];
+      const ci = Math.floor(Math.random()*enWords.length);
+      const otherW = unique.find(w=>w!==enWords[ci]);
+      if(otherW) fakeEn[ci] = otherW;
+      articleQuizQuestions.push({
+        type:'translate', q:`"${cnSent}" 对应的英文是？`, a:enSent.trim(),
+        opts:[enSent.trim(), fakeEn.join(' '), sentences[(ti+1)%sentences.length].trim(), sentences[(ti+2)%sentences.length].trim()].sort(()=>Math.random()-0.5),
+        note:`原文对应: "${enSent.trim()}"。中译英的关键是找到主语和谓语动词，然后对照中文意思看哪个英文选项最匹配。`
+      });
+    }
+  }
+
+  // === 听写题: 听发音选句子 ===
+  if(sentences.length>=2){
+    const si = Math.floor(Math.random()*sentences.length);
+    articleQuizQuestions.push({
+      type:'dictation', q:'点击 🔊 听发音，选出你听到的句子', a:sentences[si].trim(),
+      opts:[sentences[si].trim(), sentences[(si+1)%sentences.length].trim(), sentences[(si+2)%sentences.length].trim(), '以上都不是'].sort(()=>Math.random()-0.5),
+      note:`你听到的是: "${sentences[si].trim()}"。听力技巧：先抓住句子中的关键词（主语、动词），再匹配选项。`
+    });
+  }
+
+  quizCorrect=0; quizIdx=0;
+  const main=document.getElementById('mainContent');
+  main.innerHTML=`
+    <div style="max-width:550px;margin:40px auto;padding:20px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:18px;font-weight:700;">📝 ${a.title} — 课后练习</div>
+        <div style="font-size:12px;color:var(--text2);">共 ${articleQuizQuestions.length} 题 · 含词汇/语法/阅读/翻译/听写</div>
+      </div>
+      <div id="quizArea"></div>
+      <button style="display:block;margin:16px auto;padding:8px 24px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;" onclick="selectArticle(currentArticle);renderContent();">返回文章</button>
+    </div>
+  `;
+  showQuizQ();
+}
+
+function showQuizQ(){
+  if(quizIdx>=articleQuizQuestions.length){
+    const pct = Math.round((quizCorrect/articleQuizQuestions.length)*100);
+    const star = pct>=80?'⭐⭐⭐':pct>=60?'⭐⭐':'⭐';
+    document.getElementById('quizArea').innerHTML=`
+      <div class="quiz-score">${star}<br>${quizCorrect}/${articleQuizQuestions.length} 正确 (${pct}%)</div>
+      <button class="tab" style="display:block;margin:12px auto;" onclick="startArticleQuiz()">再来一次</button>
+    `;
+    return;
+  }
+  const q = articleQuizQuestions[quizIdx];
+  const labels = {vocab:'📝 词汇', detail:'📖 阅读理解', grammar:'📐 语法填空', translate:'🇨🇳 中译英', dictation:'👂 听力'};
+  const label = labels[q.type]||'';
+  document.getElementById('quizArea').innerHTML=`
+    <div style="font-size:11px;color:var(--text2);text-align:center;">${label} · ${quizIdx+1}/${articleQuizQuestions.length}</div>
+    <div class="quiz-q" style="margin-top:8px;">${q.q}</div>
+    ${q.opts.map(o=>`<button class="quiz-opt" onclick="answerArticleQuiz('${o.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${(q.a||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${o}</button>`).join('')}
+    ${q.type==='dictation'?`<button style="margin:12px auto;display:block;padding:10px 24px;border-radius:20px;border:1px solid var(--accent);background:var(--surface);cursor:pointer;font-family:inherit;font-size:14px;color:var(--accent);font-weight:600;" onclick="speakText('${q.a.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">🔊 播放句子</button>`:''}
+  `;
+}
+
+function answerArticleQuiz(chosen,correct,btn){
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>{o.disabled=true;if(o.textContent===correct)o.classList.add('correct');});
+  if(chosen!==correct)btn.classList.add('wrong');else quizCorrect++;
+  // 显示解析
+  const q = articleQuizQuestions[quizIdx];
+  const area = document.getElementById('quizArea');
+  if(q.note){
+    const noteDiv = document.createElement('div');
+    noteDiv.style.cssText = 'margin-top:12px;padding:10px 14px;background:#f0f8f4;border-radius:8px;border-left:3px solid var(--accent2);font-size:12px;color:var(--text2);line-height:1.8;';
+    noteDiv.innerHTML = `<strong>💡 解析：</strong>${q.note}`;
+    area.appendChild(noteDiv);
+  }
+  // 手动翻题按钮
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;margin-top:12px;justify-content:center;';
+  if(quizIdx>0)btnRow.innerHTML += '<button class="tab" onclick="quizIdx--;showQuizQ();" style="font-size:11px;">◀ 上一题</button>';
+  btnRow.innerHTML += `<button class="tab" onclick="quizIdx++;showQuizQ();" style="font-size:11px;background:var(--accent);color:#fff;border-color:var(--accent);">${quizIdx<articleQuizQuestions.length-1?'下一题 ▶':'查看结果'}</button>`;
+  area.appendChild(btnRow);
+}
+
+function selectArticle(i){currentArticle=i;renderContent();}
+function prevArticle(){if(currentArticle>0){currentArticle--;renderContent();}}
+function nextArticle(){if(currentArticle<articles.length-1){currentArticle++;renderContent();}}
+
+
+function renderGrid(main, words){
+  main.innerHTML = `
+    <div style="display:flex;height:100%;">
+      <div class="word-grid" style="flex:1;overflow-y:auto;align-content:flex-start;">${words.map((w,i)=>`
+        <div class="word-card" onclick="showExample('${w.en.replace(/'/g,"\\'")}','${w.cn.replace(/'/g,"\\'")}',${i})" id="wc${i}">
+          <span class="play" onclick="event.stopPropagation();speakWord('${w.en.replace(/'/g,"\\'")}')">▶</span>
+          <span class="en">${w.en}</span>
+          <span class="cn${hideCN?' hidden':''}">${w.cn}</span>
+        </div>
+      `).join('')}</div>
+      <div id="examplePanel" style="width:380px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;align-self:flex-start;max-height:100%;">
+        <div style="padding:16px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;position:sticky;top:0;background:var(--surface);z-index:1;">📖 例句学习</div>
+        <div id="exampleContent" style="flex:1;padding:16px;overflow-y:auto;">
+          <div style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;">点击左侧单词查看例句</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+let exampleTimer = null;
+function showExample(word, cn, idx){
+  document.querySelectorAll('.word-card').forEach(c=>c.style.background='');
+  const card = document.getElementById('wc'+idx);
+  if(card) card.style.background = '#f0e8d8';
+
+  const sentences = generateExamples(word, cn);
+  const panel = document.getElementById('exampleContent');
+  if(!panel) return;
+  const phon = getPhonetics(word);
+
+  panel.innerHTML = `
+    <div style="width:100%;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;">
+        <div style="font-size:26px;font-weight:700;color:var(--text);">${word}</div>
+        <div style="font-size:16px;color:var(--accent);">${phon.ipa}</div>
+      </div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:10px;">${cn}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <button onclick="speakWord('${word.replace(/'/g,"\\'")}')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;">🔊 发音</button>
+        <button id="btnRecWord" onclick="toggleRecord('${word.replace(/'/g,"\\'")}')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--accent);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;color:var(--accent);">🎤 跟读打分</button>
+        <span id="recStatus" style="font-size:11px;color:var(--text2);display:flex;align-items:center;"></span>
+      </div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px;">
+        ${phon.phonemes.map(p=>`<span style="padding:3px 7px;border-radius:4px;font-size:12px;font-weight:600;${p.type==='vowel'?'background:#ffe8d0;color:#c8a082;':p.type==='digraph'?'background:#d0e8e0;color:#5a8a7a;':'background:#e8e0d8;color:#8b7a62;'}">${p.text}<span style="font-size:9px;display:block;opacity:0.7;">${p.ipa}</span></span>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">音节: ${phon.syllables.join(' · ')}</div>
+      <div style="font-size:11px;color:var(--accent);margin-bottom:14px;line-height:1.8;">
+        ${phon.phonics.map(p=>`<span style="display:inline-block;margin:2px 3px 2px 0;padding:2px 7px;background:#f8f2e8;border-radius:5px;">${p}</span>`).join('')}
+      </div>
+      ${sentences.map((s,i)=>`
+        <div style="margin-bottom:14px;padding:12px;background:#f8f6f0;border-radius:10px;border-left:3px solid var(--accent);">
+          <div style="font-size:15px;line-height:1.8;cursor:pointer;" onclick="speakText('${s.en.replace(/'/g,"\\'")}')" title="点击朗读">${s.en}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px;">${s.cn}</div>
+          ${s.note?`<div style="font-size:11px;color:var(--accent);margin-top:4px;">${s.note}</div>`:''}
+        </div>
+      `).join('')}
+      <button style="margin-top:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);cursor:pointer;font-family:inherit;font-size:12px;color:var(--accent);" onclick="speakText('${sentences.map(s=>s.en).join(' ').replace(/'/g,"\\'")}')">🔊 连续朗读全部例句</button>
+    </div>
+  `;
+}
+
+function lookupWord(w){
+  // 在 850 词库里查词，处理变形
+  const clean = w.toLowerCase().replace(/[^a-z'-]/g,'');
+  const allWords = data.groups.flatMap(g=>g.words);
+  // 1. 精确匹配
+  let found = allWords.find(x=>x.en===clean);
+  if(found) return found;
+  // 2. 去后缀: -s, -es, -ed, -ing, -er, -est, -ly, -'s
+  const base = clean.replace(/(ies|ied)$/,'y').replace(/(ves)$/,'f').replace(/((s|es|ed|ing|er|est|ly|'s|s'|ness|ment|ful|less|able))$/,'').replace(/(.)\1ing$/,'$1').replace(/([aeiou])[^aeiou]ing$/,'$1');
+  if(base!==clean){
+    found = allWords.find(x=>x.en===base);
+    if(found) return found;
+  }
+  // 3. 常见不规则
+  const irreg = {comes:'come',goes:'go',does:'do',has:'have',is:'be',are:'be',was:'be',were:'be',am:'be',went:'go',gone:'go',got:'get',took:'take',taken:'take',made:'make',said:'say',seen:'see',done:'do',had:'have',ran:'run',sat:'sit',stood:'stand',fell:'fall',grew:'grow',knew:'know',threw:'throw',wrote:'write', gave:'give', ate:'eat', drank:'drink', slept:'sleep', read:'read', put:'put', let:'let', set:'set', cut:'cut', hit:'hit', hurt:'hurt', kept:'keep', slept:'sleep', felt:'feel', left:'leave', lost:'lose', met:'meet', paid:'pay', sent:'send', spent:'spend', built:'build', found:'find', held:'hold', told:'tell', sold:'sell', bought:'buy', brought:'bring', caught:'catch', taught:'teach', thought:'think', fought:'fight', wore:'wear', won:'win', woke:'wake', blew:'blow', flew:'fly', grew:'grow', knew:'know', drew:'draw', showed:'show', broke:'break', spoke:'speak', stole:'steal', drove:'drive', rode:'ride', rose:'rise', chose:'choose', froze:'freeze', hid:'hide', bit:'bite', beat:'beat', fed:'feed', led:'lead', hung:'hang', rang:'ring', sang:'sing', swam:'swim', began:'begin', drank:'drink', sank:'sink', shrank:'shrink', stank:'stink', sprang:'spring', swung:'swing', ran:'run'};
+  if(irreg[clean]){found=allWords.find(x=>x.en===irreg[clean]);if(found)return found;}
+  return null;
+}
+
+function getPhonetics(word){
+  const w = word.toLowerCase();
+  const phonics = [], syllables = [];
+  let phonemes = [];  // 逐字母/组合的音素拆解
+
+  // === 音素拆解：逐字母分析 ===
+  const digraphs = [
+    {re:/^tion/, s:'tion', ipa:'ʃən', note:'tion 发 /ʃən/'},
+    {re:/^sion/, s:'sion', ipa:'ʒən', note:'sion 发 /ʒən/'},
+    {re:/^ture/, s:'ture', ipa:'tʃər', note:'ture 发 /tʃər/'},
+    {re:/^sure/, s:'sure', ipa:'ʒər', note:'sure 发 /ʒər/'},
+    {re:/^ough/, s:'ough', ipa:'ʌf', note:'ough 可发 /ʌf/ 或 /oʊ/'},
+    {re:/^augh/, s:'augh', ipa:'ɔː', note:'augh 发长音 /ɔː/'},
+    {re:/^ight/, s:'ight', ipa:'aɪt', note:'igh 发 /aɪ/，t 发 /t/'},
+    {re:/^ee/, s:'ee', ipa:'iː', note:'ee 发长音 /iː/'},
+    {re:/^ea/, s:'ea', ipa:'iː', note:'ea 常发 /iː/'},
+    {re:/^oo/, s:'oo', ipa:'uː', note:'oo 常发长音 /uː/'},
+    {re:/^ou/, s:'ou', ipa:'aʊ', note:'ou 常发 /aʊ/'},
+    {re:/^ow/, s:'ow', ipa:'oʊ', note:'ow 发 /oʊ/'},
+    {re:/^oi/, s:'oi', ipa:'ɔɪ', note:'oi 发 /ɔɪ/'},
+    {re:/^oy/, s:'oy', ipa:'ɔɪ', note:'oy 发 /ɔɪ/'},
+    {re:/^ai/, s:'ai', ipa:'eɪ', note:'ai 发 /eɪ/'},
+    {re:/^ay/, s:'ay', ipa:'eɪ', note:'ay 发 /eɪ/'},
+    {re:/^oa/, s:'oa', ipa:'oʊ', note:'oa 发 /oʊ/'},
+    {re:/^au/, s:'au', ipa:'ɔː', note:'au 常发 /ɔː/'},
+    {re:/^aw/, s:'aw', ipa:'ɔː', note:'aw 发 /ɔː/'},
+    {re:/^ew/, s:'ew', ipa:'juː', note:'ew 常发 /juː/'},
+    {re:/^th/, s:'th', ipa:'θ', note:'th 舌尖轻触上齿发 /θ/'},
+    {re:/^sh/, s:'sh', ipa:'ʃ', note:'sh 发 /ʃ/，像汉语"嘘"'},
+    {re:/^ch/, s:'ch', ipa:'tʃ', note:'ch 发 /tʃ/，像汉语"吃"'},
+    {re:/^ph/, s:'ph', ipa:'f', note:'ph 发 /f/'},
+    {re:/^wh/, s:'wh', ipa:'w', note:'wh 发 /w/'},
+    {re:/^ck/, s:'ck', ipa:'k', note:'ck 发 /k/，跟在短元音后'},
+    {re:/^ng/, s:'ng', ipa:'ŋ', note:'ng 发鼻音 /ŋ/'},
+    {re:/^nk/, s:'nk', ipa:'ŋk', note:'nk 发 /ŋk/'},
+    {re:/^kn/, s:'kn', ipa:'n', note:'kn 开头的 k 不发音'},
+    {re:/^wr/, s:'wr', ipa:'r', note:'wr 开头的 w 不发音'},
+    {re:/^mb$/, s:'mb', ipa:'m', note:'mb 结尾的 b 不发音'},
+    {re:/^dge/, s:'dge', ipa:'dʒ', note:'dge 发 /dʒ/'},
+    {re:/^tch/, s:'tch', ipa:'tʃ', note:'tch 发 /tʃ/'},
+  ];
+
+  let pos=0;
+  while(pos < w.length){
+    let matched=false;
+    for(const d of digraphs){
+      if(w.substring(pos).match(d.re)){
+        phonemes.push({text:d.s, ipa:d.ipa, type:'digraph'});
+        phonics.push(d.note);
+        pos+=d.s.length;
+        matched=true;
+        break;
+      }
+    }
+    if(!matched){
+      const c=w[pos];
+      if(/[aeiou]/.test(c)){
+        // 判断长短元音
+        const next=w[pos+1]||'', next2=w[pos+2]||'';
+        let ipa='', note='';
+        if(c==='a'){
+          if(next2==='e'&&!w[pos+2]||(next!=='e'&&next2==='e')){ipa='eɪ';note='a 发长音 /eɪ/（开音节）';}
+          else{ipa='æ';note='a 发短音 /æ/（闭音节）';}
+        }else if(c==='e'){
+          if(next==='e'||(next!=='e'&&next2==='e')){ipa='iː';note='e 发长音 /iː/（开音节）';}
+          else{ipa='e';note='e 发短音 /e/（闭音节）';}
+        }else if(c==='i'){
+          if(next==='e'&&pos+1===w.length-1){ipa='aɪ';note='i 发长音 /aɪ/（i_e 结构）';}
+          else if(next2==='e'){ipa='aɪ';note='i 发长音 /aɪ/（开音节）';}
+          else{ipa='ɪ';note='i 发短音 /ɪ/（闭音节）';}
+        }else if(c==='o'){
+          if(next==='e'&&pos+1===w.length-1){ipa='oʊ';note='o 发长音 /oʊ/（o_e 结构）';}
+          else if(next2==='e'){ipa='oʊ';note='o 发长音 /oʊ/（开音节）';}
+          else{ipa='ɒ';note='o 发短音 /ɒ/（闭音节）';}
+        }else if(c==='u'){
+          if(next==='e'&&pos+1===w.length-1){ipa='juː';note='u 发长音 /juː/（u_e 结构）';}
+          else if(next2==='e'){ipa='juː';note='u 发长音 /juː/（开音节）';}
+          else{ipa='ʌ';note='u 发短音 /ʌ/（闭音节）';}
+        }else{ipa='ə';note='弱读 /ə/';}
+        phonemes.push({text:c, ipa, type:'vowel'});
+        phonics.push(note);
+      }else{
+        // 辅音
+        const map={b:'b',c:'k',d:'d',f:'f',g:'g',h:'h',j:'dʒ',k:'k',l:'l',m:'m',n:'n',p:'p',q:'kw',r:'r',s:'s',t:'t',v:'v',w:'w',x:'ks',y:'j',z:'z'};
+        phonemes.push({text:c, ipa:map[c]||c, type:'consonant'});
+      }
+      pos++;
+    }
+  }
+
+  // 音节数
+  const vowelCount = (w.match(/[aeiou]/g)||[]).length;
+  syllables.push(`${vowelCount||1} 个音节`);
+
+  // 音节划分提示
+  if(w.length<=4) syllables.push('短词整体记忆');
+  else if(w.length<=7) syllables.push('可分音节记忆');
+  else syllables.push('逐音节拆开朗读');
+
+  // Magic E
+  if(/[aeiou][^aeiou]e$/.test(w) && w.length>=4){
+    phonics.push('Silent E 规则: 末尾 e 不发音，让前面元音读长音（字母本音）');
+  }
+  // CVC
+  if(/^[^aeiou][aeiou][^aeiou]$/.test(w) && w.length===3){
+    phonics.push('CVC 闭音节: 元音读短音，如 cat /kæt/');
+  }
+
+  // 前缀
+  if(w.startsWith('un')){phonics.push('前缀 un- /ʌn/ 表示"不，相反"');}
+  if(w.startsWith('re')&&w.length>4){phonics.push('前缀 re- /riː/ 表示"再次，重新"');}
+  if(w.startsWith('dis')){phonics.push('前缀 dis- /dɪs/ 表示"否定，相反"');}
+  if(w.startsWith('pre')){phonics.push('前缀 pre- /priː/ 表示"在…之前"');}
+
+  // 后缀
+  if(w.endsWith('ing')){phonics.push('后缀 -ing /ɪŋ/ 表进行时或动名词');}
+  if(w.endsWith('ed')){phonics.push('后缀 -ed 可发 /t/ /d/ 或 /ɪd/，取决于前面辅音');}
+  if(w.endsWith('er')){phonics.push('后缀 -er /ər/ 表示"做…的人/物"或比较级');}
+  if(w.endsWith('est')){phonics.push('后缀 -est /ɪst/ 表示最高级"最…"');}
+  if(w.endsWith('ly')){phonics.push('后缀 -ly /li/ 副词后缀');}
+  if(w.endsWith('ful')){phonics.push('后缀 -ful /fʊl/ 表示"充满…的"');}
+  if(w.endsWith('less')){phonics.push('后缀 -less /ləs/ 表示"没有…的"');}
+  if(w.endsWith('ment')){phonics.push('后缀 -ment /mənt/ 名词后缀');}
+  if(w.endsWith('ness')){phonics.push('后缀 -ness /nəs/ 名词后缀');}
+  if(w.endsWith('able')){phonics.push('后缀 -able /əbəl/ 表示"可…的"');}
+  if(w.endsWith('tion')){phonics.push('后缀 -tion /ʃən/ 名词后缀');}
+  if(w.endsWith('ous')){phonics.push('后缀 -ous /əs/ 形容词后缀');}
+  if(w.endsWith('y')&&w.length>3){phonics.push('后缀 -y /i/ 形容词或名词后缀');}
+
+  if(phonics.length===0) phonics.push('按字母发音规则逐音朗读');
+
+  // 生成 IPA 串
+  const ipaStr = '/' + phonemes.map(p=>p.ipa).join('') + '/';
+
+  return {
+    ipa: ipaStr,
+    phonemes,
+    syllables,
+    phonics: [...new Set(phonics)].slice(0, 8),
+  };
+}
+
+// 录音跟读
+let mediaRecorder=null,recordedChunks=[],recordedAudio=null,isRecording=false;
+async function toggleRecord(targetText){
+  if(isRecording){stopRecord(targetText);return;}
+  if(recordedAudio){playRecording();return;}
+
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream);
+    recordedChunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(recordedChunks,{type:'audio/webm'});
+      recordedAudio=URL.createObjectURL(blob);
+      stream.getTracks().forEach(t=>t.stop());
+      checkPronunciation(targetText);
+    };
+    mediaRecorder.start();
+    isRecording=true;
+    const stEl = getStatusEl();
+    if(stEl){stEl.textContent='🎤 录音中...请朗读';stEl.style.color='#e04040';}
+  }catch(e){alert('请允许麦克风权限');}
+}
+
+function stopRecord(){
+  if(mediaRecorder&&isRecording){mediaRecorder.stop();isRecording=false;}
+}
+
+function playRecording(){
+  if(recordedAudio){
+    const a=new Audio(recordedAudio);
+    a.play();
+    document.getElementById('recStatus').textContent='🔊 播放录音中...';
+    a.onended=()=>{document.getElementById('recStatus').textContent='回听完成';document.getElementById('recStatus').style.color='var(--text2)';};
+  }
+}
+
+function getStatusEl(){
+  const el = document.getElementById('recStatus');
+  if(el && el.offsetParent) return el;
+  return document.getElementById('articleRecStatus') || el;
+}
+
+function checkPronunciation(target){
+  const statusEl = getStatusEl();
+  if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)){
+    if(statusEl){statusEl.textContent='录音已保存 (当前浏览器不支持语音识别)';statusEl.style.color='var(--text2)';}
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec=new SR();
+  rec.lang='en-US';rec.interimResults=false;
+  rec.onresult=e=>{
+    const said=e.results[0][0].transcript.toLowerCase().trim();
+    const targetLower=target.toLowerCase().trim();
+    const targetWords=targetLower.split(/\s+/).slice(0,20);
+    const saidWords=said.split(/\s+/);
+    let correct=0;
+    for(let i=0;i<Math.min(targetWords.length,saidWords.length);i++){
+      if(targetWords[i]===saidWords[i])correct++;
+    }
+    const pct=Math.round((correct/Math.max(targetWords.length,saidWords.length))*100);
+    const emoji=pct>=80?'🎉':pct>=50?'👍':'📚';
+    if(statusEl){statusEl.innerHTML=`${emoji} 识别: "${said}" · 正确率 ${pct}%`;statusEl.style.color=pct>=80?'var(--accent2)':pct>=50?'var(--accent)':'#d4a08a';}
+  };
+  rec.onerror=()=>{if(statusEl){statusEl.textContent='录音已保存 (未检测到语音)';statusEl.style.color='var(--text2)';}};
+  rec.onend=()=>{recordedAudio=null;};
+  rec.start();
+}
+
+function generateExamples(word, cn){
+  const w = word.toLowerCase();
+  const templates = [
+    {en:`I can see the ${w}.`, cn:`我能看见${cn}。`, note:'can + 动词原形'},
+    {en:`The ${w} is very good.`, cn:`这个${cn}很好。`, note:'主系表结构'},
+    {en:`Please give me the ${w}.`, cn:`请把${cn}给我。`, note:'祈使句'},
+    {en:`This ${w} is for you.`, cn:`这个${cn}是给你的。`, note:'for 表示目的'},
+    {en:`I put the ${w} on the table.`, cn:`我把${cn}放在桌子上。`, note:'put...on 短语'},
+    {en:`Do you have a ${w}?`, cn:`你有${cn}吗？`, note:'一般疑问句'},
+    {en:`The ${w} is in the room.`, cn:`${cn}在房间里。`, note:'in 表示位置'},
+    {en:`I got a new ${w} yesterday.`, cn:`我昨天得到了一个新的${cn}。`, note:'一般过去时'},
+  ];
+
+  // 动词特殊处理
+  const verbs = ['come','get','give','go','keep','let','make','put','seem','take','be','do','have','say','see','send','run','walk','jump','eat','drink','sleep','read','write','play','work','move','turn','open','close','start','stop','help','like','love','hate','want','need','feel','hear','look','find','try','talk','sit','stand','fall','grow','learn','teach','show','ask','tell','call','bring','buy','catch','cut','hold','pull','push','wash','watch','touch','send','give','live','fly','swim'];
+  if(verbs.includes(w)){
+    return [
+      {en:`I ${w} every day.`, cn:`我每天${cn}。`, note:'一般现在时 · 每日习惯'},
+      {en:`He ${w.endsWith('y')?w.slice(0,-1)+'ies':w+'s'} very well.`, cn:`他${cn}得很好。`, note:'第三人称单数 +s'},
+      {en:`I will ${w} tomorrow.`, cn:`我明天会${cn}。`, note:'will + 动词原形 · 将来时'},
+      {en:`Please ${w} now.`, cn:`请现在${cn}。`, note:'祈使句'},
+    ];
+  }
+
+  // 形容词特殊处理
+  const adjs = ['good','bad','big','small','new','old','happy','sad','beautiful','kind','great','strong','high','low','clean','dirty','hot','cold','warm','soft','hard','long','short','young','dark','light','true','false','important','common','strange','different','same','free','full','necessary','possible','ready'];
+  if(adjs.includes(w)){
+    return [
+      {en:`This is a very ${w} thing.`, cn:`这是一件很${cn}的事。`, note:'very + 形容词'},
+      {en:`It is ${w} to do this.`, cn:`做这件事很${cn}。`, note:'It is + adj + to do'},
+      {en:`She is ${w}.`, cn:`她很${cn}。`, note:'主系表 · 描述人'},
+      {en:`The ${w} day is here.`, cn:`${cn}的一天来了。`, note:'形容词修饰名词'},
+    ];
+  }
+
+  return templates.slice(0, 4);
+}
+
+function renderFlashcard(main, words){
+  if(words.length===0){main.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);">暂无词汇</div>';return;}
+  flashWords = words;
+  if(flashIdx>=words.length) flashIdx=0;
+  const w = words[flashIdx];
+  main.innerHTML = `
+    <div class="flashcard-view">
+      <div class="big-card" id="bigCard" onclick="this.classList.toggle('flipped')">
+        <div class="big-card-inner">
+          <div class="big-card-front">
+            <div>${w.en}</div>
+            <div class="big-card-hint">点击翻转</div>
+          </div>
+          <div class="big-card-back">${w.cn}</div>
+        </div>
+      </div>
+      <div class="big-card-hint">${flashIdx+1} / ${words.length}</div>
+      <div class="flashcard-btns">
+        <button onclick="prevFlash()">◀</button>
+        <button onclick="speakWord('${w.en}')">🔊 发音</button>
+        <button class="primary" onclick="nextFlash()">▶ 下一个</button>
+      </div>
+    </div>
+  `;
+}
+
+function prevFlash(){flashIdx=(flashIdx-1+flashWords.length)%flashWords.length;renderContent();}
+function nextFlash(){flashIdx++;renderContent();}
+
+function renderQuiz(main, words){
+  if(words.length<4){main.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2);">词汇太少，无法出题<br>至少需要4个词</div>';return;}
+  if(quizIdx===0){quizCorrect=0;quizWords=words.sort(()=>Math.random()-0.5).slice(0,10);}
+  if(quizIdx>=quizWords.length||quizIdx>=10){
+    main.innerHTML=`<div class="quiz-view"><div class="quiz-score">测验完成！${quizCorrect}/${quizWords.length} 正确</div><button class="flashcard-btns" style="margin:0 auto;display:block;"><button class="primary" onclick="quizIdx=0;renderContent()">再来一次</button></div>`;
+    quizIdx=0;return;
+  }
+  const w = quizWords[quizIdx];
+  const options = [w.cn];
+  while(options.length<4){const r=words[Math.floor(Math.random()*words.length)].cn;if(!options.includes(r))options.push(r);}
+  options.sort(()=>Math.random()-0.5);
+  main.innerHTML = `
+    <div class="quiz-view">
+      <div style="font-size:12px;color:var(--text2);text-align:center;">${quizIdx+1}/${quizWords.length} · 选择正确翻译</div>
+      <div class="quiz-q" style="margin-top:12px;">${w.en}</div>
+      ${options.map(o=>`<button class="quiz-opt" onclick="answerQuiz('${o}','${w.cn}',this)">${o}</button>`).join('')}
+      <button style="margin-top:16px;display:block;width:100%;padding:8px;border-radius:8px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:12px;color:var(--text2);" onclick="speakWord('${w.en}')">🔊 听发音</button>
+    </div>
+  `;
+}
+
+function answerQuiz(chosen, correct, btn){
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>{o.disabled=true;if(o.textContent===correct)o.classList.add('correct');});
+  if(chosen!==correct){btn.classList.add('wrong');}
+  else quizCorrect++;
+  setTimeout(()=>{quizIdx++;renderContent();},1200);
+}
+
+let bestVoice = null;
+
+function getBestVoice(){
+  if(bestVoice) return bestVoice;
+  const voices = speechSynthesis.getVoices();
+  // 优先选好的英文语音
+  const preferred = ['Google US English', 'Microsoft Zira', 'Microsoft David', 'Samantha', 'Alex', 'Karen'];
+  for(const p of preferred){
+    const v = voices.find(v=>v.name.includes(p) && v.lang.startsWith('en'));
+    if(v){bestVoice=v;return v;}
+  }
+  bestVoice = voices.find(v=>v.lang.startsWith('en')) || voices[0];
+  return bestVoice;
+}
+speechSynthesis.onvoiceschanged = () => { bestVoice = null; getBestVoice(); };
+
+function speakWord(word){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.voice = getBestVoice();
+  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1;
+  speechSynthesis.speak(u);
+}
+
+let speakAllTimer=null;
+function speakAllWords(){
+  if(speakAllTimer){clearInterval(speakAllTimer);speakAllTimer=null;return;}
+  const words = getGroupWords();
+  let i = 0;
+  function next(){if(i>=words.length){speakAllTimer=null;return;}speakWord(words[i].en);i++;speakAllTimer=setTimeout(next,1800);}
+  next();
+}
+
+function speakText(text){
+  if(window._nativeAudio){window._nativeAudio.currentTime=0;window._nativeAudio.play();return;}
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  isSpeaking = true;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  let i = 0;
+  function next(){
+    if(i >= sentences.length || !isSpeaking){ isSpeaking=false; return; }
+    const u = new SpeechSynthesisUtterance(sentences[i].trim());
+    u.voice = getBestVoice(); u.lang = 'en-US'; u.rate = 0.82;
+    u.onend = () => { i++; setTimeout(next, 300); };
+    speechSynthesis.speak(u);
+  }
+  next();
+}
+
+let isSpeaking=false;
+
+// 文章句子点击事件代理
+document.getElementById('mainContent').addEventListener('click', e => {
+  const s = e.target.closest('.article-sentence');
+  if(!s) return;
+  const idx = parseInt(s.dataset.idx);
+  if(!isNaN(idx)){
+    document.querySelectorAll('.article-sentence').forEach(p=>p.style.background='');
+    s.style.background = '#f0e8d8';
+    speakText(s.dataset.text || s.textContent);
+  }
+});
+document.getElementById('mainContent').addEventListener('contextmenu', e => {
+  const s = e.target.closest('.article-sentence');
+  if(!s) return;
+  e.preventDefault();
+  const idx = parseInt(s.dataset.idx);
+  if(!isNaN(idx)) shadowRecordByElem(s);
+});
+
+function shadowRecordByElem(el){
+  const targetText = (el.dataset.text||el.textContent||'').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+  const statusEl = document.getElementById('articleRecStatus');
+  stopSpeaking();
+  if(statusEl){ statusEl.textContent='🔊 先听示范...'; statusEl.style.color='var(--accent)'; }
+  const u = new SpeechSynthesisUtterance(targetText);
+  u.voice = getBestVoice(); u.lang = 'en-US'; u.rate = 0.78;
+  u.onend = async () => {
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      mediaRecorder = new MediaRecorder(stream);
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t=>t.stop());
+        if(statusEl){ statusEl.textContent='⏳ 识别中...'; statusEl.style.color='var(--text2)'; }
+        checkPronunciation(targetText);
+      };
+      mediaRecorder.start(); isRecording = true;
+      if(statusEl){ statusEl.textContent='🎤 请跟读...'; statusEl.style.color='#e04040'; }
+      setTimeout(()=>{ if(isRecording){ mediaRecorder.stop(); isRecording=false; }}, 6000);
+    }catch(e){ if(statusEl){ statusEl.textContent='请允许麦克风权限'; } }
+  };
+  speechSynthesis.speak(u);
+}
+
+function readSentence(idx){
+  const el = document.getElementById('p'+idx);
+  if(!el) return;
+  document.querySelectorAll('[id^="p"]').forEach(p=>p.style.background='');
+  el.style.background = '#f0e8d8';
+  speakText(el.textContent);
+}
+
+function readFullArticle(){
+  if(window._nativeAudio){
+    window._nativeAudio.currentTime=0;
+    window._nativeAudio.play();
+    document.getElementById('nativeAudioStatus').textContent='▶ 真人音频播放中...';
+    return;
+  }
+  speakText(articles[currentArticle].text);
+}
+
+function stopSpeaking(){
+  speechSynthesis.cancel();
+  isSpeaking = false;
+  if(window._nativeAudio){window._nativeAudio.pause();}
+}
+
+let nativeAudio = null;
+function loadNativeAudio(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(nativeAudio){nativeAudio.pause();}
+  nativeAudio = new Audio(URL.createObjectURL(file));
+  window._nativeAudio = nativeAudio;
+  const status = document.getElementById('nativeAudioStatus');
+  if(status){status.textContent='✅ 已加载: '+file.name;status.style.color='var(--accent2)';}
+  // 句子点击时播放原声音频片段
+  nativeAudio.onloadedmetadata = ()=>{
+    if(status){status.textContent='✅ 真人音频就绪 ('+Math.round(nativeAudio.duration)+'秒)';}
+  };
+}
+
+</script>
+</body>
+</html>

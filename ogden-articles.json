@@ -1,0 +1,257 @@
+[
+  {
+    "title": "My Morning",
+    "text": "I get up early every day. The sun comes through the window and I see the light on the wall. I put on my clothes and go to the wash room. There I make my face clean with cold water. After that I have a meal of bread and fruit. My mother gives me a cup of milk. I take my book and go to school. The road is short and I see other boys and girls on the way. We say good morning to one another. This is how my day starts.",
+    "trans": [
+      "我每天早早起床。",
+      "太阳从窗户照进来，我看见光打在墙上。",
+      "我穿上衣服，去洗手间。",
+      "在那我用冷水把脸洗干净。",
+      "之后我吃一顿面包和水果的早餐。",
+      "妈妈给我一杯牛奶。",
+      "我拿上书，去学校。",
+      "路很短，路上我看见别的男孩和女孩。",
+      "我们互相说早上好。",
+      "这就是我一天开始的样子。"
+    ],
+    "grammar": [
+      "一般现在时: get up, comes, see, go, have, gives, take, say, starts — 表示日常习惯",
+      "第三人称单数 +s: comes, gives, starts — he/she/it 后面动词加 s",
+      "介词短语: through the window, on the wall, on the way, of bread, to school",
+      "时间顺序: Every day → After that → 按时间先后连接句子"
+    ]
+  },
+  {
+    "title": "A Walk in the Country",
+    "text": "Last week I went for a walk in the country. The sky was blue and the air was warm. There were green fields on every side. I saw a small river with clear water running over white stones. Some sheep were on the grass near the water. A boy was there with them. He gave me a smile and said the weather was good for walking. I sat down under a tree and took a rest. It was very quiet and I felt happy to be there.",
+    "trans": [
+      "上周我去乡间散步。",
+      "天空很蓝，空气暖暖的。",
+      "四面八方都是绿色的田野。",
+      "我看见一条小河，清澈的水流过白色的石头。",
+      "几只羊在水边草地上。",
+      "一个男孩跟它们在一起。",
+      "他朝我笑了笑，说天气很适合散步。",
+      "我在一棵树下坐下，休息了一会儿。",
+      "周围非常安静，待在那里我感觉很开心。"
+    ],
+    "grammar": [
+      "一般过去时: went, was, were, saw, gave, said, sat, felt — 表示过去发生的事情",
+      "there be 句型: There were green fields / A boy was there — 表示某地有某物",
+      "过去进行时: was running, was walking — was/were + -ing 表示过去正在进行的动作",
+      "形容词顺序: small river, clear water, white stones, green fields — 形容词在名词前"
+    ]
+  },
+  {
+    "title": "The Old Man and His Dog",
+    "text": "There is an old man who lives near my house. He has a brown dog that goes with him everywhere. Every morning the man takes his dog out for a walk. The dog runs in front of him and then comes back again. Sometimes the man gives the dog a bit of bread. The dog is his best friend. When the man is sad, the dog puts its head on his knee. When the man is happy, the dog jumps up and down. They have been together for many years.",
+    "trans": [
+      "我家附近住着一位老人。",
+      "他有一只棕色的狗，去哪都跟着他。",
+      "每天早上老人带狗出去散步。",
+      "狗在他前面跑，然后又跑回来。",
+      "有时老人会给狗一小块面包。",
+      "这只狗是他最好的朋友。",
+      "当老人难过的时候，狗把头放在他膝盖上。",
+      "当老人开心的时候，狗就跳上跳下。",
+      "他们已经在一起很多年了。"
+    ],
+    "grammar": [
+      "定语从句: an old man who lives / a dog that goes — who/that 引导的从句修饰前面的名词",
+      "一般现在时第三人称: lives, has, takes, runs, gives, puts, jumps — 描述习惯性动作",
+      "When 时间状语从句: When the man is sad / When the man is happy",
+      "现在完成时: have been together — have/has + 过去分词表示持续至今的状态"
+    ]
+  },
+  {
+    "title": "How to Make a Cup of Tea",
+    "text": "First, put some water in a kettle and put it on the fire. When the water is boiling, take the kettle off the heat. Put a small amount of tea leaves into a pot. Then put the boiling water into the pot. Let the tea rest for a short time, about three to five minutes. Take a cup and put a little milk in it if you like. Now put the tea into the cup through a net. The tea is ready. Take the cup in your hand and have a drink.",
+    "trans": [
+      "首先，把水倒进壶里，放在火上。",
+      "水开了之后，把壶从火上拿开。",
+      "往茶壶里放少量茶叶。",
+      "然后把开水倒进茶壶。",
+      "让茶泡一小会儿，大约三到五分钟。",
+      "拿一个杯子，如果喜欢可以加一点牛奶。",
+      "现在用滤网把茶倒进杯子。",
+      "茶就泡好了。",
+      "端起杯子，喝一口吧。"
+    ],
+    "grammar": [
+      "祈使句: put, take, let, have — 动词原形开头，表示命令或指导",
+      "When 引导的条件句: When the water is boiling — 表示条件",
+      "序数词: First → Then → Now — 表示步骤顺序",
+      "if 条件句: if you like — 表示选择"
+    ]
+  },
+  {
+    "title": "The Four Seasons",
+    "text": "The year has four parts: spring, summer, autumn and winter. In spring the weather gets warm and flowers come out of the earth. The trees put out new green leaves. In summer the sun is high and the days are long. The air is hot and sometimes there is thunder and rain. In autumn the leaves turn yellow and red, and then fall to the ground. The nights get cold. In winter there is snow in many places. The trees have no leaves and the world seems quiet and white.",
+    "trans": [
+      "一年有四个部分：春、夏、秋、冬。",
+      "春天天气变暖，花儿从泥土里长出来。",
+      "树木长出嫩绿的叶子。",
+      "夏天太阳高高挂，白天很长。",
+      "空气炎热，有时会打雷下雨。",
+      "秋天树叶变黄变红，然后落到地上。",
+      "夜晚变冷了。",
+      "冬天很多地方会下雪。",
+      "树上没有叶子，世界显得安静而洁白。"
+    ],
+    "grammar": [
+      "季节介词: in spring, in summer, in autumn, in winter — in + 季节",
+      "There be 句型: there is thunder, there is snow — 表示自然现象",
+      "感官动词: gets, turn, seems — 表示状态变化",
+      "并列结构: quiet and white / yellow and red — and 连接对等成分"
+    ]
+  },
+  {
+    "title": "Learning a New Language",
+    "text": "It is not easy to learn a new language, but it is a very good thing to do. At first, you may not understand much. You will only see strange words on the page. But if you keep working, day by day, you will get better. The important thing is to make the new language part of your life. Read a little every day. Say the words out loud. Try to think in the new language. Do not be afraid to make errors, for errors are part of learning. One day you will see that you have made great progress.",
+    "trans": [
+      "学一门新语言不容易，但这是非常值得做的事。",
+      "一开始你可能理解不了多少。",
+      "你只会看到书页上陌生的单词。",
+      "但如果你日复一日坚持下去，你会越来越好。",
+      "重要的是让这门新语言成为你生活的一部分。",
+      "每天读一点点。",
+      "把单词大声说出来。",
+      "试着用这门新语言思考。",
+      "不要害怕犯错误，因为错误是学习的一部分。",
+      "总有一天你会发现自己取得了巨大的进步。"
+    ],
+    "grammar": [
+      "形式主语: It is not easy to learn — It 作形式主语，真正主语是 to learn",
+      "情态动词: may not understand, will get, can say — may/will/can + 动词原形",
+      "if 条件句主将从现: If you keep working, you will get better",
+      "祈使句否定: Do not be afraid — Do not + 动词原形",
+      "现在完成时: you have made great progress"
+    ]
+  },
+  {
+    "title": "A Letter to a Friend",
+    "text": "Dear Mary, I am writing to you from my new house. It is a small place but it has a very good view of the sea. From my window I can see the blue water and the white sails of boats. The people here are kind and the town is quiet. I have been here for only a short time but I am very happy. Please come and see me when you have time. We can go for a walk by the sea together. I am certain you will like it here. With love, Jane.",
+    "trans": [
+      "亲爱的玛丽，我在我的新家给你写信。",
+      "这个地方不大，但能看到非常好的海景。",
+      "从窗户望去，我能看见蓝色的海水和白色的船帆。",
+      "这里的人很友善，小镇也很安静。",
+      "我来了没多久，但非常开心。",
+      "你有空的时候请来看看我。",
+      "我们可以一起去海边散步。",
+      "我相信你会喜欢这里的。",
+      "爱你的，简。"
+    ],
+    "grammar": [
+      "现在进行时: I am writing — am/is/are + -ing 表示正在进行的动作",
+      "介词短语表位置: from my window, of the sea, here, by the sea, to you",
+      "并列转折: a small place but it has a good view — but 连接转折",
+      "情态动词 can: I can see, We can go — can + 动词原形表能力或可能",
+      "书信格式: Dear..., With love — 英文书信的习惯表达"
+    ]
+  },
+  {
+    "title": "The Value of Time",
+    "text": "Time is one thing that you cannot get back once it is gone. Every minute is of great value. Some people say they have no time, but they do not use the time they have in a good way. If you put off your work till tomorrow, tomorrow will have its own work too. The best way is to do the important things first. Do not let small pleasures take your time away from the things that truly matter. Remember: the past is gone, the future is not here yet. All you have is now.",
+    "trans": [
+      "时间是一样东西，一旦过去就拿不回来了。",
+      "每一分钟都非常宝贵。",
+      "有些人说自己没时间，但他们没有好好利用已有的时间。",
+      "如果你把工作推到明天，明天也会有明天的事。",
+      "最好的方法是先做重要的事。",
+      "不要让小小的娱乐占用了你在真正重要的事情上的时间。",
+      "记住：过去已经走了，未来还没有来。",
+      "你拥有的只有现在。"
+    ],
+    "grammar": [
+      "定语从句: one thing that you cannot get back / the things that truly matter",
+      "一般现在时表示真理: Time is / Every minute is / All you have is",
+      "条件句: If you put off your work, tomorrow will have its own work",
+      "不可数名词: time, work, value — 不与 a/an 连用，没有复数",
+      "格言式表达: the past is gone, the future is not here yet"
+    ]
+  },
+  {
+    "title": "Keeping Healthy",
+    "text": "To keep your body healthy, you need three things: good food, enough sleep, and regular exercise. First, make certain that you eat a range of different foods. Fruit, vegetables, meat, and milk products all have their place. Second, get enough sleep every night. Most people need seven to eight hours. When you are sleeping, your body does its repair work. Third, move your body every day. A short walk, a run, or any sport will help keep your muscles strong. A healthy body is the base of a happy life.",
+    "trans": [
+      "要保持身体健康，你需要三样东西：好食物、充足睡眠和规律运动。",
+      "首先，确保你吃各种不同的食物。",
+      "水果、蔬菜、肉类和奶制品都有它们的位置。",
+      "第二，每晚要睡够觉。",
+      "大多数人需要七到八个小时。",
+      "当你睡觉的时候，身体在做修复工作。",
+      "第三，每天都要活动身体。",
+      "散个步、跑个步，或者任何运动都有助于保持肌肉强壮。",
+      "健康的身体是幸福生活的基础。"
+    ],
+    "grammar": [
+      "不定式表目的: To keep your body healthy — to + 动词原形表示目的",
+      "序数词: First, Second, Third — 组织段落结构",
+      "祈使句: make certain, get enough sleep, move your body",
+      "情态动词 will: will help — 表示将会发生",
+      "When 引导时间状语从句: When you are sleeping"
+    ]
+  },
+  {
+    "title": "What Makes a Good Friend",
+    "text": "A good friend is someone who is there for you in good times and in bad. They do not turn away when things get hard. A true friend gives you help before you even have to ask for it. They will keep your secrets safe and will not talk of you to others in a bad way. When you make an error, they do not judge you but give you support. You can say anything to a friend without fear. A friend is like a warm light on a dark road. If you have one good friend in your life, you are rich indeed.",
+    "trans": [
+      "好朋友是那种无论顺境还是逆境都在你身边的人。",
+      "当事情变困难的时候，他们不会转身离开。",
+      "真正的朋友在你开口之前就会伸出援手。",
+      "他们会帮你保守秘密，不会在背后说你的坏话。",
+      "当你犯错误的时候，他们不会责怪你，而是给你支持。",
+      "你可以毫无恐惧地对朋友说任何话。",
+      "朋友就像黑暗道路上的一盏暖灯。",
+      "如果生命中有一个好朋友，你就真的很富有了。"
+    ],
+    "grammar": [
+      "定语从句: someone who is there for you — who/that 限定名词",
+      "一般现在时真理式表达: A good friend is / A true friend gives",
+      "时间状语从句: when things get hard / When you make an error",
+      "比喻: like a warm light on a dark road — like 表示比喻",
+      "条件句: If you have one good friend, you are rich"
+    ]
+  },
+  {
+    "title": "A Story About a King",
+    "text": "Long ago there was a king who had everything he could ever want. He had a great house, good food, and a thousand servants. But he was not happy. One day he sent for a wise old man and asked, 'Why am I not happy?' The old man said, 'Go out and find the poorest person who is still happy. Take note of what they have.' The king went out and after a long search he met a worker who had almost nothing but was full of joy. The king saw then that happiness does not come from having much, but from needing little.",
+    "trans": [
+      "很久以前有一个国王，他拥有想要的一切。",
+      "他有宏伟的宫殿、精美的食物、还有一千个仆人。",
+      "但是他并不快乐。",
+      "一天，他找来一位智慧的老人，问道：「为什么我不快乐？」",
+      "老人说：「出去找一个最穷但依然快乐的人，看看他们拥有什么。」",
+      "国王出去了，找了很久，遇到一个工人，几乎一无所有却满心欢喜。",
+      "国王这才明白，幸福不是来自拥有很多，而是来自需要很少。"
+    ],
+    "grammar": [
+      "There be 句型过去时: there was a king — 讲述故事的标准开头",
+      "间接引语: asked why he was not happy / said happiness does not come",
+      "定语从句: a king who had everything / a worker who had nothing",
+      "who/that 引导: the poorest person who is still happy",
+      "对比结构: not from having much, but from needing little — not...but... 对比"
+    ]
+  },
+  {
+    "title": "The Power of Reading",
+    "text": "Reading is one of the most important things a person can do. When you read, you are not just looking at words on paper. You are taking in new ideas, seeing new places, and meeting new people — all without moving from your seat. A good book can be like a wise teacher or an old friend. It does not matter if you read for only ten minutes a day. Over time, those minutes become hours, and those hours become a library of knowledge in your mind. Reading makes the world wider and the heart deeper.",
+    "trans": [
+      "阅读是一个人能做的最重要的事情之一。",
+      "当你在读书的时候，你不只是在看纸上的文字。",
+      "你在吸收新的思想、看见新的地方、认识新的人——全都不用离开座位。",
+      "一本好书就像一位智慧的老师或者一位老朋友。",
+      "哪怕每天只读十分钟也没关系。",
+      "日积月累，那些分钟变成小时，那些小时在脑海中变成一座知识图书馆。",
+      "阅读让世界更广阔，让心灵更深刻。"
+    ],
+    "grammar": [
+      "现在进行时表示抽象行为: you are not just looking, you are taking in",
+      "情态动词: can do, can be — 表示可能性",
+      "比喻: like a wise teacher or an old friend — like + 名词表比喻",
+      "if 引导让步: It does not matter if...",
+      "比较级: wider, deeper — 形容词 + er 表示更…"
+    ]
+  }
+]
