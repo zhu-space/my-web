@@ -45,7 +45,13 @@ body{font-family:"PingFang SC","Noto Serif SC","STSong","Microsoft YaHei",serif;
 .quiz-score{font-size:24px;font-weight:700;text-align:center;padding:16px;color:var(--accent)}
 .voice-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);cursor:pointer;font-family:inherit;font-size:13px;color:var(--accent);font-weight:600;margin-left:auto}
 .main-content{display:flex;flex-direction:column;flex:1;overflow:hidden}
-@media(max-width:600px){.word-card{min-width:100px;font-size:13px;padding:6px 10px}}
+@media(max-width:768px){
+  .example-panel-desktop{position:fixed!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;width:100%!important;max-height:50vh!important;z-index:25!important;border-left:none!important;border-top:2px solid var(--accent)!important;border-radius:16px 16px 0 0!important;box-shadow:0 -4px 20px rgba(0,0,0,0.1)!important;transform:translateY(0)!important;transition:transform 0.3s!important;}
+  .example-panel-desktop.example-hidden{transform:translateY(100%)!important;}
+  .close-example-btn{display:block!important;}
+  .word-card{min-width:100px;font-size:13px;padding:6px 10px}
+  .vocab-panel{width:100%!important;}
+}
 </style>
 </head>
 <body>
@@ -677,17 +683,20 @@ function nextArticle(){if(currentArticle<articles.length-1){currentArticle++;ren
 function renderGrid(main, words){
   main.innerHTML = `
     <div style="display:flex;height:100%;">
-      <div class="word-grid" style="flex:1;overflow-y:auto;align-content:flex-start;">${words.map((w,i)=>`
+      <div class="word-grid" style="flex:1;overflow-y:auto;align-content:flex-start;min-width:0;">${words.map((w,i)=>`
         <div class="word-card" onclick="showExample('${w.en.replace(/'/g,"\\'")}','${w.cn.replace(/'/g,"\\'")}',${i})" id="wc${i}">
           <span class="play" onclick="event.stopPropagation();speakWord('${w.en.replace(/'/g,"\\'")}')">▶</span>
           <span class="en">${w.en}</span>
           <span class="cn${hideCN?' hidden':''}">${w.cn}</span>
         </div>
       `).join('')}</div>
-      <div id="examplePanel" style="width:380px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;align-self:flex-start;max-height:100%;">
-        <div style="padding:16px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;position:sticky;top:0;background:var(--surface);z-index:1;">📖 例句学习</div>
+      <div id="examplePanel" class="example-panel-desktop" style="width:380px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;align-self:flex-start;max-height:100%;">
+        <div style="padding:16px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;position:sticky;top:0;background:var(--surface);z-index:1;display:flex;justify-content:space-between;align-items:center;">
+          📖 例句学习
+          <button onclick="document.getElementById('examplePanel').classList.add('example-hidden');" style="border:none;background:none;cursor:pointer;font-size:14px;display:none;" class="close-example-btn">✕</button>
+        </div>
         <div id="exampleContent" style="flex:1;padding:16px;overflow-y:auto;">
-          <div style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;">点击左侧单词查看例句</div>
+          <div style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;">点击单词查看例句</div>
         </div>
       </div>
     </div>`;
@@ -698,6 +707,9 @@ function showExample(word, cn, idx){
   document.querySelectorAll('.word-card').forEach(c=>c.style.background='');
   const card = document.getElementById('wc'+idx);
   if(card) card.style.background = '#f0e8d8';
+  // 手机上自动弹出例句面板
+  const panel = document.getElementById('examplePanel');
+  if(panel) panel.classList.remove('example-hidden');
 
   const sentences = generateExamples(word, cn);
   const panel = document.getElementById('exampleContent');
