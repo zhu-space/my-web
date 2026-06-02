@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Say It English — Speak with AI</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --card: #1c1c1c;
+    --text: #eaeaea;
+    --dim: #8b8b8b;
+    --accent: #10b981;
+    --accent2: #34d399;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --border: #2a2a2a;
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .app {
+    width: 100%;
+    max-width: 520px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* === Top Bar === */
+  .topbar {
+    padding: 16px 20px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .topbar h2 { font-size: 1.1rem; font-weight: 600; }
+  .topbar .streak {
+    font-size: 0.75rem;
+    color: var(--warn);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .topbar .level-badge {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent);
+  }
+
+  /* === Tabs === */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 20px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--dim);
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* === Content Area === */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px;
+  }
+
+  /* === Course Card === */
+  .course-grid { display: flex; flex-direction: column; gap: 10px; }
+  .course-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    position: relative;
+  }
+  .course-card:active { transform: scale(0.98); }
+  .course-card.top { border-color: rgba(16, 185, 129, 0.3); }
+  .course-card .title { font-weight: 600; margin-bottom: 4px; }
+  .course-card .desc { font-size: 0.78rem; color: var(--dim); }
+  .course-card .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 10px;
+  }
+  .course-card .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .course-card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--dim);
+  }
+  .course-card .badge {
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+  }
+  .badge.recommend { background: rgba(251, 191, 36, 0.15); color: var(--warn); }
+  .badge.new { background: rgba(16, 185, 129, 0.15); color: var(--accent); }
+
+  /* === Scenario Mode === */
+  .scenario-header {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .scenario-header .icon { font-size: 3rem; margin-bottom: 8px; }
+  .scenario-header .name { font-size: 1.2rem; font-weight: 600; }
+  .scenario-header .sub { font-size: 0.8rem; color: var(--dim); }
+
+  .conversation {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .msg-row { display: flex; gap: 8px; animation: slide 0.25s ease; }
+  @keyframes slide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .msg-row.ai { justify-content: flex-start; }
+  .msg-row.me { justify-content: flex-end; }
+  .msg-bubble {
+    max-width: 82%;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    position: relative;
+  }
+  .msg-row.ai .msg-bubble { background: var(--surface); border-bottom-left-radius: 4px; }
+  .msg-row.me .msg-bubble { background: #0f382a; border-bottom-right-radius: 4px; }
+  .msg-row .name-tag {
+    font-size: 0.65rem;
+    color: var(--accent);
+    margin-bottom: 3px;
+    font-weight: 600;
+  }
+  .msg-row .feedback-tag {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-top: 5px;
+  }
+  .feedback-tag.great { background: rgba(16,185,129,0.15); color: var(--accent2); }
+  .feedback-tag.good { background: rgba(52,211,153,0.1); color: #6ee7b7; }
+  .feedback-tag.ok { background: rgba(251,191,36,0.1); color: var(--warn); }
+
+  /* === Controls Bar === */
+  .control-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px 24px;
+    background: linear-gradient(transparent, rgba(10,10,10,0.9) 30%);
+  }
+  .mic-btn {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .mic-btn:active { transform: scale(0.93); }
+  .mic-btn.recording {
+    background: var(--danger);
+    animation: micPulse 1.2s infinite;
+  }
+  @keyframes micPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); }
+    50% { box-shadow: 0 0 0 18px rgba(248,113,113,0); }
+  }
+  .mic-btn svg { width: 24px; height: 24px; fill: #000; }
+  .control-status {
+    flex: 1;
+    font-size: 0.78rem;
+    color: var(--dim);
+  }
+  .btn-hint {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 18px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-end {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  /* === Settings === */
+  .settings-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+  .settings-card label { display: block; font-size: 0.78rem; color: var(--dim); margin-bottom: 6px; }
+  .settings-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+  .btn-save {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-save:active { opacity: 0.8; }
+
+  /* === Dashboard === */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-card .num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .stat-card .label { font-size: 0.72rem; color: var(--dim); margin-top: 4px; }
+
+  /* Back button */
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: var(--dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .unsupported { text-align:center; padding:60px 20px; color:var(--danger); }
+  .unsupported a { color: var(--accent); }
+  .loading { text-align:center; padding:20px; color:var(--dim); font-size:0.85rem; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+(function() {
+  // ==================== CONFIG ====================
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const synth = window.speechSynthesis;
+
+  if (!SpeechRecognition) {
+    document.getElementById('app').innerHTML = '<div class="unsupported"><h3>Browser not supported</h3><p>Use <a href="https://www.google.com/chrome/" target="_blank">Chrome</a> on desktop or Android.</p></div>';
+    return;
+  }
+
+  // ==================== STATE ====================
+  const LS = {
+    get(key, d) { try { const v = localStorage.getItem('sayit_'+key); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+    set(key, val) { try { localStorage.setItem('sayit_'+key, JSON.stringify(val)); } catch(e) {} }
+  };
+
+  let state = {
+    page: 'home', // home | course | dashboard | settings
+    currentCourse: null,
+    currentStep: 0,
+    apiKey: LS.get('apikey', ''),
+    model: LS.get('model', 'deepseek-chat'),
+    history: LS.get('history', []),
+    streak: LS.get('streak', 0),
+    lastPractice: LS.get('lastPractice', ''),
+    totalSessions: LS.get('totalSessions', 0),
+    totalMinutes: LS.get('totalMinutes', 0),
+    courses: LS.get('courses', generateCourseData()),
+    isRecording: false,
+    transcriptBuffer: '',
+    aiThinking: false,
+  };
+
+  // ==================== COURSE DATA ====================
+  function generateCourseData() {
+    return [
+      { id:'a1', level:'A1 Beginner', title:'Greetings & Introductions', desc:'Learn to introduce yourself, say hello, and make small talk.', icon:'👋', scenarios:[
+        { prompt:'Say hello and introduce yourself to someone for the first time.', hint:'Hi, my name is ___. Nice to meet you.', keywords:['hello','hi','name','nice','meet'] },
+        { prompt:'Ask someone how they are doing today.', hint:'How are you today?', keywords:['how','are','you','today','fine'] },
+        { prompt:'Tell them where you are from.', hint:'I am from China. Where are you from?', keywords:['from','china','where','live'] },
+        { prompt:'Say goodbye and wish them a nice day.', hint:'Goodbye! Have a great day!', keywords:['goodbye','bye','nice','day','see'] },
+        { prompt:'Ask someone what they do for work.', hint:'What do you do? I work in foreign trade.', keywords:['what','do','work','job','trade'] },
+      ]},
+      { id:'a2', title:'Everyday Conversations', desc:'Talk about your day, food, weather, and daily routines.', icon:'☕', scenarios:[
+        { prompt:'Describe what you ate for lunch today.', hint:'I ate rice with vegetables and meat. It was delicious.', keywords:['ate','eat','rice','vegetable','meat','delicious'] },
+        { prompt:'Talk about the weather right now.', hint:'It is sunny and hot today. I like this weather.', keywords:['weather','sunny','hot','cold','rain','today'] },
+        { prompt:'Tell someone about your morning routine.', hint:'I wake up at 7, eat breakfast, and go to work.', keywords:['wake','morning','breakfast','work','routine'] },
+        { prompt:'Ask someone what they like to do on weekends.', hint:'What do you like to do on weekends?', keywords:['what','weekend','like','do','free','time'] },
+        { prompt:'Describe your favorite hobby.', hint:'I enjoy reading books and studying English.', keywords:['enjoy','like','love','reading','study','english'] },
+      ]},
+      { id:'a3', title:'At a Restaurant', desc:'Order food, ask about the menu, pay the bill.', icon:'🍽️', scenarios:[
+        { prompt:'Ask the waiter for a table for two.', hint:'A table for two, please.', keywords:['table','two','please','for','person'] },
+        { prompt:'Order a drink.', hint:'I would like a glass of water, please.', keywords:['would','like','water','coffee','tea','please'] },
+        { prompt:'Ask what the special of the day is.', hint:'What is the special today?', keywords:['what','special','today','recommend'] },
+        { prompt:'Order your main course.', hint:'I will have the chicken with rice, please.', keywords:['have','chicken','rice','salad','fish','please'] },
+        { prompt:'Ask for the bill and say it was good.', hint:'Can I have the bill please? The food was great!', keywords:['bill','check','pay','great','delicious','thank'] },
+      ]},
+      { id:'b1', title:'Travel English', desc:'Navigate airports, hotels, transportation, and directions.', icon:'✈️', scenarios:[
+        { prompt:'Check in at the airport.', hint:'I have a flight to Dubai. Here is my passport.', keywords:['flight','check','passport','dubai','here'] },
+        { prompt:'Check into your hotel.', hint:'I have a reservation under the name Hui. Here is my confirmation.', keywords:['reservation','name','check','room','confirmation'] },
+        { prompt:'Ask for directions to the train station.', hint:'Excuse me, where is the nearest train station?', keywords:['excuse','where','train','station','nearest'] },
+        { prompt:'Buy a ticket at the train station.', hint:'One ticket to the city center, please. How much is it?', keywords:['ticket','city','center','please','how','much'] },
+        { prompt:'Tell a taxi driver where you want to go.', hint:'Please take me to the airport. How long will it take?', keywords:['take','airport','hotel','how','long','please'] },
+      ]},
+      { id:'b2', title:'Workplace English', desc:'Meetings, emails, presentations, and office communication.', icon:'💼', scenarios:[
+        { prompt:'Introduce yourself in a business meeting.', hint:'Hello everyone, I am Hui from the trading department. I handle RFID product exports.', keywords:['hello','department','handle','export','product','rfid'] },
+        { prompt:'Explain what your company does.', hint:'Our company manufactures RFID tags. We export to retailers worldwide.', keywords:['company','manufacture','rfid','export','retailer','worldwide'] },
+        { prompt:'Describe your main responsibilities.', hint:'I am responsible for finding new customers and managing export orders.', keywords:['responsible','customer','export','order','manage','find'] },
+        { prompt:'Ask a colleague for help with a task.', hint:'Could you help me review this quotation? I want to make sure it is correct.', keywords:['help','review','quotation','correct','could','please'] },
+      ]},
+      { id:'b3', title:'Shopping English', desc:'Buy clothes, ask about prices, sizes, and returns.', icon:'🛍️', scenarios:[
+        { prompt:'Ask a shop assistant for help finding something.', hint:'Excuse me, where can I find T-shirts?', keywords:['excuse','where','find','shirt','looking'] },
+        { prompt:'Ask about the price of an item.', hint:'How much does this jacket cost?', keywords:['how','much','cost','price','jacket'] },
+        { prompt:'Ask to try something on.', hint:'Can I try this on? Where is the fitting room?', keywords:['try','on','fitting','room','can'] },
+        { prompt:'Ask if they have a different size.', hint:'Do you have this in a larger size? This one is too small.', keywords:['size','larger','smaller','this','have'] },
+      ]},
+      { id:'c1', title:'Daily Life', desc:'Doctor visits, phone calls, making appointments.', icon:'🏥', scenarios:[
+        { prompt:'Make a doctor appointment by phone.', hint:'Hi, I would like to make an appointment. I have had a headache for two days.', keywords:['appointment','doctor','headache','make','would'] },
+        { prompt:'Describe your symptoms to the doctor.', hint:'I have a sore throat and I feel tired all the time.', keywords:['sore','throat','tired','feel','symptom'] },
+        { prompt:'Call a friend and invite them to dinner.', hint:'Hey, are you free this weekend? Would you like to have dinner together?', keywords:['free','weekend','dinner','together','would'] },
+      ]},
+    ];
+  }
+
+  // ==================== AI CALL ====================
+  async function callAI(messages) {
+    if (!state.apiKey) return null;
+    try {
+      const res = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+state.apiKey },
+        body: JSON.stringify({
+          model: state.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 200,
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.choices[0].message.content.trim();
+    } catch(e) { return null; }
+  }
+
+  // ==================== TTS ====================
+  function speakText(text) {
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    u.pitch = 1.0;
+    const voices = synth.getVoices();
+    const voice = voices.find(v => v.lang === 'en-US' && v.name.includes('Female')) ||
+                  voices.find(v => v.lang === 'en-US');
+    if (voice) u.voice = voice;
+    synth.speak(u);
+  }
+
+  // ==================== RECOGNITION ====================
+  let recognition = null;
+  let autoStopTimer = null;
+  function createRecognition() {
+    const r = new SpeechRecognition();
+    r.lang = 'en-US';
+    r.interimResults = false;
+    r.continuous = false;
+    r.maxAlternatives = 1;
+    r.onresult = handleSpeechResult;
+    r.onerror = handleSpeechError;
+    r.onend = handleSpeechEnd;
+    return r;
+  }
+
+  function startRecording() {
+    if (state.isRecording || state.aiThinking) return;
+    state.isRecording = true;
+    recognition = createRecognition();
+    recognition.start();
+    autoStopTimer = setTimeout(() => {
+      if (state.isRecording) recognition.stop();
+    }, 8000);
+    renderControls();
+  }
+
+  function stopRecording() {
+    if (!state.isRecording) return;
+    recognition.stop();
+    if (autoStopTimer) clearTimeout(autoStopTimer);
+    state.isRecording = false;
+    state.aiThinking = true;
+    renderControls();
+  }
+
+  function handleSpeechResult(event) {
+    if (autoStopTimer) clearTimeout(autoStopTimer);
+    state.isRecording = false;
+    const transcript = event.results[0][0].transcript.trim();
+    state.transcriptBuffer = transcript;
+    renderConversation();
+    processAIResponse(transcript);
+    renderControls();
+  }
+
+  function handleSpeechError(event) {
+    if (autoStopTimer) clearTimeout(autoStopTimer);
+    state.isRecording = false;
+    if (event.error === 'no-speech') {
+      state.transcriptBuffer = '(No speech detected — try again louder)';
+    } else if (event.error === 'aborted') {
+      state.transcriptBuffer = '';
+    } else {
+      state.transcriptBuffer = '(Error: ' + event.error + ')';
+    }
+    renderConversation();
+    renderControls();
+  }
+
+  function handleSpeechEnd() {
+    state.isRecording = false;
+    renderControls();
+  }
+
+  // ==================== AI PROCESSING ====================
+  async function processAIResponse(userText) {
+    const course = state.courses.find(c => c.id === state.currentCourse);
+    if (!course) return;
+    const step = course.scenarios[state.currentStep % course.scenarios.length];
+
+    const messages = [
+      { role:'system', content: `You are a friendly, patient English teacher. The student is practicing: "${step.prompt}". Your task:
+1. Give brief, encouraging feedback on their English (1-2 sentences). Mention what was good and one thing to improve.
+2. Then naturally continue the conversation with a follow-up question or reply related to this scenario.
+3. Keep your total response under 60 words.
+4. Be supportive and conversational, not like a grammar robot.
+5. Respond ONLY in English.` },
+      { role:'user', content: userText },
+    ];
+
+    const aiResponse = await callAI(messages);
+    state.aiThinking = false;
+
+    if (aiResponse) {
+      state.history.push({ role:'ai', text: aiResponse, time: Date.now(), course: state.currentCourse });
+      // Speak the AI response
+      speakText(aiResponse);
+    } else {
+      // No API key — use simple fallback
+      const fallbackPhrases = [
+        'Great job! Can you tell me more?',
+        'Nice work! Try to speak a little more slowly next time.',
+        'Good effort! Practice makes perfect.',
+        'Well done! Keep going, you are improving.',
+      ];
+      const fb = fallbackPhrases[Math.floor(Math.random() * fallbackPhrases.length)];
+      state.history.push({ role:'ai', text: fb, time: Date.now(), course: state.currentCourse });
+      speakText(fb);
+    }
+
+    // Progress
+    state.currentStep++;
+    if (state.currentStep >= course.scenarios.length) state.currentStep = 0;
+
+    // Track
+    const today = new Date().toISOString().slice(0,10);
+    if (state.lastPractice !== today) {
+      state.streak++;
+      state.lastPractice = today;
+    }
+    state.totalSessions++;
+    state.totalMinutes = Math.round(state.totalMinutes + 2);
+
+    // Save
+    const idx = state.courses.findIndex(c => c.id === state.currentCourse);
+    if (idx >= 0) {
+      state.courses[idx].completed = state.courses[idx].completed || 0;
+      state.courses[idx].completed++;
+    }
+    LS.set('courses', state.courses);
+    LS.set('history', state.history.slice(-200));
+    LS.set('streak', state.streak);
+    LS.set('lastPractice', state.lastPractice);
+    LS.set('totalSessions', state.totalSessions);
+    LS.set('totalMinutes', state.totalMinutes);
+
+    renderConversation();
+    renderControls();
+  }
+
+  // ==================== RENDER ====================
+  const app = document.getElementById('app');
+
+  function render() {
+    const p = state.page;
+    if (p === 'home') renderHome();
+    else if (p === 'course') renderCoursePage();
+    else if (p === 'dashboard') renderDashboard();
+    else if (p === 'settings') renderSettings();
+  }
+
+  function renderHome() {
+    const today = new Date().toISOString().slice(0,10);
+    const practicedToday = state.lastPractice === today;
+    const top = state.courses
+      .map(c => ({ ...c, summary: Math.min((c.completed||0) / c.scenarios.length * 100, 100) }))
+      .sort((a,b) => state.apiKey ? 0 : (a.id < b.id ? -1 : 1));
+
+    app.innerHTML = `
+      <div class="topbar">
+        <h2>Say It English</h2>
+        <span class="level-badge">${practicedToday ? '🔥 '+state.streak+'d' : 'Ready'}</span>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="window._nav('home')">📚 Courses</button>
+        <button class="tab" onclick="window._nav('dashboard')">📊 Progress</button>
+        <button class="tab" onclick="window._nav('settings')">⚙️ Setup</button>
+      </div>
+      <div class="content">
+        ${!state.apiKey ? `
+          <div class="settings-card" style="margin-bottom:12px;background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);">
+            <div style="font-size:0.75rem;color:var(--warn);margin-bottom:6px;">⚡ Add your DeepSeek API key for AI feedback</div>
+            <div style="display:flex;gap:8px;">
+              <input id="quickApikey" placeholder="sk-xxxxxxxxxxxxxxxx" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.8rem;" value="${state.apiKey||''}">
+              <button onclick="window._saveQuick()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:600;cursor:pointer;font-size:0.8rem;">Save</button>
+            </div>
+            <div style="font-size:0.65rem;color:var(--dim);margin-top:4px;">Get key at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent);">platform.deepseek.com</a> — ¥0.01/day</div>
+          </div>
+        ` : ''}
+        <div class="course-grid">
+          ${top.map(c => `
+            <div class="course-card ${c.id==='a1'?'top':''}" onclick="window._startCourse('${c.id}')">
+              <div class="title">${c.icon} ${c.title}</div>
+              <div class="desc">${c.desc}</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${c.summary}%"></div></div>
+              <div class="meta">
+                <span>${c.level || ''}</span>
+                <span>${Math.round(c.summary)}% done · ${c.scenarios.length} steps</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCoursePage() {
+    const course = state.courses.find(c => c.id === state.currentCourse);
+    if (!course) { state.page='home'; render(); return; }
+    const step = course.scenarios[state.currentStep % course.scenarios.length];
+    const recent = state.history.filter(h => h.course === state.currentCourse).slice(-10);
+
+    app.innerHTML = `
+      <div class="topbar">
+        <button class="back-btn" onclick="window._nav('home')">← Back</button>
+        <span class="level-badge">Step ${state.currentStep+1}/${course.scenarios.length}</span>
+      </div>
+      <div class="content">
+        <div class="scenario-header">
+          <div class="icon">${course.icon}</div>
+          <div class="name">${course.title}</div>
+          <div class="sub" style="margin-top:10px;font-size:0.88rem;line-height:1.6;">
+            Speak now: <strong style="color:var(--accent);">${step.prompt}</strong>
+            <br><span style="font-size:0.72rem;color:var(--dim);">Hint: ${step.hint}</span>
+          </div>
+        </div>
+        <div class="conversation" id="conversation">
+          ${state.aiThinking ? '<div class="loading">AI is thinking...</div>' : ''}
+          ${recent.map(msg => `
+            <div class="msg-row ${msg.role==='ai'?'ai':'me'}">
+              <div class="msg-bubble">
+                ${msg.role==='ai' ? '<div class="name-tag">AI Teacher</div>' : '<div class="name-tag" style="color:#6ee7b7;">You</div>'}
+                ${msg.text}
+              </div>
+            </div>
+          `).join('')}
+          ${recent.length===0 ? '<div style="text-align:center;color:var(--dim);font-size:0.8rem;padding:30px;">Tap the mic to start speaking 🤙</div>' : ''}
+        </div>
+      </div>
+      <div class="control-bar" id="controls">
+        ${renderControlHTML()}
+      </div>
+    `;
+    setTimeout(() => { const c = document.getElementById('conversation'); if(c) c.scrollTop = c.scrollHeight; }, 100);
+  }
+
+  function renderControlHTML() {
+    if (state.aiThinking) {
+      return `<div class="control-status">AI teacher is responding...</div>`;
+    }
+    return `
+      <button class="mic-btn ${state.isRecording?'recording':''}" id="micBtn" onclick="window._toggleMic()">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+      </button>
+      <div class="control-status">${state.isRecording ? '🎙️ Listening...' : 'Tap mic to speak'}</div>
+      <button class="btn-hint" onclick="window._speakHint()">🔊</button>
+      <button class="btn-end" onclick="window._nav('home')">End</button>
+    `;
+  }
+
+  function renderControls() {
+    const el = document.getElementById('controls');
+    if (el) el.innerHTML = renderControlHTML();
+    const micBtn = document.getElementById('micBtn');
+    if (micBtn) {
+      micBtn.onclick = () => { if (!state.aiThinking) window._toggleMic(); };
+    }
+  }
+
+  function renderConversation() {
+    if (state.page !== 'course') return;
+    const recent = state.history.filter(h => h.course === state.currentCourse).slice(-10);
+    const el = document.getElementById('conversation');
+    if (!el) return;
+    el.innerHTML = `
+      ${state.aiThinking ? '<div class="loading">AI is thinking...</div>' : ''}
+      ${recent.map(msg => `
+        <div class="msg-row ${msg.role==='ai'?'ai':'me'}">
+          <div class="msg-bubble">
+            ${msg.role==='ai' ? '<div class="name-tag">AI Teacher</div>' : '<div class="name-tag" style="color:#6ee7b7;">You</div>'}
+            ${msg.text}
+          </div>
+        </div>
+      `).join('')}
+      ${recent.length===0 ? '<div style="text-align:center;color:var(--dim);font-size:0.8rem;padding:30px;">Tap the mic to start speaking 🤙</div>' : ''}
+    `;
+    setTimeout(() => { if(el) el.scrollTop = el.scrollHeight; }, 50);
+  }
+
+  function renderDashboard() {
+    app.innerHTML = `
+      <div class="topbar">
+        <button class="back-btn" onclick="window._nav('home')">← Back</button>
+        <h2>Your Progress</h2>
+      </div>
+      <div class="content">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="num">🔥 ${state.streak}</div><div class="label">Day Streak</div></div>
+          <div class="stat-card"><div class="num">${state.totalSessions}</div><div class="label">Total Sessions</div></div>
+          <div class="stat-card"><div class="num">~${state.totalMinutes}</div><div class="label">Minutes Spoken</div></div>
+          <div class="stat-card"><div class="num">${state.history.length}</div><div class="label">Exchanges</div></div>
+        </div>
+        <h3 style="font-size:0.9rem;margin-bottom:8px;">Course Progress</h3>
+        ${state.courses.map(c => `
+          <div class="course-card" style="margin-bottom:8px;" onclick="window._startCourse('${c.id}')">
+            <div class="title">${c.icon} ${c.title}</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((c.completed||0)/c.scenarios.length*100,100)}%"></div></div>
+            <div class="meta"><span>${c.scenarios.length} steps</span><span>${Math.round(Math.min((c.completed||0)/c.scenarios.length*100,100))}%</span></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderSettings() {
+    app.innerHTML = `
+      <div class="topbar">
+        <button class="back-btn" onclick="window._nav('home')">← Back</button>
+        <h2>Settings</h2>
+      </div>
+      <div class="content">
+        <div class="settings-card">
+          <label>DeepSeek API Key</label>
+          <input id="apikeyIn" type="password" value="${state.apiKey||''}" placeholder="sk-xxxxxxxxxxxxxxxx">
+          <div style="font-size:0.65rem;color:var(--dim);margin-top:4px;">
+            No key? AI will use simple fallback feedback. Get key at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent);">platform.deepseek.com</a> (about ¥ 0.01 per day)
+          </div>
+        </div>
+        <div class="settings-card">
+          <label>Model</label>
+          <input value="${state.model}" id="modelIn" placeholder="deepseek-chat">
+        </div>
+        <button class="btn-save" onclick="window._saveSettings()">Save Settings</button>
+        <button class="btn-save" style="margin-top:8px;background:transparent;border:1px solid var(--danger);color:var(--danger);" onclick="if(confirm('Reset all progress?')){window._reset()}">Reset All Progress</button>
+      </div>
+    `;
+  }
+
+  // ==================== GLOBAL ACTIONS ====================
+  window._nav = function(page) {
+    state.page = page;
+    state.aiThinking = false;
+    state.isRecording = false;
+    render();
+  };
+
+  window._startCourse = function(id) {
+    state.currentCourse = id;
+    state.currentStep = state.courses.find(c => c.id === id).completed || 0;
+    state.page = 'course';
+    render();
+  };
+
+  window._toggleMic = function() {
+    if (state.isRecording) stopRecording();
+    else startRecording();
+  };
+
+  window._speakHint = function() {
+    const course = state.courses.find(c => c.id === state.currentCourse);
+    if (!course) return;
+    const step = course.scenarios[state.currentStep % course.scenarios.length];
+    speakText(step.hint);
+  };
+
+  window._saveQuick = function() {
+    const val = document.getElementById('quickApikey')?.value?.trim();
+    if (val) { state.apiKey = val; LS.set('apikey', val); }
+    render();
+  };
+
+  window._saveSettings = function() {
+    const key = document.getElementById('apikeyIn')?.value?.trim();
+    const model = document.getElementById('modelIn')?.value?.trim();
+    if (key) { state.apiKey = key; LS.set('apikey', key); }
+    if (model) { state.model = model; LS.set('model', model); }
+    state.page = 'home';
+    render();
+  };
+
+  window._reset = function() {
+    state.courses = generateCourseData();
+    state.history = [];
+    state.streak = 0;
+    state.lastPractice = '';
+    state.totalSessions = 0;
+    state.totalMinutes = 0;
+    LS.set('courses', state.courses);
+    LS.set('history', []);
+    LS.set('streak', 0);
+    LS.set('lastPractice', '');
+    LS.set('totalSessions', 0);
+    LS.set('totalMinutes', 0);
+    state.page = 'home';
+    render();
+  };
+
+  // Init
+  if (synth.getVoices().length === 0) synth.onvoiceschanged = () => {};
+
+  function checkStreak() {
+    const today = new Date().toISOString().slice(0,10);
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if (state.lastPractice && state.lastPractice !== today && state.lastPractice !== yesterday) {
+      state.streak = 0;
+    }
+  }
+  checkStreak();
+  render();
+})();
+</script>
+</body>
+</html>
