@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Say It Study Tools</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --card: #1c1c1c;
+    --text: #eaeaea; --dim: #8b8b8b; --accent: #10b981;
+    --border: #2a2a2a; --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; justify-content: center;
+  }
+  .app { width: 100%; max-width: 640px; padding: 20px; }
+
+  h1 { font-size: 1.3rem; margin-bottom: 6px; }
+  .subtitle { font-size: 0.78rem; color: var(--dim); margin-bottom: 16px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  }
+  .card h3 { font-size: 0.9rem; margin-bottom: 8px; }
+
+  textarea {
+    width: 100%; min-height: 160px; padding: 12px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-size: 0.85rem; resize: vertical; line-height: 1.6;
+  }
+  select, input {
+    width: 100%; padding: 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 0.85rem; margin-top: 8px;
+  }
+  .level-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .level-tag {
+    padding: 6px 14px; border-radius: 16px; font-size: 0.72rem;
+    cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--dim);
+    transition: all 0.2s;
+  }
+  .level-tag.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:active { opacity: 0.8; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Results */
+  .result { margin-top: 16px; }
+  .vocab-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .vocab-item .word { font-weight: 600; font-size: 0.9rem; }
+  .vocab-item .meaning { font-size: 0.8rem; color: var(--dim); }
+  .quiz-q {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; margin-bottom: 10px;
+  }
+  .quiz-q .q { font-weight: 600; margin-bottom: 10px; }
+  .quiz-q .option {
+    display: block; width: 100%; text-align: left;
+    padding: 8px 12px; margin-bottom: 4px;
+    border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer;
+    font-size: 0.82rem;
+  }
+  .quiz-q .option.correct { background: rgba(16,185,129,0.25); border-color: var(--accent); }
+  .quiz-q .option.wrong { background: rgba(248,113,113,0.15); border-color: #f87171; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .tab {
+    padding: 8px 16px; border-radius: 18px; font-size: 0.8rem;
+    cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--dim);
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .sentence { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+
+  .hidden { display: none; }
+  .loading { text-align:center; padding:20px; color:var(--dim); }
+  .error { color: #f87171; font-size:0.8rem; padding:8px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>📚 Study Tools</h1>
+  <p class="subtitle">Paste English text → Get vocab, examples & quiz</p>
+
+  <div class="card">
+    <h3>1. Paste your reading text</h3>
+    <textarea id="textInput" placeholder="Paste RAZ passage or any English text here...&#10;&#10;Example:&#10;Frogs are amphibians. They live in water and on land. Frogs have smooth, wet skin. They eat insects and small fish."></textarea>
+  </div>
+
+  <div class="card">
+    <h3>2. Your level</h3>
+    <div class="level-tags" id="levelTags">
+      <button class="level-tag" data-lvl="beginner">A1 Beginner</button>
+      <button class="level-tag active" data-lvl="a2">A2 Elementary</button>
+      <button class="level-tag" data-lvl="b1">B1 Intermediate</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3. What to generate</h3>
+    <div class="tabs" id="modeTabs">
+      <button class="tab active" data-mode="vocab">📝 Vocabulary + Examples</button>
+      <button class="tab" data-mode="quiz">❓ Quiz Me</button>
+      <button class="tab" data-mode="retell">🗣️ Retell & Speak</button>
+    </div>
+    <button class="btn btn-primary" id="btnGenerate" onclick="generate()">Generate →</button>
+  </div>
+
+  <div class="card hidden" id="settingsCard">
+    <h3>⚙️ DeepSeek API Key</h3>
+    <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxx (optional, better results with)">
+    <p style="font-size:0.65rem;color:var(--dim);margin-top:4px;">Without key: simple fallback. With key: full AI-powered results. Get at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent);">platform.deepseek.com</a></p>
+  </div>
+
+  <div id="result" class="result"></div>
+</div>
+
+<script>
+const LS = {
+  get(k,d){ try{const v=localStorage.getItem('study_'+k);return v?JSON.parse(v):d;}catch(e){return d;} },
+  set(k,v){ try{localStorage.setItem('study_'+k,JSON.stringify(v));}catch(e){} }
+};
+
+let state = {
+  level: 'a2',
+  mode: 'vocab',
+  apiKey: LS.get('apikey', ''),
+};
+
+// Level tags
+document.getElementById('levelTags').onclick = e => {
+  if (e.target.dataset.lvl) {
+    document.querySelectorAll('.level-tag').forEach(b => b.classList.toggle('active', b === e.target));
+    state.level = e.target.dataset.lvl;
+  }
+};
+
+// Mode tabs
+document.getElementById('modeTabs').onclick = e => {
+  if (e.target.dataset.mode) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === e.target));
+    state.mode = e.target.dataset.mode;
+    const btn = document.getElementById('btnGenerate');
+    if (state.mode === 'vocab') btn.textContent = 'Generate Vocabulary →';
+    else if (state.mode === 'quiz') btn.textContent = 'Quiz Me →';
+    else btn.textContent = 'Retell & Speak →';
+  }
+};
+
+// Load saved API key
+const apiInput = document.getElementById('apiKeyInput');
+apiInput.value = state.apiKey || '';
+apiInput.onchange = () => { state.apiKey = apiInput.value.trim(); LS.set('apikey', state.apiKey); };
+
+// Toggle settings
+document.getElementById('settingsCard').classList.toggle('hidden', false);
+
+async function callAI(messages) {
+  if (!state.apiKey) return null;
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+state.apiKey },
+      body: JSON.stringify({ model: 'deepseek-chat', messages, temperature: 0.7, max_tokens: 800 }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.choices[0].message.content.trim();
+  } catch(e) { return null; }
+}
+
+async function generate() {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) { alert('Please paste some English text first.'); return; }
+
+  const result = document.getElementById('result');
+  result.innerHTML = '<div class="loading">Generating...</div>';
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+
+  let output = '';
+  const levelNames = { beginner:'A1 Beginner', a2:'A2 Elementary', b1:'B1 Intermediate' };
+  const levelName = levelNames[state.level] || 'A2';
+
+  if (state.mode === 'vocab') {
+    const system = `You are an English teacher. From the given text, pick 6-8 important vocabulary words for a ${levelName} student. For each word: give the Chinese meaning, and one simple example sentence using that word (different from the original text). Output in this exact JSON format only:
+[
+  {"word": "frog", "meaning": "青蛙", "example": "I saw a frog in the garden."},
+  {"word": "insect", "meaning": "昆虫", "example": "Birds eat insects."}
+]
+Return ONLY the JSON array, nothing else.`;
+    const ai = await callAI([{role:'system',content:system},{role:'user',content:text}]);
+    if (ai) {
+      try {
+        const vocab = JSON.parse(ai);
+        output = vocab.map(v => `
+          <div class="vocab-item">
+            <div><span class="word">${v.word}</span> — <span class="meaning">${v.meaning}</span></div>
+            <div style="font-size:0.78rem;color:var(--dim);margin-top:2px;">"${v.example}"</div>
+          </div>
+        `).join('');
+      } catch(e) { output = ai.replace(/\n/g,'<br>'); }
+    } else {
+      output = simpleVocab(text);
+    }
+  }
+  else if (state.mode === 'quiz') {
+    const system = `You are an English teacher. Create 3 multiple-choice quiz questions based on the given text for a ${levelName} student. Each question should test vocabulary or comprehension. Output in this exact JSON format only:
+[
+  {"question": "What do frogs eat?", "options": ["Fish", "Insects and small fish", "Leaves", "Birds"], "answer": 1},
+  ...
+]
+The "answer" is the zero-based index of the correct option. Return ONLY the JSON array, nothing else.`;
+    const ai = await callAI([{role:'system',content:system},{role:'user',content:text}]);
+    if (ai) {
+      try {
+        const quiz = JSON.parse(ai);
+        let qHTML = '';
+        quiz.forEach((q, qi) => {
+          qHTML += `<div class="quiz-q" id="qq${qi}">
+            <div class="q">${qi+1}. ${q.question}</div>
+            ${q.options.map((o,oi) => `<button class="option" onclick="checkAnswer(${qi},${oi},${q.answer},this)">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}
+          </div>`;
+        });
+        output = qHTML;
+      } catch(e) { output = ai.replace(/\n/g,'<br>'); }
+    } else {
+      output = '<p style="color:var(--dim);">Add your DeepSeek API key in Settings for quiz generation.</p>';
+    }
+  }
+  else if (state.mode === 'retell') {
+    const system = `You are an English teacher. Help a ${levelName} student practice retelling/speaking. Based on the given text, provide:
+1. Three simple questions about the text (to check comprehension)
+2. A short speaking prompt: "Now tell me about this topic in your own words using these keywords: [list 4-5 key words from the text]"
+3. A model answer (2-3 simple sentences)
+Keep everything simple and at the student's level. Output in plain text, no JSON.`;
+    const ai = await callAI([{role:'system',content:system},{role:'user',content:text}]);
+    output = ai ? ai.replace(/\n/g,'<br>') : simpleRetell(text);
+  }
+
+  result.innerHTML = output || '<p style="color:var(--dim);">Unable to generate. Try adding your API key.</p>';
+  btn.disabled = false;
+}
+
+function simpleVocab(text) {
+  const words = [...new Set(text.toLowerCase().replace(/[^a-z ]/g,'').split(/\s+/).filter(w=>w.length>3))].slice(0,6);
+  return words.map(w => `<div class="vocab-item"><span class="word">${w}</span> — look up in dictionary</div>`).join('')
+    + '<p style="color:var(--dim);font-size:0.72rem;margin-top:8px;">⚠️ Simple fallback. Add API key for AI-powered results.</p>';
+}
+
+function simpleRetell(text) {
+  const words = [...new Set(text.toLowerCase().replace(/[^a-z ]/g,'').split(/\s+/).filter(w=>w.length>3))].slice(0,5);
+  return `
+    <p style="margin-bottom:12px;">🔑 <strong>Keywords to use:</strong> ${words.join(', ')}</p>
+    <p style="margin-bottom:12px;">🗣️ <strong>Try to retell:</strong> Explain what you just read using the keywords above. Speak aloud for 30 seconds.</p>
+    <p style="color:var(--dim);font-size:0.72rem;">⚠️ Simple fallback. Add API key for AI questions and model answers.</p>
+  `;
+}
+
+window.checkAnswer = function(qi, oi, correctIdx, btn) {
+  const parent = document.getElementById('qq'+qi);
+  if (!parent || parent.dataset.answered) return;
+  parent.dataset.answered = '1';
+  const opts = parent.querySelectorAll('.option');
+  opts.forEach((o,i) => {
+    o.style.pointerEvents = 'none';
+    if (i === correctIdx) o.classList.add('correct');
+    if (i === oi && oi !== correctIdx) o.classList.add('wrong');
+  });
+};
+</script>
+</body>
+</html>
