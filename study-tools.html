@@ -234,7 +234,7 @@ The "answer" is the zero-based index of the correct option. Return ONLY the JSON
         quiz.forEach((q, qi) => {
           qHTML += `<div class="quiz-q" id="qq${qi}">
             <div class="q">${qi+1}. ${q.question}</div>
-            ${q.options.map((o,oi) => `<button class="option" onclick="checkAnswer(${qi},${oi},${q.answer},this)">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}
+            ${q.options.map((o,oi) => `<button class="option" onclick="window.checkAnswer(${qi},${oi},${q.answer},this)">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}
           </div>`;
         });
         output = qHTML;
@@ -279,10 +279,11 @@ window.checkAnswer = function(qi, oi, correctIdx, btn) {
   const opts = parent.querySelectorAll('.option');
   opts.forEach((o,i) => {
     o.style.pointerEvents = 'none';
-    if (i === correctIdx) o.classList.add('correct');
-    if (i === oi && oi !== correctIdx) o.classList.add('wrong');
+    if (i === correctIdx) { o.classList.add('correct'); o.style.background='rgba(16,185,129,0.3)'; o.style.borderColor='#10b981'; }
+    if (i === oi && oi !== correctIdx) { o.classList.add('wrong'); o.style.background='rgba(248,113,113,0.2)'; o.style.borderColor='#f87171'; }
   });
 };
+window.generate = generate;
 </script>
 </body>
 </html>
