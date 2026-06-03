@@ -220,7 +220,7 @@ Return ONLY the JSON array, nothing else.`;
     }
   }
   else if (state.mode === 'quiz') {
-    const system = `You are an English teacher. Create 3 multiple-choice quiz questions based on the given text for a ${levelName} student. Each question should test vocabulary or comprehension. Output in this exact JSON format only:
+    const system = `You are an English teacher. Create 5 multiple-choice quiz questions based on the given text for a ${levelName} student. Each question should test vocabulary or comprehension. Output in this exact JSON format only:
 [
   {"question": "What do frogs eat?", "options": ["Fish", "Insects and small fish", "Leaves", "Birds"], "answer": 1},
   ...
