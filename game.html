@@ -2,1073 +2,529 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>莫桑</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲申 · Jiashen 1644</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --sky-top: #f5efe0;
-    --sky-bot: #eedac4;
-    --ground: #c9a88c;
-    --text: #5c4a3a;
-    --progress: #c8a082;
-    --sunset: #d4a08a;
+    --ink: #1a1a1a;
+    --paper: #e8dcc8;
+    --fade: #8b7e6a;
+    --red: #8b2500;
+    --gold: #c4a35a;
   }
-
+  *{margin:0;padding:0;box-sizing:border-box}
   body {
-    font-family: "PingFang SC", "Noto Serif SC", "STSong", "Songti SC", "Microsoft YaHei", serif;
-    background: #e8d9c8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    -webkit-user-select: none;
+    background:#0a0a0a;
+    display:flex;justify-content:center;align-items:center;
+    height:100vh;overflow:hidden;
+    font-family:'Noto Serif SC','SimSun','KaiTi',serif;
+  }
+  #game {
+    position:relative;
+    width:100vw;height:100vh;
+    max-width:900px;max-height:600px;
+    overflow:hidden;
+  }
+  canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
+
+  /* Dialogue overlay */
+  #dlg {
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(transparent,rgba(0,0,0,0.85) 30%,rgba(0,0,0,0.95));
+    padding:60px 30px 24px;
+    display:none;
+    cursor:pointer;
+    transition:opacity 0.3s;
+  }
+  #dlg.visible{display:block}
+  #dlg .speaker {
+    font-size:0.72rem;color:var(--gold);
+    margin-bottom:6px;letter-spacing:2px;
+  }
+  #dlg .text {
+    font-size:1rem;color:var(--paper);
+    line-height:1.8;letter-spacing:1px;
+  }
+  #dlg .next-hint {
+    text-align:right;font-size:0.65rem;color:var(--fade);
+    margin-top:10px;animation:blink 2s infinite;
+  }
+  @keyframes blink{0%,100%{opacity:0.4}50%{opacity:1}}
+
+  /* Choices */
+  #choices {
+    position:absolute;bottom:0;left:0;right:0;
+    padding:40px 30px 30px;
+    display:none;
+    background:linear-gradient(transparent,rgba(0,0,0,0.9) 20%);
+  }
+  #choices.visible{display:flex;flex-direction:column;gap:10px}
+  .choice-btn {
+    background:rgba(28,24,18,0.85);
+    border:1px solid rgba(196,163,90,0.3);
+    color:var(--paper);
+    padding:14px 20px;
+    font-family:inherit;font-size:0.9rem;
+    cursor:pointer;text-align:left;letter-spacing:1px;
+    transition:all 0.25s;border-radius:4px;
+  }
+  .choice-btn:hover{background:rgba(40,32,20,0.9);border-color:var(--gold);padding-left:28px}
+
+  /* Title screen */
+  #title {
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at center,rgba(20,15,10,0.3),rgba(0,0,0,0.9));
+    cursor:pointer;
+  }
+  #title h1 {
+    font-size:3rem;color:var(--paper);letter-spacing:8px;
+    font-weight:400;margin-bottom:8px;
+  }
+  #title .sub {
+    font-size:0.8rem;color:var(--fade);letter-spacing:4px;margin-bottom:40px;
+  }
+  #title .start-hint {
+    font-size:0.7rem;color:var(--gold);
+    animation:blink 2s infinite;letter-spacing:3px;
   }
 
-  .game-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    aspect-ratio: 3 / 5;
-    background: var(--sky-top);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(139, 111, 94, 0.15);
+  /* Line select */
+  #lineSelect {
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.92);
+    gap:16px;
   }
+  #lineSelect.visible{display:flex}
+  .line-btn {
+    background:transparent;
+    border:1px solid rgba(196,163,90,0.3);
+    color:var(--paper);
+    padding:20px 40px;
+    font-family:inherit;font-size:1rem;
+    cursor:pointer;letter-spacing:3px;
+    width:280px;text-align:center;
+    transition:all 0.3s;
+  }
+  .line-btn:hover{background:rgba(40,32,20,0.5);border-color:var(--gold)}
+  .line-btn .line-label{font-size:0.6rem;color:var(--fade);margin-bottom:6px;letter-spacing:2px}
 
-  canvas { display: block; width: 100%; height: 100%; }
-
-  .overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    pointer-events: none;
-    z-index: 2;
-    background: rgba(245, 239, 224, 0.78);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    transition: opacity 0.4s;
+  /* Episode title */
+  #epTitle {
+    position:absolute;inset:0;
+    display:none;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.95);
+    flex-direction:column;
   }
-  .overlay.active { pointer-events: auto; }
-
-  .overlay-title {
-    font-size: 34px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.06em;
-  }
-  .overlay-sub {
-    font-size: 14px;
-    color: #8b7a62;
-    letter-spacing: 0.08em;
-  }
-  .overlay-score {
-    font-size: 56px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .overlay-poem {
-    font-size: 15px;
-    color: #8b6f5e;
-    text-align: center;
-    line-height: 1.8;
-    letter-spacing: 0.05em;
-    max-width: 300px;
-    white-space: nowrap;
-  }
-
-  .lb-list {
-    width: 100%;
-    max-width: 300px;
-    max-height: 300px;
-    overflow-y: auto;
-    text-align: left;
-    padding: 0 8px;
-  }
-  .lb-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    margin: 4px 0;
-    background: rgba(255,255,255,0.5);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--text);
-    gap: 6px;
-  }
-  .lb-item:nth-child(1) .lb-rank { color: #d4a08a; font-weight: 700; }
-  .lb-item:nth-child(2) .lb-rank { color: #c8a082; font-weight: 700; }
-  .lb-item:nth-child(3) .lb-rank { color: #bfa07a; font-weight: 700; }
-  .lb-rank { font-size: 16px; min-width: 24px; text-align: center; }
-  .lb-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .lb-stats { font-size: 11px; color: #8b7a62; text-align: right; line-height: 1.4; }
-  .lb-empty { text-align: center; color: #8b7a62; font-size: 13px; padding: 20px; }
-
-  .lb-save-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
-  }
-  .lb-input {
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1.5px solid var(--ground);
-    font-size: 14px;
-    font-family: inherit;
-    background: rgba(255,255,255,0.7);
-    color: var(--text);
-    width: 120px;
-    text-align: center;
-    outline: none;
-  }
-  .lb-input:focus { border-color: var(--text); }
-
-  .btn {
-    padding: 12px 36px;
-    border-radius: 999px;
-    border: 1.5px solid var(--ground);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    transition: all 0.25s;
-    font-family: inherit;
-    background: rgba(255,255,255,0.6);
-    color: var(--text);
-  }
-  .btn:active { transform: scale(0.96); background: var(--ground); }
-
-  .btn-primary {
-    background: var(--ground);
-    color: #fff;
-    border: none;
-  }
-  .btn-primary:active { background: #b89578; }
-
-  .btn-row { display: flex; gap: 10px; }
-  .best-text { font-size: 13px; color: #8b7a62; display: flex; align-items: center; gap: 4px; }
-  .hidden { display: none !important; }
-
-  .level-up-name {
-    font-size: 40px;
-    font-weight: 700;
-    color: var(--sunset);
-    letter-spacing: 0.1em;
-  }
-
-  .easter-frame {
-    border: 2px solid var(--sunset);
-    border-radius: 12px;
-    padding: 16px 20px;
-    max-width: 280px;
-    font-size: 14px;
-    color: #8b6f5e;
-    line-height: 2;
-    letter-spacing: 0.05em;
-    background: rgba(212,160,138,0.08);
-  }
-
-  .charge-hint {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 12px;
-    color: #8b7a62;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.7;
-  }
+  #epTitle.visible{display:flex}
+  #epTitle .ep-num{font-size:0.7rem;color:var(--gold);letter-spacing:3px}
+  #epTitle .ep-name{font-size:1.5rem;color:var(--paper);margin-top:8px;letter-spacing:4px}
+  #epTitle .ep-line{font-size:0.75rem;color:var(--fade);margin-top:6px}
 </style>
 </head>
 <body>
-
-<div class="game-container" id="gameContainer">
-  <canvas id="gameCanvas"></canvas>
-
-  <!-- 开始 -->
-  <div class="overlay active" id="startScreen">
-    <p class="overlay-title">莫 桑</p>
-    <p class="overlay-sub">点击跳跃 · 空中再点腾跃 · 可多次点按</p>
-    <button class="btn btn-primary" id="btnStart">开始游戏</button>
-    <p class="best-text" id="bestDisplay"></p>
-    <button class="btn" id="btnShowLeaderboard" style="margin-top:4px;">排行榜</button>
+<div id="game">
+  <canvas id="c"></canvas>
+  <div id="title">
+    <h1>甲 申</h1>
+    <div class="sub">J I A S H E N · 1 6 4 4</div>
+    <div class="start-hint">点击开始</div>
   </div>
-
-  <!-- 排行榜 -->
-  <div class="overlay hidden" id="leaderboardScreen">
-    <p class="overlay-title" style="font-size:20px;">排行榜</p>
-    <div class="lb-list" id="leaderboardList"></div>
-    <button class="btn btn-primary" id="btnLeaderboardBack">返回</button>
+  <div id="lineSelect">
+    <button class="line-btn" onclick="startGame('A')">
+      <div class="line-label">第一线</div>士 · 国子监生
+    </button>
+    <button class="line-btn" onclick="startGame('B')">
+      <div class="line-label">第二线</div>海 · 走私船主
+    </button>
+    <button class="line-btn" onclick="startGame('C')">
+      <div class="line-label">第三线</div>隐 · 汉人旗兵
+    </button>
   </div>
-
-  <!-- 过关 -->
-  <div class="overlay hidden" id="levelUpScreen">
-    <p class="overlay-sub" id="levelUpLabel">第 1 关 通过</p>
-    <p class="level-up-name" id="levelUpName"></p>
-    <p class="overlay-poem" id="levelUpPoem"></p>
+  <div id="epTitle">
+    <div class="ep-num"></div>
+    <div class="ep-name"></div>
+    <div class="ep-line"></div>
   </div>
-
-  <!-- 通关 -->
-  <div class="overlay hidden" id="victoryScreen">
-    <p class="overlay-sub">恭喜通关</p>
-    <p class="overlay-title" style="font-size:22px;">行尽青山，长宁以至</p>
-    <div class="lb-save-row">
-      <input class="lb-input" id="victoryNameInput" type="text" maxlength="8" placeholder="留个名字吧">
-      <button class="btn btn-primary" id="btnSaveVictory">保存成绩</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn" id="btnShare">分享成绩</button>
-      <button class="btn btn-primary" id="btnShowEaster">彩蛋</button>
-      <button class="btn" id="btnReplay">再次出发</button>
-    </div>
-  </div>
-
-  <!-- 彩蛋 -->
-  <div class="overlay hidden" id="easterEggScreen">
-    <p class="overlay-sub">恭喜通关</p>
-    <p class="overlay-poem" id="easterPoem" style="font-size:19px;max-width:280px;"></p>
-    <div class="easter-frame">
-      <p>人生关卡往复不停，但守住本心，一切难关终会渡过去。</p>
-    </div>
-    <div class="btn-row" style="margin-top:8px;">
-      <button class="btn" id="btnShareEgg">分享成绩</button>
-      <button class="btn btn-primary" id="btnReplayEgg">再次出发</button>
-    </div>
-  </div>
-
-  <!-- 失败 -->
-  <div class="overlay hidden" id="endScreen">
-    <p class="overlay-sub">止于 <span id="endLevelName">初霁</span> · 第 <span id="endLevel">1</span> 关</p>
-    <p class="overlay-score" id="finalScore">0</p>
-    <p class="overlay-sub">掠过 <span id="endDodged">0</span> 处风景 · 萤火 <span id="endFirefly">0</span> 只 · 余命 <span id="endLives">0</span></p>
-    <p class="overlay-poem" id="endPoem"></p>
-    <div class="lb-save-row">
-      <input class="lb-input" id="endNameInput" type="text" maxlength="8" placeholder="留个名字吧">
-      <button class="btn btn-primary" id="btnSaveEnd">保存成绩</button>
-    </div>
-    <div class="btn-row" style="margin-top:8px;">
-      <button class="btn" id="btnShareEnd">分享成绩</button>
-      <button class="btn btn-primary" id="btnRetry">再次出发</button>
-    </div>
-  </div>
-
-  <!-- 域名锁 -->
-  <div class="overlay hidden" id="lockScreen" style="gap:20px;">
-    <p class="overlay-title" style="font-size:22px;">此游戏仅在原站运行</p>
-    <p class="overlay-sub">请访问 zhu-space.github.io 体验</p>
-    <p class="overlay-sub" style="font-size:12px;opacity:0.6;">搬运代码不招待哦</p>
-  </div>
-
-  <p class="charge-hint" id="chargeHint">点击跳跃 · 空中点按腾跃</p>
+  <div id="dlg"><div class="speaker"></div><div class="text"></div><div class="next-hint">点击继续</div></div>
+  <div id="choices"></div>
 </div>
 
 <script>
-(function () {
-  // --- 域名锁 ---
-  var _a=atob("emh1LXNwYWNlLmdpdGh1Yi5pbw==");
-  var _h=location.hostname;
-  if (_h && _h!==_a && _h!=="localhost" && _h!=="127.0.0.1" && _h.indexOf("github.dev")===-1) {
-    document.getElementById("lockScreen").classList.remove("hidden");
-    document.getElementById("lockScreen").classList.add("active");
+// ==================== GAME ENGINE ====================
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+const dlg = document.getElementById('dlg');
+const dlgSpeaker = dlg.querySelector('.speaker');
+const dlgText = dlg.querySelector('.text');
+const choicesEl = document.getElementById('choices');
+const titleEl = document.getElementById('title');
+const lineSelectEl = document.getElementById('lineSelect');
+const epTitleEl = document.getElementById('epTitle');
+
+let game = { line:null, sceneIdx:0, dialogIdx:0, choices:null, choiceMade:false, titleShown:false, currentScene:null };
+let worldState = loadWorld();
+
+function resize() {
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ==================== WORLD STATE ====================
+function loadWorld() {
+  try { return JSON.parse(localStorage.getItem('jiashen_world')) || {}; } catch(e) { return {}; }
+}
+function saveWorld() {
+  try { localStorage.setItem('jiashen_world', JSON.stringify(worldState)); } catch(e) {}
+}
+function setWorld(key, val) { worldState[key] = val; saveWorld(); }
+
+// ==================== SCENE DATA ====================
+const scenes = {
+  A: [
+    {
+      bg:'city_wall_dusk', char:'scholar', epTitle:{num:'第一章',name:'留发不留头',line:'A 线 · 士 · 南京'},
+      dialogs:[
+        {speaker:'沈临川',text:'城墙上的风，今天格外冷。'},
+        {speaker:'沈临川',text:'崇祯十七年，三月十九。陛下在煤山……不说了。'},
+        {speaker:'沈临川',text:'（远处有马蹄声）'},
+        {speaker:'老仆',text:'公子，快回府吧。李自成的兵已经过了淮安，南京城里人人自危。'},
+        {speaker:'沈临川',text:'我还能在这城墙上站多久。'},
+      ],
+      choices:[
+        {text:'回府收拾行李，带家人出城',next:1,world:{choice1:'flee'}},
+        {text:'去国子监，看看还有谁在',next:2,world:{choice1:'stay'}},
+      ]
+    },
+    {
+      bg:'courtyard_night', char:'scholar', epTitle:null,
+      dialogs:[
+        {speaker:'沈临川',text:'府里一片狼藉。下人们已经跑了一半。'},
+        {speaker:'妻',text:'相公，真的要走了吗。南京可是我们的家。'},
+        {speaker:'沈临川',text:'（攥着手里的碎银）这些够我们走到扬州。到了扬州再想办法。'},
+        {speaker:'沈临川',text:'我把剩下的碎银分给了邻居们。他们走不走，各安天命吧。'},
+      ],
+      choices:[ {text:'连夜出城',next:3,world:{fled:true}} ]
+    },
+    {
+      bg:'academy_dusk', char:'scholar', epTitle:null,
+      dialogs:[
+        {speaker:'沈临川',text:'国子监里烛火还在亮。几个同年还在抄书。'},
+        {speaker:'同年',text:'临川兄，你怎么还没走？'},
+        {speaker:'沈临川',text:'我也不知道我为什么要来。大概是想看看——还有没有人记得这是什么地方。'},
+        {speaker:'同年',text:'（沉默片刻）出城的最后一批船，明早卯时。'},
+      ],
+      choices:[
+        {text:'上船，跟同年一起走',next:3,world:{fled:true}},
+        {text:'留下，去衙门看看出了什么事',next:4,world:{fled:false}},
+      ]
+    },
+    {
+      bg:'river_dawn', char:'boat', epTitle:null,
+      dialogs:[
+        {speaker:'沈临川',text:'江面上风很大。回头看，南京的城墙像一道剪影。'},
+        {speaker:'沈临川',text:'我不知道这辈子还能不能回来。'},
+        {speaker:'沈临川',text:'（手里还有一封没写完的家书，收信人是亡妻）'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+    {
+      bg:'yamen_dusk', char:'scholar', epTitle:null,
+      dialogs:[
+        {speaker:'沈临川',text:'衙门里空了。公案上落了一层灰。'},
+        {speaker:'沈临川',text:'墙上还有一张没来得及撤下来的海捕文书。上面画的人，像我的一个老师。'},
+        {speaker:'沈临川',text:'（风穿堂而过，文书被吹到地上）'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+  ],
+  B: [
+    {
+      bg:'sea_sunset', char:'captain', epTitle:{num:'第一章',name:'两头不靠岸',line:'B 线 · 海 · 料罗湾'},
+      dialogs:[
+        {speaker:'陈海生',text:'又一天。海上的日落跟岸上的——算了。'},
+        {speaker:'船工',text:'头，风向变了。再不出港，季风一过这批货得在船上烂半年。'},
+        {speaker:'陈海生',text:'郑家的旗还挂着吗。'},
+        {speaker:'船工',text:'旗还在。但岸上消息说清兵已经到了福建。旗还管不管用，不知道。'},
+      ],
+      choices:[
+        {text:'带货运去台湾，找郑家的人',next:1,world:{bChoice:'taiwan'}},
+        {text:'把货运回泉州港，回家',next:2,world:{bChoice:'home'}},
+      ]
+    },
+    {
+      bg:'stormy_sea', char:'captain', epTitle:null,
+      dialogs:[
+        {speaker:'陈海生',text:'海上起了浪。船舱里有一个偷渡的小孩，我发现了，但没出声。'},
+        {speaker:'陈海生',text:'让他躲着吧。'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+    {
+      bg:'port_dusk', char:'captain', epTitle:null,
+      dialogs:[
+        {speaker:'陈海生',text:'泉州港不像以前了。码头上的旗换成了我没见过的。'},
+        {speaker:'陈海生',text:'家里还亮着灯。但我不知道自己还算不算陈家的人。'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+  ],
+  C: [
+    {
+      bg:'camp_fire', char:'bannerman', epTitle:{num:'第一章',name:'哪边的',line:'C 线 · 隐 · 盛京'},
+      dialogs:[
+        {speaker:'佟阿林',text:'（望着火堆出神）'},
+        {speaker:'旗兵兄弟',text:'喂，阿林。想啥呢？'},
+        {speaker:'佟阿林',text:'我在想我们家以前过年杀猪。'},
+        {speaker:'旗兵兄弟',text:'（笑）明天南下，有的是猪给你杀。'},
+        {speaker:'佟阿林',text:'（嘴角动了一下，但没笑出来）'},
+      ],
+      choices:[
+        {text:'把手里的干粮塞给旁边的汉人俘虏',next:1,world:{cChoice:'kind'}},
+        {text:'站起来，走向长官的帐，申请明天的前锋位置',next:2,world:{cChoice:'advance'}},
+      ]
+    },
+    {
+      bg:'camp_night', char:'bannerman', epTitle:null,
+      dialogs:[
+        {speaker:'佟阿林',text:'那个俘虏愣了一下，接过干粮，什么都没说。'},
+        {speaker:'佟阿林',text:'他可能以为我要害他。也可能他知道不是。我们没再说一句话。'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+    {
+      bg:'camp_dawn', char:'bannerman', epTitle:null,
+      dialogs:[
+        {speaker:'佟阿林',text:'长官看了我一眼。他什么也没说，在纸上写了我的名字。'},
+        {speaker:'佟阿林',text:'我也不知道为什么想冲前面。大概是证明点什么。大概是——证明我是真的。'},
+      ],
+      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
+    },
+  ],
+};
+
+// ==================== RENDERER ====================
+function drawBackground(bgId) {
+  const w = canvas.width, h = canvas.height;
+  const grad = ctx.createLinearGradient(0,0,0,h);
+
+  switch(bgId) {
+    case 'city_wall_dusk':
+      grad.addColorStop(0,'#2a2520'); grad.addColorStop(0.5,'#3d3025'); grad.addColorStop(1,'#1a1510');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#1a1510'; ctx.fillRect(0,h*0.55,w,h*0.45);
+      for(let i=0;i<12;i++) ctx.fillRect(i*w/12,h*0.5,8,30);
+      ctx.fillStyle='#252018'; ctx.beginPath();ctx.moveTo(0,h*0.5);for(let i=0;i<=w;i+=30)ctx.lineTo(i,h*0.45+Math.sin(i*0.01)*25);ctx.lineTo(w,h*0.55);ctx.fill();
+      ctx.fillStyle='rgba(180,120,60,0.15)'; ctx.fillRect(w*0.4,0,w*0.3,h*0.5);
+      break;
+    case 'courtyard_night':
+      grad.addColorStop(0,'#0f0e12'); grad.addColorStop(0.5,'#1a1620'); grad.addColorStop(1,'#0a090f');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#131018'; ctx.fillRect(w*0.1,h*0.2,w*0.8,h*0.6);
+      ctx.fillStyle='#1a1522'; for(let i=3;i<=8;i++)ctx.fillRect(w*0.05*i,h*0.15,3,12);
+      ctx.fillStyle='rgba(200,180,140,0.2)'; ctx.beginPath();ctx.arc(w*0.75,h*0.2,30,0,Math.PI*2);ctx.fill();
+      break;
+    case 'academy_dusk':
+      grad.addColorStop(0,'#1a1815'); grad.addColorStop(1,'#0f0e0c');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#252018'; ctx.fillRect(w*0.2,h*0.35,w*0.6,h*0.5);
+      ctx.fillStyle='rgba(200,160,80,0.25)'; ctx.fillRect(w*0.4,h*0.4,8,15);
+      break;
+    case 'river_dawn':
+      grad.addColorStop(0,'#1a1a20'); grad.addColorStop(0.6,'#2a3035'); grad.addColorStop(1,'#1a2020');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#0a0a15'; ctx.fillRect(0,h*0.6,w,h*0.4);
+      ctx.fillStyle='rgba(180,160,120,0.15)'; ctx.fillRect(w*0.2,h*0.1,w*0.6,h*0.15);
+      break;
+    case 'sea_sunset':
+      grad.addColorStop(0,'#1a1820');grad.addColorStop(0.3,'#2a2540');grad.addColorStop(0.6,'#3a3040');grad.addColorStop(1,'#0a0a15');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#0a0a18';ctx.fillRect(0,h*0.6,w,h*0.4);
+      ctx.fillStyle='rgba(200,140,80,0.2)';ctx.beginPath();ctx.arc(w*0.65,h*0.55,50,0,Math.PI*2);ctx.fill();
+      break;
+    case 'port_dusk':
+      grad.addColorStop(0,'#1a1610');grad.addColorStop(1,'#0f0c08');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#151210';ctx.fillRect(0,h*0.55,w,h*0.45);
+      for(let i=0;i<6;i++){ctx.fillStyle='#1a1510';ctx.fillRect(w*0.1+i*w*0.15,h*0.5,4,40)}
+      break;
+    case 'camp_fire':
+      grad.addColorStop(0,'#0f0e12');grad.addColorStop(1,'#1a1410');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#0a090f';for(let i=0;i<40;i++)ctx.fillRect(Math.random()*w,Math.random()*h,2,8);
+      ctx.fillStyle='rgba(200,120,40,0.3)';ctx.beginPath();ctx.arc(w*0.5,h*0.5,20,0,Math.PI*2);ctx.fill();
+      for(let i=0;i<8;i++){ctx.fillStyle='rgba(220,160,60,'+(0.5-Math.random()*0.3)+')';ctx.fillRect(w*0.48+Math.random()*w*0.04,h*0.4+Math.random()*h*0.1,2,6)}
+      break;
+    case 'camp_night':
+      grad.addColorStop(0,'#0a0a12');grad.addColorStop(1,'#0f0c0a');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='rgba(180,140,80,0.08)';ctx.beginPath();ctx.arc(w*0.7,h*0.3,25,0,Math.PI*2);ctx.fill();
+      break;
+    case 'camp_dawn':
+      grad.addColorStop(0,'#151820');grad.addColorStop(1,'#1a1510');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='rgba(200,160,100,0.1)';ctx.fillRect(w*0.3,0,w*0.4,h*0.5);
+      break;
+    case 'stormy_sea':
+      grad.addColorStop(0,'#0f1018');grad.addColorStop(0.5,'#1a2530');grad.addColorStop(1,'#0a0e15');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#0a0e18';ctx.fillRect(0,h*0.6,w,h*0.4);
+      for(let i=0;i<15;i++){ctx.fillStyle='rgba(180,200,220,0.3)';ctx.fillRect(w*0.15+Math.random()*w*0.7,h*0.5+Math.random()*h*0.3,1,8)}
+      break;
+    case 'yamen_dusk':
+      grad.addColorStop(0,'#1a1615');grad.addColorStop(1,'#0f0e0c');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#201815';ctx.fillRect(w*0.1,h*0.3,w*0.8,h*0.5);
+      ctx.fillStyle='#1a1210';ctx.fillRect(w*0.45,h*0.35,2,25);
+      break;
+    default:
+      grad.addColorStop(0,'#1a1810');grad.addColorStop(1,'#0a0908');
+      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+  }
+}
+
+function drawCharacter(charId) {
+  const w=canvas.width, h=canvas.height;
+  ctx.globalAlpha = 0.85;
+  if (charId==='scholar') {
+    ctx.fillStyle='#0a0808';
+    ctx.beginPath();ctx.ellipse(w*0.45,h*0.42,14,22,0,0,Math.PI*2);ctx.fill();
+    ctx.fillRect(w*0.44,h*0.46,18,38);
+    ctx.fillRect(w*0.44,h*0.52,18,6); ctx.fillRect(w*0.43,h*0.52,22,3);
+    ctx.fillStyle='rgba(120,100,80,0.4)';ctx.fillRect(w*0.445,h*0.55,17,2);
+  } else if (charId==='boat') {
+    ctx.fillStyle='#0a0808';
+    ctx.beginPath();ctx.moveTo(w*0.3,h*0.7);ctx.lineTo(w*0.7,h*0.7);ctx.lineTo(w*0.6,h*0.75);ctx.lineTo(w*0.4,h*0.75);ctx.fill();
+    ctx.fillStyle='#1a1510';ctx.fillRect(w*0.47,h*0.55,3,40);
+  } else if (charId==='captain') {
+    ctx.fillStyle='#0a0808';
+    ctx.beginPath();ctx.ellipse(w*0.48,h*0.4,16,24,0,0,Math.PI*2);ctx.fill();
+    ctx.fillRect(w*0.46,h*0.44,22,42);
+    ctx.fillRect(w*0.445,h*0.52,26,4);
+  } else if (charId==='bannerman') {
+    ctx.fillStyle='#0a0808';
+    ctx.beginPath();ctx.ellipse(w*0.47,h*0.38,16,22,0,0,Math.PI*2);ctx.fill();
+    ctx.fillRect(w*0.455,h*0.42,20,40);
+    ctx.fillRect(w*0.44,h*0.38,26,5);
+    ctx.fillStyle='#1a1210';ctx.fillRect(w*0.455,h*0.5,20,3);
+  }
+  ctx.globalAlpha = 1;
+  if (['city_wall_dusk','academy_dusk','camp_fire'].includes(game.currentScene?.bg)) {
+    for(let i=0;i<3;i++) {
+      ctx.fillStyle='rgba(200,180,150,'+(0.3+Math.random()*0.2)+')';
+      ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h*0.5,1.5,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+
+// ==================== GAMEPLAY ====================
+let currentSceneIdx = 0;
+let currentDialogIdx = 0;
+let isPlaying = false;
+
+titleEl.onclick = () => {
+  titleEl.style.display='none';
+  lineSelectEl.classList.add('visible');
+};
+
+function startGame(line) {
+  game.line = line;
+  currentSceneIdx = 0;
+  currentDialogIdx = 0;
+  isPlaying = true;
+  lineSelectEl.classList.remove('visible');
+  showScene(0);
+}
+
+function showScene(idx) {
+  currentSceneIdx = idx;
+  currentDialogIdx = 0;
+  const sceneList = scenes[game.line];
+  if (!sceneList || idx >= sceneList.length) { showEnd(); return; }
+  const scene = sceneList[idx];
+  game.currentScene = scene;
+
+  drawBackground(scene.bg);
+  drawCharacter(scene.char);
+
+  if (scene.epTitle) {
+    const ep = scene.epTitle;
+    epTitleEl.querySelector('.ep-num').textContent = ep.num;
+    epTitleEl.querySelector('.ep-name').textContent = ep.name;
+    epTitleEl.querySelector('.ep-line').textContent = ep.line;
+    epTitleEl.classList.add('visible');
+    setTimeout(() => { epTitleEl.classList.remove('visible'); showDialog(); }, 2500);
+  } else {
+    showDialog();
+  }
+}
+
+function showDialog() {
+  const scene = scenes[game.line][currentSceneIdx];
+  if (currentDialogIdx >= scene.dialogs.length) {
+    showChoices(scene.choices);
     return;
   }
+  const d = scene.dialogs[currentDialogIdx];
+  dlgSpeaker.textContent = d.speaker;
+  dlgText.textContent = d.text;
+  dlg.classList.add('visible');
+  choicesEl.classList.remove('visible');
+}
 
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-  const container = document.getElementById("gameContainer");
+dlg.onclick = () => {
+  currentDialogIdx++;
+  showDialog();
+};
 
-  const startScreen = document.getElementById("startScreen");
-  const levelUpScreen = document.getElementById("levelUpScreen");
-  const victoryScreen = document.getElementById("victoryScreen");
-  const endScreen = document.getElementById("endScreen");
-  const finalScoreEl = document.getElementById("finalScore");
-  const endLevelEl = document.getElementById("endLevel");
-  const endDodgedEl = document.getElementById("endDodged");
-  const endFireflyEl = document.getElementById("endFirefly");
-  const endLivesEl = document.getElementById("endLives");
-  const endLevelNameEl = document.getElementById("endLevelName");
-  const endPoemEl = document.getElementById("endPoem");
-  const levelUpPoemEl = document.getElementById("levelUpPoem");
-  const bestDisplay = document.getElementById("bestDisplay");
-  const victoryPoem = document.getElementById("victoryPoem");
-  const levelUpLabel = document.getElementById("levelUpLabel");
-  const levelUpName = document.getElementById("levelUpName");
-  const chargeHint = document.getElementById("chargeHint");
-  const leaderboardScreen = document.getElementById("leaderboardScreen");
-  const leaderboardList = document.getElementById("leaderboardList");
-  const endNameInput = document.getElementById("endNameInput");
-  const victoryNameInput = document.getElementById("victoryNameInput");
-  const easterEggScreen = document.getElementById("easterEggScreen");
-  const easterPoem = document.getElementById("easterPoem");
-
-  const W = 400, H = 666;
-  const GROUND_Y = H - 80;
-
-  // ---- 关卡 ----
-  const LEVELS = [
-    { n:1,  season:"春", name:"初霁",   target:5,  speed:200, interval:2.0, types:["basic"], poem:"雨落终会逢初霁，前路漫漫皆可期。" },
-    { n:2,  season:"春", name:"知途",   target:6,  speed:220, interval:1.9, types:["basic","tall"], poem:"眼下纵有迷雾阻，行至深处自知途。" },
-    { n:3,  season:"春", name:"随风",   target:7,  speed:240, interval:1.8, types:["basic","tall","fast"], poem:"得失聚散皆随风，收拾心绪再赴程。" },
-    { n:4,  season:"夏", name:"安渡",   target:7,  speed:260, interval:1.7, types:["basic","tall","fast","floating"], poem:"此番风雨从容渡，他日山海皆可赴。" },
-    { n:5,  season:"夏", name:"观聚散", target:8,  speed:280, interval:1.6, types:["basic","tall","fast","floating","moving"], poem:"看透浮生离合意，重整行囊向前行。" },
-    { n:6,  season:"夏", name:"执经纬", target:8,  speed:300, interval:1.5, types:["basic","tall","fast","floating","moving","spike"], poem:"纵命浮沉有定数，本心经纬永不移。" },
-    { n:7,  season:"秋", name:"晚晴",   target:9,  speed:310, interval:1.4, types:["basic","tall","fast","floating","moving","spike","double"], poem:"历尽千山风雨苦，暮色温柔自有晴。" },
-    { n:8,  season:"秋", name:"归行",   target:9,  speed:320, interval:1.3, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"漂泊终有回头路，不忘初心踏归途。" },
-    { n:9,  season:"秋", name:"澄心",   target:10, speed:340, interval:1.2, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"涤尽浮生万千扰，灵台空净悟今朝。" },
-    { n:10, season:"冬", name:"听澜",   target:10, speed:360, interval:1.1, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"坐看尘世千帆过，胸中自有万里河。" },
-    { n:11, season:"冬", name:"枕月",   target:12, speed:380, interval:1.0, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"暂借清辉栖尘骨，养得心力再出发。" },
-    { n:12, season:"冬", name:"循归",   target:15, speed:400, interval:0.9, types:["basic","tall","fast","floating","moving","spike","double","ghost"], poem:"一轮尘路终行尽，归来仍是最初人。" },
-  ];
-
-  // ---- 四季主题 ----
-  const THEMES = {
-    "春": { skyTop:"#f5efe0", skyMid:"#f0e4d0", skyBot:"#eedac4", ground:"#c9a88c", groundTop:"#bfa07a", mountain1:"#e2d2bd", mountain2:"#eaddcb", sun:"rgba(255,242,230,0.5)", cloud:"rgba(255,252,248,{a})", bird:"#c4b5a0", player:"#8b6f5e", firefly:"sakura", ambient:"petal", label:"🌸" },
-    "夏": { skyTop:"#dee3d4", skyMid:"#d2d8c4", skyBot:"#c4cdb0", ground:"#a8ae92", groundTop:"#969c80", mountain1:"#c2c8ae", mountain2:"#b4ba9e", sun:"rgba(228,232,218,0.4)", cloud:"rgba(238,242,232,{a})", bird:"#9eaa8e", player:"#7e856a", firefly:"bamboo", ambient:"glow", label:"🎋" },
-    "秋": { skyTop:"#efe0ce", skyMid:"#e6d2bc", skyBot:"#dbc0a6", ground:"#be9878", groundTop:"#ae8868", mountain1:"#d6bfa6", mountain2:"#cab098", sun:"rgba(242,220,200,0.5)", cloud:"rgba(250,242,232,{a})", bird:"#c0a688", player:"#8b6f5e", firefly:"maple", ambient:"leaf", label:"🍂" },
-    "冬": { skyTop:"#e2e4ea", skyMid:"#d4d7de", skyBot:"#c4c7d0", ground:"#bcc0c8", groundTop:"#aab0b8", mountain1:"#cdd0d8", mountain2:"#c0c4cc", sun:"rgba(228,232,238,0.25)", cloud:"rgba(238,240,245,{a})", bird:"#b0b6be", player:"#787880", firefly:"snowflake", ambient:"snow", label:"❄️" },
-  };
-
-  function getTheme(lvl) { return THEMES[LEVELS[lvl].season]; }
-
-  const POEMS = [
-    "莫道桑榆晚，为霞尚满天",
-    "苔花如米小，也学牡丹开",
-    "心有经纬，何惧岁晚",
-    "长风破浪会有时，直挂云帆济沧海",
-    "千磨万击还坚劲，任尔东西南北风",
-    "行到水穷处，坐看云起时",
-    "山重水复疑无路，柳暗花明又一村",
-    "会当凌绝顶，一览众山小",
-    "不畏浮云遮望眼，自缘身在最高层",
-    "回首向来萧瑟处，归去，也无风雨也无晴",
-    "万缕千丝终不改，任他随聚随分",
-    "钱塘江上潮信来，今日方知我是我",
-  ];
-
-  // ---- 状态 ----
-  const ST = { IDLE:0, PLAYING:1, LEVEL_UP:2, VICTORY:3, OVER:4 };
-  let state = ST.IDLE;
-  let currentLevel = 0, dodgedInLevel = 0, totalDodged = 0;
-  let bestLevel = Math.min(parseInt(localStorage.getItem("mosangBestLevel") || "0"), LEVELS.length);
-
-  // 玩家
-  const PW = 30, PH = 30;
-  let player = { x:80, y:0, vy:0, grounded:true, airJumps:0, invincible:0 };
-
-  // ---- 音效 ----
-  let audioCtx = null;
-  function getAudioCtx() {
-    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-    return audioCtx;
-  }
-
-  function playTone(freq, type, duration, vol = 0.08, ramp = true) {
-    const ctx = getAudioCtx();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, now);
-    if (ramp) gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-    else gain.gain.linearRampToValueAtTime(0, now + duration);
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(now); osc.stop(now + duration);
-  }
-
-  function sfxJump() { playTone(440, "sine", 0.12, 0.06); playTone(660, "sine", 0.10, 0.04); }
-  function sfxBoost() { playTone(520, "sine", 0.1, 0.05); playTone(780, "sine", 0.08, 0.03); }
-  function sfxCollect() { playTone(880, "sine", 0.08, 0.05); setTimeout(() => playTone(1100, "sine", 0.1, 0.05), 60); }
-  function sfxHit() { playTone(80, "triangle", 0.25, 0.1); playTone(55, "sine", 0.3, 0.08); }
-  function sfxLevelUp() {
-    playTone(523, "sine", 0.12, 0.06); setTimeout(() => playTone(659, "sine", 0.12, 0.06), 100);
-    setTimeout(() => playTone(784, "sine", 0.12, 0.06), 200); setTimeout(() => playTone(1047, "sine", 0.2, 0.08), 300);
-  }
-  function sfxGameOver() { playTone(330, "sine", 0.2, 0.07); setTimeout(() => playTone(220, "sine", 0.3, 0.07), 150); }
-  function sfxVictory() {
-    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, "sine", 0.25, 0.07), i * 120));
-  }
-
-  // 跳跃
-  const JUMP_VY = -560;
-  const AIR_BOOST_VY = -500;
-  const MAX_AIR_BOOSTS = 3;
-
-  // 萤火 + 生命
-  let fireflies = [];
-  let fireflyCount = 0;
-  let lives = 3;
-  const FIREFLIES_PER_LIFE = 5;
-  const MAX_LIVES = 6;
-  const INITIAL_LIVES = 3;
-
-  // 障碍物 & 环境
-  let obstacles = [];
-  let particles = [];
-  let clouds = [];
-  let birds = [];
-  let obstacleTimer = 0;
-  let fireflyTimer = 0;
-  let speed = 280, obstacleInterval = 1.5;
-  let levelUpTimer = 0;
-  let time = 0;
-  let ambients = [];
-  let ambientTimer = 0;
-  let mountainPoints = [];
-
-  function generateMountains() {
-    mountainPoints = [{ x:-20, y:GROUND_Y+20 }];
-    for (let x = 0; x <= W+20; x += 30)
-      mountainPoints.push({ x, y:GROUND_Y - (40 + Math.sin(x*0.008)*35 + Math.sin(x*0.019+1.3)*25 + Math.sin(x*0.003)*50) });
-    mountainPoints.push({ x:W+20, y:GROUND_Y+20 });
-  }
-
-  function initClouds() {
-    clouds = [];
-    for (let i = 0; i < 5; i++)
-      clouds.push({ x:Math.random()*W, y:30+Math.random()*120, w:60+Math.random()*100, speed:8+Math.random()*15, alpha:0.25+Math.random()*0.25 });
-  }
-
-  function initBirds() {
-    birds = [];
-    for (let i = 0; i < 4; i++)
-      birds.push({ x:Math.random()*W, y:50+Math.random()*100, vx:20+Math.random()*40, wing:Math.random()*Math.PI*2 });
-  }
-
-  function getCfg() { return LEVELS[currentLevel]; }
-
-  // ---- 重置 ----
-  function reset() {
-    player.y = GROUND_Y - PH;
-    player.vy = 0;
-    player.grounded = true;
-    player.airJumps = 0;
-    player.invincible = 0;
-    obstacles = []; particles = []; fireflies = []; ambients = [];
-    obstacleTimer = 0; fireflyTimer = 0; ambientTimer = 0;
-    currentLevel = 0; dodgedInLevel = 0; totalDodged = 0;
-    fireflyCount = 0; lives = INITIAL_LIVES;
-    const c = getCfg(); speed = c.speed; obstacleInterval = c.interval;
-    levelUpTimer = 0;
-  }
-
-  // ---- 障碍物生成 ----
-  function spawnObstacle() {
-    const types = getCfg().types;
-    const type = types[Math.floor(Math.random()*types.length)];
-    const o = { x:W+20, scored:false, type };
-
-    switch (type) {
-      case "basic":   o.h=28+Math.random()*36; o.w=20+Math.random()*14; o.y=GROUND_Y-o.h; break;
-      case "tall":    o.h=55+Math.random()*30; o.w=16+Math.random()*10; o.y=GROUND_Y-o.h; break;
-      case "fast":    o.h=18+Math.random()*20; o.w=14+Math.random()*8; o.y=GROUND_Y-o.h; o.speedMul=1.3; break;
-      case "floating":o.w=26+Math.random()*16; o.h=10+Math.random()*10; o.y=GROUND_Y-70-Math.random()*40; break;
-      case "moving":  o.w=18+Math.random()*10; o.h=34+Math.random()*28; o.y=GROUND_Y-o.h; o.baseY=o.y; o.moveAmp=30+Math.random()*50; o.moveFreq=1.8+Math.random()*2.5; o.movePhase=Math.random()*Math.PI*2; break;
-      case "spike":   o.w=12; o.h=55+Math.random()*25; o.y=GROUND_Y-o.h; break;
-      case "double":  o.h=22+Math.random()*18; o.w=16+Math.random()*8; o.y=GROUND_Y-o.h; o.gap=36+Math.random()*20; break;
-      case "ghost":   o.h=30+Math.random()*34; o.w=20+Math.random()*14; o.y=GROUND_Y-o.h; o.ghostAlpha=1; o.ghostDir=-1; break;
-    }
-    obstacles.push(o);
-  }
-
-  function spawnFirefly() {
-    const h = 40 + Math.random() * 180;
-    fireflies.push({
-      x: W + 30 + Math.random() * 100,
-      y: GROUND_Y - h,
-      r: 7 + Math.random() * 5,
-      phase: Math.random() * Math.PI * 2,
-      collected: false,
-    });
-  }
-
-  function spawnPetals(x, y, count) {
-    for (let i = 0; i < count; i++)
-      particles.push({ x, y, vx:(Math.random()-0.5)*80, vy:(Math.random()-0.8)*140, life:0.6+Math.random()*0.6, maxLife:0.6+Math.random()*0.6, r:1.5+Math.random()*3, color:Math.random()>0.5?"#e8b896":"#d4a08a" });
-  }
-
-  function spawnFireflyParticles(x, y) {
-    for (let i = 0; i < 6; i++)
-      particles.push({ x, y, vx:(Math.random()-0.5)*100, vy:(Math.random()-1)*160, life:0.3+Math.random()*0.4, maxLife:0.3+Math.random()*0.4, r:1+Math.random()*2, color:"#f5e8a0" });
-  }
-
-  // ---- 跳跃 ----
-  function doJump(vy) {
-    player.vy = vy;
-    player.grounded = false;
-    player.airJumps = MAX_AIR_BOOSTS;
-  }
-
-  // ---- 更新 ----
-  function update(dt) {
-    if (state === ST.IDLE || state === ST.VICTORY || state === ST.OVER) return;
-    const cap = Math.min(dt, 0.05);
-    time += cap;
-
-    if (state === ST.LEVEL_UP) {
-      levelUpTimer -= cap;
-      if (levelUpTimer <= 0) {
-        currentLevel++;
-        if (currentLevel >= LEVELS.length) { completeGame(); return; }
-        dodgedInLevel = 0; obstacles = []; fireflies = []; ambients = []; obstacleTimer = 0; fireflyTimer = 0; ambientTimer = 0;
-        const c = getCfg(); speed = c.speed; obstacleInterval = c.interval;
-        levelUpScreen.classList.add("hidden"); levelUpScreen.classList.remove("active");
-        state = ST.PLAYING;
-        player.y = GROUND_Y - PH; player.vy = 0; player.grounded = true; player.airJumps = 0;
-        chargeHint.classList.remove("hidden");
+function showChoices(choices) {
+  dlg.classList.remove('visible');
+  choicesEl.innerHTML = '';
+  choices.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = ch.text;
+    btn.onclick = () => {
+      if (ch.world) Object.entries(ch.world).forEach(([k,v]) => setWorld(k,v));
+      choicesEl.classList.remove('visible');
+      dlg.classList.remove('visible');
+      if (ch.next === 'end_chapter1') {
+        showEnd();
+      } else if (typeof ch.next === 'number') {
+        showScene(ch.next);
       }
-      for (let i = particles.length-1; i >= 0; i--) {
-        const p = particles[i]; p.life -= cap;
-        if (p.life <= 0) { particles.splice(i,1); continue; }
-        p.x += p.vx*cap; p.y += p.vy*cap; p.vy += 300*cap;
-      }
-      return;
-    }
-
-    // 无敌倒计时
-    if (player.invincible > 0) player.invincible -= cap;
-
-    // 玩家物理
-    player.vy += 1750 * cap;
-    player.y += player.vy * cap;
-    if (player.y >= GROUND_Y - PH) {
-      player.y = GROUND_Y - PH; player.vy = 0; player.grounded = true; player.airJumps = 0;
-    }
-
-    // 障碍物生成
-    obstacleTimer += cap;
-    if (obstacleTimer >= obstacleInterval) { obstacleTimer = 0; spawnObstacle(); }
-
-    // 萤火虫生成
-    fireflyTimer += cap;
-    if (fireflyTimer >= 2.0 + Math.random() * 2.5) {
-      fireflyTimer = 0;
-      if (fireflies.length < 7) spawnFirefly();
-    }
-
-    // 障碍物更新
-    for (let i = obstacles.length-1; i >= 0; i--) {
-      const obs = obstacles[i];
-      obs.x -= speed * (obs.speedMul||1) * cap;
-      if (obs.type === "moving") { obs.movePhase += obs.moveFreq*cap; obs.y = obs.baseY + Math.sin(obs.movePhase)*obs.moveAmp; }
-      if (obs.type === "ghost") { obs.ghostAlpha += obs.ghostDir*2.5*cap; if (obs.ghostAlpha<=0.15){obs.ghostAlpha=0.15;obs.ghostDir=1;} if (obs.ghostAlpha>=1){obs.ghostAlpha=1;obs.ghostDir=-1;} }
-
-      if (player.invincible <= 0) {
-        const px=player.x+5, py=player.y+4, pw=PW-10, ph=PH-8;
-        let hit = false;
-        if (obs.type === "double") {
-          const g = obs.gap||40;
-          hit = (px<obs.x+obs.w && px+pw>obs.x && py<obs.y+obs.h && py+ph>obs.y) ||
-                (px<obs.x+obs.w+g+obs.w && px+pw>obs.x+obs.w+g && py<obs.y+obs.h && py+ph>obs.y);
-        } else {
-          const ox=obs.x+2, oy=obs.y+2, ow=obs.w-4, oh=obs.h-4;
-          hit = px<ox+ow && px+pw>ox && py<oy+oh && py+ph>oy;
-        }
-        if (hit) {
-          lives--;
-          player.invincible = 1.5;
-          sfxHit();
-          spawnFireflyParticles(player.x+PW/2, player.y+PH/2);
-          if (lives <= 0) {
-            endGame(); return;
-          }
-        }
-      }
-
-      const sx = obs.type==="double" ? obs.x+obs.w+(obs.gap||40)+obs.w : obs.x+obs.w;
-      if (!obs.scored && sx < player.x) { obs.scored=true; dodgedInLevel++; totalDodged++; if (dodgedInLevel >= getCfg().target) levelUp(); }
-      if (obs.x < -80) obstacles.splice(i,1);
-    }
-
-    // 萤火虫更新与收集
-    for (let i = fireflies.length-1; i >= 0; i--) {
-      const f = fireflies[i];
-      f.x -= speed * cap;
-      f.phase += cap * 3;
-      const fx = f.x, fy = f.y;
-      if (Math.abs(fx - (player.x+PW/2)) < 22 && Math.abs(fy - (player.y+PH/2)) < 22) {
-        fireflies.splice(i,1);
-        fireflyCount++;
-        sfxCollect();
-        spawnFireflyParticles(fx, fy);
-        if (fireflyCount % FIREFLIES_PER_LIFE === 0 && lives < MAX_LIVES) lives++;
-      } else if (f.x < -30) {
-        fireflies.splice(i,1);
-      }
-    }
-
-    // 云
-    for (const c of clouds) { c.x -= c.speed*cap; if (c.x < -c.w) c.x = W+c.w; }
-    // 鸟
-    for (const b of birds) { b.x += b.vx*cap; b.wing += cap*3; if (b.x > W+30) b.x = -30; }
-    // 粒子
-    for (let i = particles.length-1; i >= 0; i--) {
-      const p = particles[i]; p.life -= cap;
-      if (p.life <= 0) { particles.splice(i,1); continue; }
-      p.x += p.vx*cap; p.y += p.vy*cap; p.vy += 300*cap;
-    }
-
-    // 环境粒子
-    ambientTimer += cap;
-    const theme = getTheme(currentLevel);
-    if (ambientTimer >= 1.8 + Math.random() * 2.5) {
-      ambientTimer = 0;
-      if (ambients.length < 12) {
-        ambients.push({
-          x: Math.random() * (W + 60) - 30,
-          y: -20,
-          vy: 20 + Math.random() * 30,
-          vx: (Math.random() - 0.5) * 20,
-          r: theme.ambient === "snow" ? 2 + Math.random() * 3 : 3 + Math.random() * 5,
-          phase: Math.random() * Math.PI * 2,
-          type: theme.ambient,
-        });
-      }
-    }
-    for (let i = ambients.length-1; i >= 0; i--) {
-      const a = ambients[i];
-      a.y += a.vy * cap;
-      a.x += a.vx * cap + Math.sin(a.phase + time * 0.5) * 10 * cap;
-      a.phase += cap * 1.5;
-      if (a.y > H + 40) { ambients.splice(i, 1); }
-    }
-  }
-
-  function levelUp() {
-    sfxLevelUp();
-    state = ST.LEVEL_UP;
-    levelUpTimer = 1.8;
-    const c = getCfg();
-    levelUpLabel.textContent = `${c.season} · ${c.name} 通过`;
-    levelUpName.textContent = c.name;
-    levelUpPoemEl.textContent = c.poem;
-    levelUpScreen.classList.remove("hidden"); levelUpScreen.classList.add("active");
-    chargeHint.classList.add("hidden");
-    spawnPetals(player.x+PW/2, player.y, 16);
-  }
-
-  function completeGame() {
-    sfxVictory();
-    state = ST.VICTORY;
-    if (LEVELS.length > bestLevel) { bestLevel = LEVELS.length; localStorage.setItem("mosangBestLevel", bestLevel); }
-    easterPoem.textContent = POEMS[Math.floor(Math.random()*POEMS.length)];
-    victoryScreen.classList.remove("hidden"); victoryScreen.classList.add("active");
-    chargeHint.classList.add("hidden");
-    spawnPetals(W/2, H/2, 40);
-  }
-
-  function showEasterEgg() {
-    easterPoem.textContent = POEMS[Math.floor(Math.random()*POEMS.length)];
-    victoryScreen.classList.add("hidden"); victoryScreen.classList.remove("active");
-    easterEggScreen.classList.remove("hidden"); easterEggScreen.classList.add("active");
-  }
-
-  function endGame() {
-    sfxGameOver();
-    state = ST.OVER;
-    spawnPetals(player.x+PW/2, player.y, 12);
-    const rl = currentLevel+1;
-    if (rl > bestLevel) { bestLevel = rl; localStorage.setItem("mosangBestLevel", bestLevel); }
-    const cfg = getCfg();
-    finalScoreEl.textContent = totalDodged;
-    endLevelEl.textContent = rl;
-    endLevelNameEl.textContent = cfg.name;
-    endDodgedEl.textContent = totalDodged;
-    endFireflyEl.textContent = fireflyCount;
-    endLivesEl.textContent = lives;
-    endPoemEl.textContent = cfg.poem;
-    endScreen.classList.remove("hidden"); endScreen.classList.add("active");
-    chargeHint.classList.add("hidden");
-  }
-
-  // ---- 渲染 ----
-  function drawSky(ctx) {
-    const t = getTheme(currentLevel);
-    const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0, t.skyTop); bg.addColorStop(0.5, t.skyMid); bg.addColorStop(1, t.skyBot);
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-    const sun = ctx.createRadialGradient(W*0.7,H*0.25,20,W*0.7,H*0.25,200);
-    sun.addColorStop(0, t.sun); sun.addColorStop(1,"rgba(255,242,230,0)");
-    ctx.fillStyle=sun; ctx.fillRect(0,0,W,H);
-  }
-
-  function drawClouds(ctx) {
-    const t = getTheme(currentLevel);
-    for (const c of clouds) {
-      ctx.fillStyle = t.cloud.replace("{a}", c.alpha);
-      ctx.beginPath(); ctx.ellipse(c.x, c.y, c.w*0.5, c.w*0.18, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(c.x-c.w*0.2, c.y-c.w*0.06, c.w*0.3, c.w*0.13, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(c.x+c.w*0.25, c.y-c.w*0.04, c.w*0.28, c.w*0.12, 0, 0, Math.PI*2); ctx.fill();
-    }
-  }
-
-  function drawBirds(ctx) {
-    const t = getTheme(currentLevel);
-    for (const b of birds) {
-      ctx.strokeStyle=t.bird; ctx.lineWidth=1.2; ctx.lineCap="round";
-      ctx.beginPath(); ctx.moveTo(b.x-8, b.y-Math.sin(b.wing)*6);
-      ctx.quadraticCurveTo(b.x-4, b.y-3-Math.sin(b.wing)*6, b.x, b.y-Math.sin(b.wing)*6);
-      ctx.quadraticCurveTo(b.x+4, b.y-3-Math.sin(b.wing)*6, b.x+8, b.y-Math.sin(b.wing)*6);
-      ctx.stroke();
-    }
-  }
-
-  function drawMountains(ctx) {
-    const t = getTheme(currentLevel);
-    if (mountainPoints.length===0) generateMountains();
-    ctx.fillStyle=t.mountain1; ctx.beginPath(); ctx.moveTo(mountainPoints[0].x,mountainPoints[0].y);
-    for (let i=1;i<mountainPoints.length;i++) ctx.lineTo(mountainPoints[i].x,mountainPoints[i].y);
-    ctx.lineTo(W+20,GROUND_Y+20); ctx.lineTo(-20,GROUND_Y+20); ctx.closePath(); ctx.fill();
-    ctx.fillStyle=t.mountain2; ctx.beginPath(); ctx.moveTo(-20,GROUND_Y+20);
-    for (let x=-20;x<=W+20;x+=25) ctx.lineTo(x,GROUND_Y-(25+Math.sin(x*0.012+0.7)*20+Math.sin(x*0.025)*15));
-    ctx.lineTo(W+20,GROUND_Y+20); ctx.closePath(); ctx.fill();
-  }
-
-  function drawGround(ctx) {
-    const t = getTheme(currentLevel);
-    ctx.fillStyle=t.ground; ctx.fillRect(0,GROUND_Y,W,H-GROUND_Y);
-    ctx.fillStyle=t.groundTop; ctx.fillRect(0,GROUND_Y,W,4);
-    ctx.strokeStyle="rgba(139,111,94,0.3)"; ctx.lineWidth=1; ctx.setLineDash([4,12]);
-    ctx.beginPath(); ctx.moveTo(0,GROUND_Y+10); ctx.lineTo(W,GROUND_Y+10); ctx.stroke(); ctx.setLineDash([]);
-  }
-
-  function drawPlayer(ctx) {
-    const x=player.x, y=player.y;
-
-    // 无敌闪烁
-    if (player.invincible > 0 && Math.floor(player.invincible*10)%2===0) return;
-
-    // 光晕
-    const glow = ctx.createRadialGradient(x+PW/2,y+PH/2,4,x+PW/2,y+PH/2,32);
-    glow.addColorStop(0,"rgba(232,184,150,0.35)"); glow.addColorStop(1,"rgba(232,184,150,0)");
-    ctx.fillStyle=glow; ctx.fillRect(x-12,y-12,PW+24,PH+24);
-
-    // 身体
-    const t = getTheme(currentLevel);
-    ctx.fillStyle=t.player; ctx.beginPath(); ctx.roundRect(x,y,PW,PH,8); ctx.fill();
-    ctx.fillStyle="rgba(255,248,240,0.25)"; ctx.beginPath(); ctx.roundRect(x+4,y+3,10,8,4); ctx.fill();
-    ctx.fillStyle="#fffef9"; ctx.beginPath(); ctx.arc(x+20,y+13,4.5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="#3a2a1a"; ctx.beginPath(); ctx.arc(x+21,y+12,2.2,0,Math.PI*2); ctx.fill();
-
-    // 二段跳提示
-    if (!player.grounded && player.airJumps > 0) {
-      ctx.fillStyle="rgba(232,184,150,0.25)";
-      ctx.beginPath(); ctx.arc(x+PW/2, y+PH, 10, 0, Math.PI*2); ctx.fill();
-    }
-  }
-
-  function drawFireflies(ctx) {
-    const theme = getTheme(currentLevel);
-    const type = theme.firefly;
-    for (const f of fireflies) {
-      const pulse = 0.6 + Math.sin(f.phase)*0.4;
-      const alpha = 0.7 * pulse;
-      if (type === "sakura") {
-        // 樱花：5片粉色花瓣
-        for (let i = 0; i < 5; i++) {
-          const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
-          const px = f.x + Math.cos(angle) * f.r * 0.7;
-          const py = f.y + Math.sin(angle) * f.r * 0.7;
-          ctx.fillStyle = `rgba(255,160,180,${alpha})`;
-          ctx.beginPath(); ctx.arc(px, py, f.r * 0.5, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.fillStyle = `rgba(255,210,220,${alpha})`;
-        ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 0.25, 0, Math.PI * 2); ctx.fill();
-      } else if (type === "bamboo") {
-        // 竹叶：细长绿色叶片
-        ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(pulse * 0.4 - 0.2);
-        ctx.fillStyle = `rgba(140,162,120,${alpha})`;
-        ctx.beginPath(); ctx.ellipse(0, 0, f.r, f.r * 0.28, 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(160,180,140,${alpha})`;
-        ctx.beginPath(); ctx.ellipse(0, 0, f.r * 0.5, f.r * 0.15, 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      } else if (type === "maple") {
-        // 红枫：五角星形
-        const cx = f.x, cy = f.y;
-        ctx.fillStyle = `rgba(210,120,90,${alpha})`;
-        ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
-          const ax = cx + Math.cos(a) * f.r * 0.9;
-          const ay = cy + Math.sin(a) * f.r * 0.9;
-          if (i === 0) ctx.moveTo(ax, ay); else ctx.lineTo(ax, ay);
-          const ba = a + Math.PI / 5;
-          ctx.lineTo(cx + Math.cos(ba) * f.r * 0.35, cy + Math.sin(ba) * f.r * 0.35);
-        }
-        ctx.closePath(); ctx.fill();
-        ctx.fillStyle = `rgba(240,160,130,${alpha})`;
-        ctx.beginPath(); ctx.arc(cx, cy, f.r * 0.22, 0, Math.PI * 2); ctx.fill();
-      } else if (type === "snowflake") {
-        // 雪花：六角大雪花
-        const cx = f.x, cy = f.y, sz = f.r;
-        // 外层光晕，增强可见度
-        const g = ctx.createRadialGradient(cx, cy, sz * 0.3, cx, cy, sz * 1.6);
-        g.addColorStop(0, `rgba(255,255,255,${alpha * 0.5})`);
-        g.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, sz * 1.6, 0, Math.PI * 2); ctx.fill();
-        // 六条主臂
-        ctx.fillStyle = `rgba(240,244,255,${alpha})`;
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * Math.PI * 2;
-          ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
-          ctx.beginPath(); ctx.roundRect(-sz * 0.14, -sz * 1.05, sz * 0.28, sz * 1.05, sz * 0.14); ctx.fill();
-          ctx.restore();
-        }
-        // 小分枝
-        ctx.fillStyle = `rgba(220,230,248,${alpha * 0.8})`;
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * Math.PI * 2;
-          ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
-          ctx.translate(0, -sz * 0.55);
-          ctx.beginPath(); ctx.roundRect(-sz * 0.06, -sz * 0.28, sz * 0.12, sz * 0.28, sz * 0.06); ctx.fill();
-          ctx.restore();
-        }
-        // 花心
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-        ctx.beginPath(); ctx.arc(cx, cy, sz * 0.22, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-  }
-
-  // ---- 障碍物绘制 ----
-  function drawStone(ctx,x,y,w,h,c){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y+4,w,h-4,w*0.5);ctx.fill();ctx.fillStyle="rgba(255,248,240,0.2)";ctx.beginPath();ctx.arc(x+w*0.35,y+h*0.35,w*0.2,0,Math.PI*2);ctx.fill();}
-  function drawShrub(ctx,x,y,w,h){ctx.fillStyle="#8b7a62";ctx.fillRect(x+w*0.4,y+h*0.3,w*0.2,h*0.7);ctx.beginPath();ctx.arc(x+w/2,y+h*0.25,w*0.7,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w*0.25,y+h*0.35,w*0.45,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w*0.75,y+h*0.3,w*0.5,0,Math.PI*2);ctx.fill();}
-  function drawCritter(ctx,x,y,w,h){ctx.fillStyle="#e8b896";ctx.beginPath();ctx.ellipse(x+w*0.6,y+h*0.5,w*0.5,h*0.4,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w*0.7,y+h*0.15,w*0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w*0.45,y+h*0.2,w*0.18,0,Math.PI*2);ctx.fill();}
-  function drawLeafCluster(ctx,x,y,w,h){for(let i=0;i<5;i++){ctx.fillStyle=i%2===0?"#b8a99a":"#c9a88c";ctx.beginPath();ctx.ellipse(x+Math.cos(i*1.3+time*2)*w*0.4,y+Math.sin(i*0.9+time*1.5)*h*0.5,6,3,0.3,0,Math.PI*2);ctx.fill();}}
-  function drawBamboo(ctx,x,y,w,h){ctx.fillStyle="#8b6f5e";ctx.fillRect(x+w*0.4,y,w*0.2,h);for(let jy=y+h*0.15;jy<y+h;jy+=h*0.2){ctx.fillStyle="#7a5f4e";ctx.fillRect(x+w*0.3,jy,w*0.4,2);ctx.fillStyle="#8b6f5e";}ctx.fillStyle="#9b8a72";ctx.beginPath();ctx.ellipse(x+w*0.6,y+h*0.2,w*0.5,w*0.12,0.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+w*0.2,y+h*0.5,w*0.4,w*0.1,-0.3,0,Math.PI*2);ctx.fill();}
-  function drawSpike(ctx,x,y,w,h){ctx.fillStyle="#a0846c";ctx.beginPath();ctx.moveTo(x,y+h);ctx.lineTo(x+w/2,y);ctx.lineTo(x+w,y+h);ctx.closePath();ctx.fill();}
-  function drawMist(ctx,x,y,w,h){ctx.fillStyle="rgba(245,239,224,0.45)";ctx.beginPath();ctx.ellipse(x+w/2,y+h/2,w*0.6,h*0.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+w*0.35,y+h*0.4,w*0.4,h*0.35,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(x+w*0.65,y+h*0.55,w*0.35,h*0.3,0,0,Math.PI*2);ctx.fill();}
-
-  function drawObstacles(ctx) {
-    for (const obs of obstacles) {
-      ctx.globalAlpha = obs.type==="ghost" ? (obs.ghostAlpha||1) : 1;
-      if (obs.type==="double") {
-        const g=obs.gap||40; drawStone(ctx,obs.x,obs.y,obs.w,obs.h,"#d4a08a"); drawStone(ctx,obs.x+obs.w+g,obs.y,obs.w,obs.h,"#d4a08a");
-      } else switch(obs.type) {
-        case "basic": drawStone(ctx,obs.x,obs.y,obs.w,obs.h,"#c9a88c"); break;
-        case "tall": drawShrub(ctx,obs.x,obs.y,obs.w,obs.h); break;
-        case "fast": drawCritter(ctx,obs.x,obs.y,obs.w,obs.h); break;
-        case "floating": drawLeafCluster(ctx,obs.x,obs.y,obs.w,obs.h); break;
-        case "moving": drawBamboo(ctx,obs.x,obs.y,obs.w,obs.h); break;
-        case "spike": drawSpike(ctx,obs.x,obs.y,obs.w,obs.h); break;
-        case "ghost": drawMist(ctx,obs.x,obs.y,obs.w,obs.h); break;
-      }
-    }
-    ctx.globalAlpha=1;
-  }
-
-  function drawParticles(ctx) {
-    for (const p of particles) {
-      const a=p.life/p.maxLife; ctx.fillStyle=p.color; ctx.globalAlpha=a;
-      ctx.beginPath(); ctx.ellipse(p.x,p.y,p.r*a,p.r*0.5*a,Math.random(),0,Math.PI*2); ctx.fill();
-    }
-    ctx.globalAlpha=1;
-  }
-
-  function drawAmbients(ctx) {
-    for (const a of ambients) {
-      const pulse = 0.7 + Math.sin(a.phase) * 0.3;
-      if (a.type === "petal") {
-        ctx.fillStyle = `rgba(255,190,200,${pulse * 0.6})`;
-        ctx.beginPath(); ctx.ellipse(a.x, a.y, a.r, a.r * 0.5, Math.random(), 0, Math.PI * 2); ctx.fill();
-      } else if (a.type === "glow") {
-        const g = ctx.createRadialGradient(a.x, a.y, 1, a.x, a.y, a.r * 2);
-        g.addColorStop(0, `rgba(180,210,150,${pulse * 0.35})`);
-        g.addColorStop(1, "rgba(180,210,150,0)");
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 2, 0, Math.PI * 2); ctx.fill();
-      } else if (a.type === "leaf") {
-        ctx.fillStyle = `rgba(200,140,100,${pulse * 0.55})`;
-        ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(a.phase);
-        ctx.beginPath(); ctx.ellipse(0, 0, a.r, a.r * 0.4, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      } else if (a.type === "snow") {
-        ctx.fillStyle = `rgba(220,225,240,${pulse * 0.55})`;
-        ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-  }
-
-  function drawHUD(ctx) {
-    if (state !== ST.PLAYING && state !== ST.LEVEL_UP) return;
-    const c = getCfg(), lvl = c.n;
-
-    // 关卡
-    ctx.fillStyle="#5c4a3a"; ctx.font="14px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="left";
-    ctx.fillText(`第 ${lvl}/12 关 · ${c.name}`, 18, 34);
-
-    // 进度条
-    const bx=18, by=44, bw=W-36, bh=4;
-    ctx.fillStyle="rgba(201,168,140,0.25)"; ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,2); ctx.fill();
-    const pct = Math.min(dodgedInLevel/c.target, 1);
-    ctx.fillStyle="#c8a082"; ctx.beginPath(); ctx.roundRect(bx,by,bw*pct,bh,2); ctx.fill();
-    ctx.fillStyle="#8b7a62"; ctx.font="11px 'PingFang SC','Microsoft YaHei',serif"; ctx.textAlign="right";
-    ctx.fillText(`${dodgedInLevel}/${c.target}`, W-18, by-4);
-
-    // 萤火 & 生命
-    ctx.textAlign="right";
-    ctx.fillStyle="#8b7a62"; ctx.font="12px 'PingFang SC','Microsoft YaHei',serif";
-    ctx.fillText(`萤火 ${fireflyCount}`, W-18, 74);
-    ctx.fillText(`生命 ${lives}`, W-18, 92);
-
-    ctx.textAlign="left";
-  }
-
-  function render() {
-    ctx.clearRect(0,0,W,H);
-    drawSky(ctx); drawClouds(ctx); drawBirds(ctx); drawAmbients(ctx); drawMountains(ctx); drawGround(ctx);
-    drawFireflies(ctx); drawObstacles(ctx); drawPlayer(ctx); drawParticles(ctx); drawHUD(ctx);
-  }
-
-  let lastTime=0, animId;
-  function loop(ts) { const dt=lastTime?(ts-lastTime)/1000:0; lastTime=ts; update(dt); render(); animId=requestAnimationFrame(loop); }
-
-  // ---- 输入 ----
-  function handleTap(e) {
-    e.preventDefault();
-    if (state === ST.IDLE) { startGame(); return; }
-    if (state !== ST.PLAYING) return;
-
-    if (player.grounded) {
-      doJump(JUMP_VY);
-      sfxJump();
-      spawnPetals(player.x+PW/2, player.y+PH, 4);
-    } else if (player.airJumps > 0) {
-      player.vy = AIR_BOOST_VY;
-      player.airJumps--;
-      sfxBoost();
-      spawnPetals(player.x+PW/2, player.y+PH, 6);
-    }
-  }
-
-  canvas.addEventListener("pointerdown", handleTap);
-  canvas.addEventListener("touchstart", handleTap, { passive: false });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp") {
-      e.preventDefault();
-      if (state === ST.IDLE) { startGame(); return; }
-      if (state !== ST.PLAYING) return;
-      if (player.grounded) {
-        doJump(JUMP_VY);
-        sfxJump();
-        spawnPetals(player.x+PW/2, player.y+PH, 4);
-      } else if (player.airJumps > 0) {
-        player.vy = AIR_BOOST_VY;
-        player.airJumps--;
-        sfxBoost();
-        spawnPetals(player.x+PW/2, player.y+PH, 6);
-      }
-    }
+    };
+    choicesEl.appendChild(btn);
   });
+  choicesEl.classList.add('visible');
+}
 
-  function startGame() {
-    reset();
-    state = ST.PLAYING;
-    [startScreen,endScreen,victoryScreen,levelUpScreen,easterEggScreen,leaderboardScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
-    chargeHint.classList.remove("hidden");
-  }
+function showEnd() {
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  dlg.classList.remove('visible');
+  choicesEl.classList.remove('visible');
+  dlgSpeaker.textContent = '';
+  dlgText.textContent = '第一章 完';
+  dlg.querySelector('.next-hint').style.display = 'none';
+  dlg.classList.add('visible');
+  isPlaying = false;
+  setTimeout(() => {
+    dlg.classList.remove('visible');
+    dlg.querySelector('.next-hint').style.display = '';
+    lineSelectEl.classList.add('visible');
+    currentSceneIdx = 0;
+    currentDialogIdx = 0;
+  }, 3000);
+}
 
-  document.getElementById("btnStart").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
-  document.getElementById("btnRetry").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
-  document.getElementById("btnReplay").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
-
-  function doShare(){
-    const rl=state===ST.VICTORY?12:(currentLevel+1);
-    const extra=state===ST.VICTORY?`「${easterPoem.textContent}」`:"";
-    const text=`🏔️ 我在「莫桑」走到了第 ${rl} 关，收集 ${fireflyCount} 只萤火虫。${extra} 来山野间走一走吧！`;
-    if(navigator.share) navigator.share({title:"莫桑",text,url:location.href});
-    else navigator.clipboard.writeText(text+" "+location.href).then(()=>alert("分享文案已复制！")).catch(()=>prompt("复制这段分享吧：",text+" "+location.href));
-  }
-
-  document.getElementById("btnShare").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
-  document.getElementById("btnShareEnd").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
-  document.getElementById("btnShowEaster").addEventListener("click",(e)=>{e.stopPropagation();showEasterEgg();});
-  document.getElementById("btnShareEgg").addEventListener("click",(e)=>{e.stopPropagation();doShare();});
-  document.getElementById("btnReplayEgg").addEventListener("click",(e)=>{e.stopPropagation();startGame();});
-
-  // ---- 排行榜 ----
-  const LB_KEY = "mosangLeaderboard";
-
-  function loadLeaderboard() {
-    try {
-      const lb = JSON.parse(localStorage.getItem(LB_KEY)) || [];
-      return lb.map(e => ({...e, level: Math.min(e.level, 12)}));
-    }
-    catch { return []; }
-  }
-
-  function saveScore(name, lvl, dodged, flies) {
-    const lb = loadLeaderboard();
-    lb.push({ name: name || "无名旅人", level: lvl, dodged: dodged, fireflies: flies, date: new Date().toLocaleDateString("zh-CN") });
-    lb.sort((a, b) => b.level !== a.level ? b.level - a.level : b.dodged - a.dodged);
-    const top = lb.slice(0, 20);
-    localStorage.setItem(LB_KEY, JSON.stringify(top));
-    return top;
-  }
-
-  function renderLeaderboard() {
-    const lb = loadLeaderboard();
-    if (lb.length === 0) {
-      leaderboardList.innerHTML = '<p class="lb-empty">还没有成绩记录<br>快去闯关吧！</p>';
-      return;
-    }
-    leaderboardList.innerHTML = lb.slice(0, 10).map((e, i) => `
-      <div class="lb-item">
-        <span class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)}</span>
-        <span class="lb-name">${e.name.replace(/</g,'&lt;')}</span>
-        <span class="lb-stats">第${e.level}关 · ${e.dodged}闪 · ${e.fireflies}萤</span>
-      </div>`).join("");
-  }
-
-  function showLeaderboard() {
-    renderLeaderboard();
-    [startScreen,endScreen,victoryScreen,levelUpScreen,easterEggScreen,leaderboardScreen].forEach(el=>{el.classList.add("hidden");el.classList.remove("active");});
-    leaderboardScreen.classList.remove("hidden"); leaderboardScreen.classList.add("active");
-  }
-
-  document.getElementById("btnShowLeaderboard").addEventListener("click",(e)=>{e.stopPropagation();showLeaderboard();});
-  document.getElementById("btnLeaderboardBack").addEventListener("click",(e)=>{e.stopPropagation();leaderboardScreen.classList.add("hidden");leaderboardScreen.classList.remove("active");startScreen.classList.remove("hidden");startScreen.classList.add("active");});
-
-  document.getElementById("btnSaveEnd").addEventListener("click",(e)=>{
-    e.stopPropagation();
-    const name = endNameInput.value.trim();
-    saveScore(name, currentLevel + 1, totalDodged, fireflyCount);
-    endNameInput.value = "";
-    showLeaderboard();
-  });
-
-  document.getElementById("btnSaveVictory").addEventListener("click",(e)=>{
-    e.stopPropagation();
-    const name = victoryNameInput.value.trim();
-    saveScore(name, 12, totalDodged, fireflyCount);
-    victoryNameInput.value = "";
-    showLeaderboard();
-  });
-
-  // 初始化
-  function res(){canvas.width=W;canvas.height=H;}
-  res(); window.addEventListener("resize",res);
-  generateMountains(); initClouds(); initBirds();
-  bestDisplay.textContent = bestLevel>0 ? `曾至 第 ${bestLevel} 关` : "点击跳跃 · 空中点按腾跃";
-  player.y = GROUND_Y - PH;
-  lastTime = performance.now();
-  animId = requestAnimationFrame(loop);
-})();
+// Initial render
+drawBackground('default');
 </script>
 </body>
 </html>
