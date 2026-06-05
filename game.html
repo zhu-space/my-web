@@ -7,7 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0806;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'SimSun','KaiTi',serif;user-select:none;-webkit-user-select:none}
-#wrap{position:relative;width:100vw;height:100vh;max-width:960px;max-height:640px;overflow:hidden}
+#wrap{position:relative;width:100vw;height:100vh;max-width:960px;max-height:640px;overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat}
+#wrap.bg-city{background-image:url('bg_city.png')}
 canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #hud{position:absolute;z-index:10;pointer-events:none;top:0;left:0;right:0;bottom:0}
 #hud>*{pointer-events:auto}
@@ -202,12 +203,14 @@ function wife(x,y,s){
 
 // ===== SCENE DRAWING =====
 function draw_bg(id){
-  var w=W(),h=H();
+  var w=W(),h=H(),wrap=document.getElementById('wrap');
+  wrap.className = imgCache['city_wall'] && id==='city_wall_dusk' ? 'bg-city' : '';
+  // Clear canvas for image-backed scenes
+  if(imgCache['city_wall'] && id==='city_wall_dusk'){ctx.clearRect(0,0,w,h)}
   switch(id){
   case'city_wall_dusk':
     var gx=w*0.42,gw=w*0.16;
-    if(imgCache['city_wall']){ctx.drawImage(imgCache['city_wall'],0,0,w,h);}
-    else{sky([[0,18,16,20],[0.45,28,24,30],[0.7,42,30,22],[1,20,14,8]]);inkMtn(h*0.38,h*0.12,5,8,5,6);ctx.fillStyle=ink(14,12,10,0.6);ctx.fillRect(0,h*0.48,w,h*0.52);ctx.fillStyle=ink(10,8,6,0.9);ctx.fillRect(0,h*0.5,w,h-w*0.5);
+    if(!imgCache['city_wall']){sky([[0,18,16,20],[0.45,28,24,30],[0.7,42,30,22],[1,20,14,8]]);inkMtn(h*0.38,h*0.12,5,8,5,6);ctx.fillStyle=ink(14,12,10,0.6);ctx.fillRect(0,h*0.48,w,h*0.52);ctx.fillStyle=ink(10,8,6,0.9);ctx.fillRect(0,h*0.5,w,h-w*0.5);
     for(var i=0;i<32;i++){ctx.fillStyle=ink(12,10,8,0.7);ctx.fillRect(i*(w/32),h*0.5,3,h*0.06)}
     for(i=0;i<20;i++){var bx=i*(w/19);ctx.fillStyle=ink(12,9,7,0.85);ctx.fillRect(bx,h*0.48,w/38+2,h*0.04)}
     ctx.fillStyle=ink(4,3,2,0.9);ctx.fillRect(gx,h*0.52,gw,h*0.12);ctx.fillStyle=ink(6,5,3,0.6);ctx.beginPath();ctx.arc(gx+gw/2,h*0.6,gw*0.44,PI,0);ctx.fill();}
@@ -316,7 +319,7 @@ function gameLoop(){renderFrame();if(playing)loop=requestAnimationFrame(gameLoop
 function showDlg(){var sc=scenes[game.line][sIdx];if(di>=sc.dlg.length){showCho(sc.cho);return}var d=sc.dlg[di];dlgS.textContent=d.s;dlgT.textContent=d.t;dlgBox.classList.add('show');choEl.classList.remove('show')}
 dlgBox.onclick=function(){di++;showDlg()};
 function showCho(chs){dlgBox.classList.remove('show');choEl.innerHTML='';chs.forEach(function(ch){var b=document.createElement('button');b.className='ch';b.textContent=ch.text;b.onclick=function(){choEl.classList.remove('show');dlgBox.classList.remove('show');if(ch.next==='end')endGame();else if(typeof ch.next==='number')showScene(ch.next)};choEl.appendChild(b)});choEl.classList.add('show')}
-function endGame(){setAmbient(null);playing=false;dlgBox.classList.remove('show');choEl.classList.remove('show');dlgS.textContent='';dlgT.textContent='第一章 完';dlgBox.classList.add('show');setTimeout(function(){dlgBox.classList.remove('show');lineEl.classList.add('show');sIdx=0;di=0},3500)}
+function endGame(){setAmbient(null);playing=false;dlgBox.classList.remove('show');choEl.classList.remove('show');dlgS.textContent='';dlgT.textContent='第一章 完';dlgBox.classList.add('show');document.getElementById('wrap').className='';setTimeout(function(){dlgBox.classList.remove('show');lineEl.classList.add('show');sIdx=0;di=0},3500)}
 
 titleEl.onclick=function(){titleEl.style.display='none';lineEl.classList.add('show')};
 window.startGame=function(line){
