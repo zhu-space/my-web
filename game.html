@@ -5,526 +5,425 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>甲申 · Jiashen 1644</title>
 <style>
-  :root {
-    --ink: #1a1a1a;
-    --paper: #e8dcc8;
-    --fade: #8b7e6a;
-    --red: #8b2500;
-    --gold: #c4a35a;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body {
-    background:#0a0a0a;
-    display:flex;justify-content:center;align-items:center;
-    height:100vh;overflow:hidden;
-    font-family:'Noto Serif SC','SimSun','KaiTi',serif;
-  }
-  #game {
-    position:relative;
-    width:100vw;height:100vh;
-    max-width:900px;max-height:600px;
-    overflow:hidden;
-  }
-  canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
-
-  /* Dialogue overlay */
-  #dlg {
-    position:absolute;bottom:0;left:0;right:0;
-    background:linear-gradient(transparent,rgba(0,0,0,0.85) 30%,rgba(0,0,0,0.95));
-    padding:60px 30px 24px;
-    display:none;
-    cursor:pointer;
-    transition:opacity 0.3s;
-  }
-  #dlg.visible{display:block}
-  #dlg .speaker {
-    font-size:0.72rem;color:var(--gold);
-    margin-bottom:6px;letter-spacing:2px;
-  }
-  #dlg .text {
-    font-size:1rem;color:var(--paper);
-    line-height:1.8;letter-spacing:1px;
-  }
-  #dlg .next-hint {
-    text-align:right;font-size:0.65rem;color:var(--fade);
-    margin-top:10px;animation:blink 2s infinite;
-  }
-  @keyframes blink{0%,100%{opacity:0.4}50%{opacity:1}}
-
-  /* Choices */
-  #choices {
-    position:absolute;bottom:0;left:0;right:0;
-    padding:40px 30px 30px;
-    display:none;
-    background:linear-gradient(transparent,rgba(0,0,0,0.9) 20%);
-  }
-  #choices.visible{display:flex;flex-direction:column;gap:10px}
-  .choice-btn {
-    background:rgba(28,24,18,0.85);
-    border:1px solid rgba(196,163,90,0.3);
-    color:var(--paper);
-    padding:14px 20px;
-    font-family:inherit;font-size:0.9rem;
-    cursor:pointer;text-align:left;letter-spacing:1px;
-    transition:all 0.25s;border-radius:4px;
-  }
-  .choice-btn:hover{background:rgba(40,32,20,0.9);border-color:var(--gold);padding-left:28px}
-
-  /* Title screen */
-  #title {
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    background:radial-gradient(ellipse at center,rgba(20,15,10,0.3),rgba(0,0,0,0.9));
-    cursor:pointer;
-  }
-  #title h1 {
-    font-size:3rem;color:var(--paper);letter-spacing:8px;
-    font-weight:400;margin-bottom:8px;
-  }
-  #title .sub {
-    font-size:0.8rem;color:var(--fade);letter-spacing:4px;margin-bottom:40px;
-  }
-  #title .start-hint {
-    font-size:0.7rem;color:var(--gold);
-    animation:blink 2s infinite;letter-spacing:3px;
-  }
-
-  /* Line select */
-  #lineSelect {
-    position:absolute;inset:0;
-    display:none;flex-direction:column;
-    align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.92);
-    gap:16px;
-  }
-  #lineSelect.visible{display:flex}
-  .line-btn {
-    background:transparent;
-    border:1px solid rgba(196,163,90,0.3);
-    color:var(--paper);
-    padding:20px 40px;
-    font-family:inherit;font-size:1rem;
-    cursor:pointer;letter-spacing:3px;
-    width:280px;text-align:center;
-    transition:all 0.3s;
-  }
-  .line-btn:hover{background:rgba(40,32,20,0.5);border-color:var(--gold)}
-  .line-btn .line-label{font-size:0.6rem;color:var(--fade);margin-bottom:6px;letter-spacing:2px}
-
-  /* Episode title */
-  #epTitle {
-    position:absolute;inset:0;
-    display:none;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.95);
-    flex-direction:column;
-  }
-  #epTitle.visible{display:flex}
-  #epTitle .ep-num{font-size:0.7rem;color:var(--gold);letter-spacing:3px}
-  #epTitle .ep-name{font-size:1.5rem;color:var(--paper);margin-top:8px;letter-spacing:4px}
-  #epTitle .ep-line{font-size:0.75rem;color:var(--fade);margin-top:6px}
+:root{--paper:#e8dcc8;--fade:#8b7e6a;--gold:#c4a35a;--red:#8b2500}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;
+  font-family:'Noto Serif SC','SimSun','KaiTi',serif;user-select:none;-webkit-user-select:none}
+#game{position:relative;width:100vw;height:100vh;max-width:900px;max-height:600px;overflow:hidden}
+canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
+#dlg{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.85) 30%,rgba(0,0,0,0.95));padding:60px 30px 24px;display:none;cursor:pointer}
+#dlg.on{display:block}
+#dlg .s{font-size:0.72rem;color:var(--gold);margin-bottom:6px;letter-spacing:2px}
+#dlg .t{font-size:1rem;color:var(--paper);line-height:1.8;letter-spacing:1px}
+#dlg .h{text-align:right;font-size:0.65rem;color:var(--fade);margin-top:10px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:0.4}50%{opacity:1}}
+#choices{position:absolute;bottom:0;left:0;right:0;padding:40px 30px 30px;display:none;background:linear-gradient(transparent,rgba(0,0,0,0.9) 20%)}
+#choices.on{display:flex;flex-direction:column;gap:10px}
+.ch{background:rgba(28,24,18,0.85);border:1px solid rgba(196,163,90,0.3);color:var(--paper);padding:14px 20px;font-family:inherit;font-size:0.9rem;cursor:pointer;text-align:left;letter-spacing:1px;transition:all 0.25s;border-radius:4px}
+.ch:hover{background:rgba(40,32,20,0.9);border-color:var(--gold);padding-left:28px}
+#title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(20,15,10,0.3),rgba(0,0,0,0.92));cursor:pointer}
+#title h1{font-size:3rem;color:var(--paper);letter-spacing:8px;font-weight:400;margin-bottom:8px}
+#title .sub{font-size:0.8rem;color:var(--fade);letter-spacing:4px;margin-bottom:40px}
+#title .sh{font-size:0.7rem;color:var(--gold);animation:blink 2s infinite;letter-spacing:3px}
+#lineSel{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);gap:16px}
+#lineSel.on{display:flex}
+.lb{background:transparent;border:1px solid rgba(196,163,90,0.3);color:var(--paper);padding:20px 40px;font-family:inherit;font-size:1rem;cursor:pointer;letter-spacing:3px;width:280px;text-align:center;transition:all 0.3s}
+.lb:hover{background:rgba(40,32,20,0.5);border-color:var(--gold)}
+.lb .ll{font-size:0.6rem;color:var(--fade);margin-bottom:6px;letter-spacing:2px}
+#ep{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);flex-direction:column}
+#ep.on{display:flex}
+#ep .en{font-size:0.7rem;color:var(--gold);letter-spacing:3px}
+#ep .em{font-size:1.5rem;color:var(--paper);margin-top:8px;letter-spacing:4px}
+#ep .el{font-size:0.75rem;color:var(--fade);margin-top:6px}
+#soundBtn{position:absolute;top:12px;right:16px;z-index:999;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:var(--fade);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+#soundBtn:hover{border-color:var(--gold);color:var(--gold)}
 </style>
 </head>
 <body>
 <div id="game">
   <canvas id="c"></canvas>
-  <div id="title">
-    <h1>甲 申</h1>
-    <div class="sub">J I A S H E N · 1 6 4 4</div>
-    <div class="start-hint">点击开始</div>
+  <button id="soundBtn" onclick="toggleSound()" title="Toggle sound">🔊</button>
+  <div id="title"><h1>甲 申</h1><div class="sub">J I A S H E N · 1 6 4 4</div><div class="sh">点击开始</div></div>
+  <div id="lineSel">
+    <button class="lb" onclick="startGame('A')"><div class="ll">第一线</div>士 · 国子监生</button>
+    <button class="lb" onclick="startGame('B')"><div class="ll">第二线</div>海 · 走私船主</button>
+    <button class="lb" onclick="startGame('C')"><div class="ll">第三线</div>隐 · 汉人旗兵</button>
   </div>
-  <div id="lineSelect">
-    <button class="line-btn" onclick="startGame('A')">
-      <div class="line-label">第一线</div>士 · 国子监生
-    </button>
-    <button class="line-btn" onclick="startGame('B')">
-      <div class="line-label">第二线</div>海 · 走私船主
-    </button>
-    <button class="line-btn" onclick="startGame('C')">
-      <div class="line-label">第三线</div>隐 · 汉人旗兵
-    </button>
-  </div>
-  <div id="epTitle">
-    <div class="ep-num"></div>
-    <div class="ep-name"></div>
-    <div class="ep-line"></div>
-  </div>
-  <div id="dlg"><div class="speaker"></div><div class="text"></div><div class="next-hint">点击继续</div></div>
+  <div id="ep"><div class="en"></div><div class="em"></div><div class="el"></div></div>
+  <div id="dlg"><div class="s"></div><div class="t"></div><div class="h">点击继续</div></div>
   <div id="choices"></div>
 </div>
 
 <script>
+// ==================== AUDIO ENGINE ====================
+let audioCtx = null, soundOn = true;
+function getAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function toggleSound(){ soundOn=!soundOn; document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';
+  if(!soundOn&&audioCtx) audioCtx.suspend(); else if(soundOn&&audioCtx) audioCtx.resume(); }
+
+function playAmbient(type) {
+  if(!soundOn)return;
+  const ctx=getAudio();
+  if(ctx.state==='suspended') ctx.resume();
+  if(type==='wind'){
+    const buf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.08;
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=200;bp.Q.value=0.5;
+    const gain=ctx.createGain();gain.gain.value=0.15;
+    src.connect(bp);bp.connect(gain);gain.connect(ctx.destination);src.start();
+    return {stop:()=>{src.stop();gain.gain.linearRampToValueAtTime(0,ctx.currentTime+0.5)}};
+  }
+  if(type==='rain'){
+    const buf=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=Math.random()>0.7?(Math.random()*2-1)*0.12:0;
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type='highpass';bp.frequency.value=800;
+    const gain=ctx.createGain();gain.gain.value=0.1;
+    src.connect(bp);bp.connect(gain);gain.connect(ctx.destination);src.start();
+    return {stop:()=>{src.stop();gain.gain.linearRampToValueAtTime(0,ctx.currentTime+0.3)}};
+  }
+  if(type==='fire'){
+    const buf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++){if(Math.random()>0.85)d[i]=(Math.random()*2-1)*0.15;else d[i]=d[Math.max(0,i-1)]*0.7}
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=400;bp.Q.value=1;
+    const gain=ctx.createGain();gain.gain.value=0.08;
+    src.connect(bp);bp.connect(gain);gain.connect(ctx.destination);src.start();
+    return {stop:()=>{src.stop();gain.gain.linearRampToValueAtTime(0,ctx.currentTime+0.5)}};
+  }
+  if(type==='waves'){
+    const osc=ctx.createOscillator();osc.type='sine';osc.frequency.value=0.08;
+    const osc2=ctx.createOscillator();osc2.type='triangle';osc2.frequency.value=0.12;
+    const gain1=ctx.createGain();gain1.gain.value=0.02;const gain2=ctx.createGain();gain2.gain.value=0.015;
+    const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=200;
+    osc.connect(gain1);gain1.connect(lp);osc2.connect(gain2);gain2.connect(lp);lp.connect(ctx.destination);
+    osc.start();osc2.start();
+    return {stop:()=>{osc.stop();osc2.stop();}}
+  }
+  if(type==='bell'){
+    const osc=ctx.createOscillator();osc.type='sine';osc.frequency.value=587;
+    const gain=ctx.createGain();gain.gain.value=0.12;gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.8);
+    osc.connect(gain);gain.connect(ctx.destination);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+2);
+    return {stop:()=>{osc.stop();}};
+  }
+  return null;
+}
+let currentAmbient = null;
+function setAmbient(type) { if(currentAmbient) currentAmbient.stop(); if(type) currentAmbient=playAmbient(type); }
+
 // ==================== GAME ENGINE ====================
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+const dlg=document.getElementById('dlg'), dlgS=dlg.querySelector('.s'), dlgT=dlg.querySelector('.t');
+const choicesEl=document.getElementById('choices');
+const titleEl=document.getElementById('title'), lineSel=document.getElementById('lineSel'), epEl=document.getElementById('ep');
 
-const dlg = document.getElementById('dlg');
-const dlgSpeaker = dlg.querySelector('.speaker');
-const dlgText = dlg.querySelector('.text');
-const choicesEl = document.getElementById('choices');
-const titleEl = document.getElementById('title');
-const lineSelectEl = document.getElementById('lineSelect');
-const epTitleEl = document.getElementById('epTitle');
+let game={line:null,currentScene:null}, world=loadW();
+let sceneIdx=0,di=0,playing=false,animFrame=null,particles=[],time=0;
 
-let game = { line:null, sceneIdx:0, dialogIdx:0, choices:null, choiceMade:false, titleShown:false, currentScene:null };
-let worldState = loadWorld();
+function resize(){canvas.width=canvas.parentElement.clientWidth;canvas.height=canvas.parentElement.clientHeight}
+window.addEventListener('resize',resize);resize();
 
-function resize() {
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
+function loadW(){try{return JSON.parse(localStorage.getItem('js_w'))||{}}catch(e){return{}}}
+function saveW(){try{localStorage.setItem('js_w',JSON.stringify(world))}catch(e){}}
+function setW(k,v){world[k]=v;saveW()}
+
+// ==================== PARTICLES ====================
+function spawnParticles(type,x,y,count){
+  for(let i=0;i<count;i++) particles.push({
+    type,x:x||Math.random()*canvas.width,y:y||Math.random()*canvas.height*0.6,
+    vy:type==='snow'?0.2+Math.random()*0.6:0,vx:type==='leaf'?-0.3-Math.random()*0.4:type==='spark'?(-0.3+Math.random()*0.6):0,
+    life:1,size:type==='snow'?2:type==='leaf'?4:1.5, decay:type==='spark'?0.02:0.002
+  });
 }
-window.addEventListener('resize', resize);
-resize();
+function updateParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i]; p.life-=p.decay;
+    if(p.type==='snow'){p.y+=p.vy; p.x+=Math.sin(time*0.02+p.y*0.01)*0.3;}
+    if(p.type==='leaf'){p.y+=0.4; p.x+=p.vx; p.vx+=Math.sin(time*0.05)*0.02;}
+    if(p.type==='spark'){p.y-=0.8+Math.random()*1.5; p.x+=p.vx; p.vx*=0.98;}
+    if(p.type==='dust'){p.x+=p.vx+Math.sin(time*0.03)*0.2;}
+    if(p.life<=0||p.y>canvas.height||p.y<-20) particles.splice(i,1);
+  }
+}
 
-// ==================== WORLD STATE ====================
-function loadWorld() {
-  try { return JSON.parse(localStorage.getItem('jiashen_world')) || {}; } catch(e) { return {}; }
+// ==================== RENDER ====================
+function sky(gradColors){
+  const w=canvas.width,h=canvas.height,g=ctx.createLinearGradient(0,0,0,h);
+  gradColors.forEach(([pos,color])=>g.addColorStop(pos,color));
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
 }
-function saveWorld() {
-  try { localStorage.setItem('jiashen_world', JSON.stringify(worldState)); } catch(e) {}
+function mountain(y,color,hVariation=0.04,count=20){
+  const w=canvas.width;ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,canvas.height);
+  for(let i=0;i<=count;i++){const x=i*w/count;ctx.lineTo(x,y+Math.sin(i*1.2+0.3)*canvas.height*hVariation+Math.sin(i*3.1+1.7)*canvas.height*hVariation*0.5)}
+  ctx.lineTo(w,canvas.height);ctx.fill();
 }
-function setWorld(key, val) { worldState[key] = val; saveWorld(); }
+function buildings(x,y,w,h,count,color){
+  ctx.fillStyle=color;for(let i=0;i<count;i++){const bx=x+i*(w/count);ctx.fillRect(bx,y+Math.random()*h*0.3,w/(count+1),h*(0.5+Math.random()*0.5))}
+}
+function roof(x,y,w,h,color){
+  ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w/2,y-h);ctx.lineTo(x+w,y);ctx.fill();
+}
+function moon(x,y,r,alpha){
+  ctx.fillStyle=`rgba(200,190,160,${alpha})`;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=`rgba(180,170,140,${alpha*0.5})`;ctx.beginPath();ctx.arc(x,y,r*1.5,0,Math.PI*2);ctx.fill();
+}
+function character(type,x,y,scale=1){
+  const s=scale;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  ctx.globalAlpha=0.9;
+  if(type==='scholar'){
+    // Robe bottom
+    ctx.fillStyle='#1a1815';ctx.beginPath();ctx.moveTo(-16,30);ctx.quadraticCurveTo(-18,20,0,22);ctx.quadraticCurveTo(18,20,16,30);ctx.lineTo(14,72);ctx.quadraticCurveTo(0,80,-14,72);ctx.fill();
+    // Robe top
+    ctx.fillStyle='#1a1612';ctx.fillRect(-14,10,28,22);
+    // Sleeves
+    ctx.fillStyle='#181512';ctx.beginPath();ctx.ellipse(-22,24,10,6,-0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(22,24,10,6,0.3,0,Math.PI*2);ctx.fill();
+    // Head
+    ctx.fillStyle='#0c0a08';ctx.beginPath();ctx.arc(0,0,11,0,Math.PI*2);ctx.fill();
+    // Hair knot / scholar cap
+    ctx.fillStyle='#0f0d0a';ctx.fillRect(-10,-13,20,6);ctx.fillRect(-6,-18,12,8);
+    // Sash
+    ctx.fillStyle='rgba(160,140,100,0.5)';ctx.fillRect(-6,32,12,2);
+    // Hands
+    ctx.fillStyle='#1a1610';ctx.beginPath();ctx.arc(-20,28,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(20,28,3,0,Math.PI*2);ctx.fill();
+  }
+  if(type==='captain'){
+    // Solid build
+    ctx.fillStyle='#141210';ctx.beginPath();ctx.quadraticCurveTo(-20,20,0,22);ctx.quadraticCurveTo(20,20,18,30);ctx.lineTo(16,70);ctx.quadraticCurveTo(0,78,-16,70);ctx.fill();
+    ctx.fillStyle='#13100e';ctx.fillRect(-16,12,32,22);
+    // Broad shoulders
+    ctx.fillStyle='#11100e';ctx.fillRect(-28,18,56,8);
+    ctx.fillStyle='#0c0a08';ctx.beginPath();ctx.arc(0,0,13,0,Math.PI*2);ctx.fill();
+    // Headband
+    ctx.fillStyle='#0f0d0a';ctx.fillRect(-14,-10,28,5);
+    // Stance
+    ctx.fillStyle='#141210';ctx.fillRect(-18,62,12,16);ctx.fillRect(6,62,12,16);
+  }
+  if(type==='bannerman'){
+    // Armor / thick clothing
+    ctx.fillStyle='#12100e';ctx.beginPath();ctx.moveTo(-18,14);ctx.quadraticCurveTo(-22,28,-16,40);ctx.lineTo(16,40);ctx.quadraticCurveTo(22,28,18,14);ctx.fill();
+    ctx.fillStyle='#141210';ctx.fillRect(-16,20,32,18);
+    // Shoulder guards
+    ctx.fillStyle='#1a1614';ctx.fillRect(-24,18,10,14);ctx.fillRect(14,18,10,14);
+    // Head
+    ctx.fillStyle='#0c0a08';ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();
+    // Helmet
+    ctx.fillStyle='#181412';ctx.fillRect(-14,-3,28,5);ctx.fillRect(-4,-12,8,12);
+    // Belt
+    ctx.fillStyle='rgba(180,140,80,0.3)';ctx.fillRect(-14,34,28,3);
+  }
+  if(type==='wife'){
+    ctx.fillStyle='#181512';ctx.beginPath();ctx.moveTo(-14,28);ctx.quadraticCurveTo(-16,18,0,20);ctx.quadraticCurveTo(16,18,14,28);ctx.lineTo(12,66);ctx.quadraticCurveTo(0,74,-12,66);ctx.fill();
+    ctx.fillStyle='#1a1614';ctx.fillRect(-12,8,24,20);
+    ctx.fillStyle='#0c0a08';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();
+    // Hair bun
+    ctx.fillStyle='#0f0d0a';ctx.beginPath();ctx.arc(0,-10,8,0,Math.PI*2);ctx.fill();
+    // Sleeves slender
+    ctx.fillStyle='#161310';ctx.beginPath();ctx.ellipse(-18,22,7,4,-0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(18,22,7,4,0.3,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;ctx.restore();
+}
+
+const bgFuncs={
+  city_wall_dusk(ctx,w,h){
+    sky([[0,'#1e1a20'],[0.4,'#2a2228'],[0.7,'#3d2c20'],[1,'#1a1510']]);
+    mountain(h*0.5,'#1a1418',0.03,25);
+    ctx.fillStyle='rgba(200,120,60,0.12)';ctx.fillRect(w*0.35,0,w*0.3,h*0.45);
+    mountain(h*0.55,'#151018',0.04,20);
+    ctx.fillStyle='#1a1510';ctx.fillRect(0,h*0.58,w,h*0.42);
+    buildings(w*0.05,h*0.52,w*0.9,h*0.08,18,'#100c0a');
+    ctx.fillStyle='#0c0808';ctx.fillRect(0,h*0.6,w,h*0.4);
+    for(let i=0;i<10;i++){ctx.fillStyle='#0a0808';ctx.fillRect(w*0.05+i*w*0.09,h*0.58,5,14)}
+    character('scholar',w*0.42,h*0.55,1);
+    spawnParticles('dust',w*0.3,h*0.5,1);
+  },
+  courtyard_night(ctx,w,h){
+    sky([[0,'#080810'],[0.5,'#0e0c16'],[1,'#0a080e']]);
+    moon(w*0.78,h*0.18,28,0.25);
+    mountain(h*0.6,'#0a0810',0.02,15);
+    ctx.fillStyle='#0c0a12';ctx.fillRect(0,h*0.5,w,h*0.5);
+    ctx.fillStyle='#100e18';ctx.fillRect(w*0.08,h*0.25,w*0.84,h*0.55);
+    ctx.fillStyle='#0a0810';ctx.fillRect(w*0.15,h*0.3,w*0.7,1);ctx.fillRect(w*0.15,h*0.8,w*0.7,1);
+    roof(w*0.06,h*0.25,w*0.88,25,'#0c0a14');
+    for(let i=2;i<=8;i++){ctx.fillStyle='#12101a';ctx.fillRect(w*0.04*i,h*0.2,3,14)}
+    ctx.fillStyle='rgba(200,180,140,0.15)';ctx.fillRect(w*0.4,h*0.38,8,18);
+    character('scholar',w*0.55,h*0.55,0.9);
+    character('wife',w*0.62,h*0.58,0.8);
+    spawnParticles('leaf',w*0.6,h*0.4,1);
+  },
+  academy_dusk(ctx,w,h){
+    sky([[0,'#141218'],[0.5,'#1a1618'],[1,'#0f0e0c']]);
+    mountain(h*0.55,'#0f0d12',0.03,18);
+    ctx.fillStyle='#1a1614';ctx.fillRect(w*0.15,h*0.3,w*0.7,h*0.55);
+    ctx.fillStyle='#120f0c';ctx.fillRect(w*0.18,h*0.33,w*0.64,h*0.48);
+    ctx.fillStyle='rgba(220,180,80,0.2)';ctx.fillRect(w*0.42,h*0.35,6,20);
+    for(let i=0;i<5;i++){ctx.fillStyle='#14100e';ctx.fillRect(w*0.22+i*w*0.12,h*0.38,3,14)}
+    character('scholar',w*0.48,h*0.5,0.9);
+    spawnParticles('dust',w*0.4,h*0.4,1);
+  },
+  river_dawn(ctx,w,h){
+    sky([[0,'#101420'],[0.5,'#182535'],[0.7,'#1a2530'],[1,'#0e1418']]);
+    ctx.fillStyle='rgba(200,170,120,0.1)';ctx.fillRect(w*0.25,h*0.08,w*0.5,h*0.12);
+    ctx.fillStyle='#0a0e15';ctx.fillRect(0,h*0.58,w,h*0.42);
+    ctx.fillStyle='#080c12';ctx.fillRect(0,h*0.62,w,h*0.38);
+    mountain(h*0.55,'#0a0e14',0.02,22);
+    // Boat
+    ctx.fillStyle='#0c0a08';ctx.beginPath();ctx.moveTo(w*0.35,h*0.68);ctx.lineTo(w*0.62,h*0.68);ctx.lineTo(w*0.58,h*0.72);ctx.lineTo(w*0.39,h*0.72);ctx.fill();
+    ctx.fillStyle='#141010';ctx.fillRect(w*0.44,h*0.63,3,12);
+    spawnParticles('dust',0,0,2);
+  },
+  sea_sunset(ctx,w,h){
+    sky([[0,'#141828'],[0.3,'#1e2040'],[0.55,'#2a2035'],[1,'#080a14']]);
+    ctx.fillStyle='rgba(220,140,60,0.15)';ctx.beginPath();ctx.arc(w*0.62,h*0.48,60,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(200,120,40,0.08)';ctx.fillRect(0,h*0.45,w,h*0.15);
+    ctx.fillStyle='#080a16';ctx.fillRect(0,h*0.6,w,h*0.4);
+    for(let i=0;i<20;i++){ctx.fillStyle='rgba(180,200,220,0.1)';ctx.fillRect(w*0.1+Math.random()*w*0.8,h*0.55+Math.random()*h*0.1,2,1)}
+    character('captain',w*0.45,h*0.5,1);
+  },
+  port_dusk(ctx,w,h){
+    sky([[0,'#141210'],[0.5,'#1a1512'],[1,'#0c0a08']]);
+    ctx.fillStyle='#0e0c0a';ctx.fillRect(0,h*0.55,w,h*0.45);
+    for(let i=0;i<5;i++){ctx.fillStyle='#120f0c';ctx.fillRect(w*0.08+i*w*0.18,h*0.48,5,35)}
+    ctx.fillStyle='#0a0808';ctx.fillRect(w*0.12,h*0.65,50,4);
+    character('captain',w*0.55,h*0.5,0.9);
+    spawnParticles('dust',w*0.3,h*0.5,2);
+  },
+  camp_fire(ctx,w,h){
+    sky([[0,'#060812'],[0.5,'#0a0c14'],[1,'#0e0a08']]);
+    ctx.fillStyle='#080a14';ctx.fillRect(0,h*0.6,w,h*0.4);
+    for(let i=0;i<30;i++){ctx.fillStyle='#0a0a0f';ctx.fillRect(Math.random()*w,Math.random()*h,2,6)}
+    // Fire
+    const fx=w*0.48,fy=h*0.52;ctx.fillStyle='rgba(220,120,30,0.25)';ctx.beginPath();ctx.arc(fx,fy,22,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(240,160,40,0.2)';ctx.beginPath();ctx.arc(fx,fy,14,0,Math.PI*2);ctx.fill();
+    for(let i=0;i<10;i++){ctx.fillStyle=`rgba(${200+Math.random()*55},${100+Math.random()*80},${20+Math.random()*40},${0.4+Math.random()*0.3})`;ctx.fillRect(fx-3+Math.random()*6,fy-8+Math.random()*10,2,5)}
+    character('bannerman',w*0.35,h*0.45,0.85);
+    spawnParticles('spark',fx,fy-8,3);
+  },
+  camp_night(ctx,w,h){
+    sky([[0,'#040612'],[0.6,'#080a14'],[1,'#0a0808']]);
+    moon(w*0.72,h*0.22,22,0.2);
+    ctx.fillStyle='#060810';ctx.fillRect(0,h*0.55,w,h*0.45);
+    character('bannerman',w*0.48,h*0.5,0.85);
+    spawnParticles('dust',0,0,1);
+  },
+  camp_dawn(ctx,w,h){
+    sky([[0,'#0e121c'],[0.4,'#121820'],[0.7,'#16140e'],[1,'#100e0a']]);
+    ctx.fillStyle='rgba(200,160,100,0.08)';ctx.fillRect(w*0.3,h*0.05,w*0.4,h*0.35);
+    character('bannerman',w*0.5,h*0.45,0.85);
+    spawnParticles('dust',w*0.4,h*0.4,1);
+  },
+  stormy_sea(ctx,w,h){
+    sky([[0,'#080c16'],[0.5,'#0e1622'],[0.8,'#0a1018'],[1,'#060810']]);
+    ctx.fillStyle='#060812';ctx.fillRect(0,h*0.55,w,h*0.45);
+    for(let i=0;i<25;i++){ctx.fillStyle='rgba(180,200,220,0.25)';ctx.fillRect(w*0.05+Math.random()*w*0.9,h*0.5+Math.random()*h*0.3,1,6)}
+    spawnParticles('dust',0,0,3);
+  },
+  yamen_dusk(ctx,w,h){
+    sky([[0,'#121110'],[0.5,'#181614'],[1,'#0c0a08']]);
+    ctx.fillStyle='#181412';ctx.fillRect(w*0.08,h*0.28,w*0.84,h*0.52);
+    ctx.fillStyle='#100e0c';ctx.fillRect(w*0.12,h*0.32,w*0.76,h*0.44);
+    for(let i=0;i<3;i++){ctx.fillStyle='#141210';ctx.fillRect(w*0.18+i*w*0.25,h*0.28,3,20)}
+    ctx.fillStyle='rgba(200,180,150,0.08)';ctx.fillRect(w*0.55,h*0.34,6,18);
+    character('scholar',w*0.5,h*0.48,0.8);
+    spawnParticles('dust',w*0.4,h*0.4,2);
+  },
+};
+
+function renderFrame(){
+  const w=canvas.width,h=canvas.height; time++;
+  const bg=game.currentScene?.bg||'default';
+  if(bgFuncs[bg]){bgFuncs[bg](ctx,w,h)}
+  else {sky([[0,'#1a1810'],[1,'#0a0908']]);}
+  updateParticles();
+  for(const p of particles){
+    ctx.globalAlpha=p.life;ctx.fillStyle=p.type==='leaf'?'rgba(160,120,80,0.6)':p.type==='spark'?'rgba(240,180,60,0.8)':'rgba(200,190,160,0.4)';
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
 
 // ==================== SCENE DATA ====================
-const scenes = {
-  A: [
-    {
-      bg:'city_wall_dusk', char:'scholar', epTitle:{num:'第一章',name:'留发不留头',line:'A 线 · 士 · 南京'},
-      dialogs:[
-        {speaker:'沈临川',text:'城墙上的风，今天格外冷。'},
-        {speaker:'沈临川',text:'崇祯十七年，三月十九。陛下在煤山……不说了。'},
-        {speaker:'沈临川',text:'（远处有马蹄声）'},
-        {speaker:'老仆',text:'公子，快回府吧。李自成的兵已经过了淮安，南京城里人人自危。'},
-        {speaker:'沈临川',text:'我还能在这城墙上站多久。'},
-      ],
-      choices:[
-        {text:'回府收拾行李，带家人出城',next:1,world:{choice1:'flee'}},
-        {text:'去国子监，看看还有谁在',next:2,world:{choice1:'stay'}},
-      ]
-    },
-    {
-      bg:'courtyard_night', char:'scholar', epTitle:null,
-      dialogs:[
-        {speaker:'沈临川',text:'府里一片狼藉。下人们已经跑了一半。'},
-        {speaker:'妻',text:'相公，真的要走了吗。南京可是我们的家。'},
-        {speaker:'沈临川',text:'（攥着手里的碎银）这些够我们走到扬州。到了扬州再想办法。'},
-        {speaker:'沈临川',text:'我把剩下的碎银分给了邻居们。他们走不走，各安天命吧。'},
-      ],
-      choices:[ {text:'连夜出城',next:3,world:{fled:true}} ]
-    },
-    {
-      bg:'academy_dusk', char:'scholar', epTitle:null,
-      dialogs:[
-        {speaker:'沈临川',text:'国子监里烛火还在亮。几个同年还在抄书。'},
-        {speaker:'同年',text:'临川兄，你怎么还没走？'},
-        {speaker:'沈临川',text:'我也不知道我为什么要来。大概是想看看——还有没有人记得这是什么地方。'},
-        {speaker:'同年',text:'（沉默片刻）出城的最后一批船，明早卯时。'},
-      ],
-      choices:[
-        {text:'上船，跟同年一起走',next:3,world:{fled:true}},
-        {text:'留下，去衙门看看出了什么事',next:4,world:{fled:false}},
-      ]
-    },
-    {
-      bg:'river_dawn', char:'boat', epTitle:null,
-      dialogs:[
-        {speaker:'沈临川',text:'江面上风很大。回头看，南京的城墙像一道剪影。'},
-        {speaker:'沈临川',text:'我不知道这辈子还能不能回来。'},
-        {speaker:'沈临川',text:'（手里还有一封没写完的家书，收信人是亡妻）'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-    {
-      bg:'yamen_dusk', char:'scholar', epTitle:null,
-      dialogs:[
-        {speaker:'沈临川',text:'衙门里空了。公案上落了一层灰。'},
-        {speaker:'沈临川',text:'墙上还有一张没来得及撤下来的海捕文书。上面画的人，像我的一个老师。'},
-        {speaker:'沈临川',text:'（风穿堂而过，文书被吹到地上）'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-  ],
-  B: [
-    {
-      bg:'sea_sunset', char:'captain', epTitle:{num:'第一章',name:'两头不靠岸',line:'B 线 · 海 · 料罗湾'},
-      dialogs:[
-        {speaker:'陈海生',text:'又一天。海上的日落跟岸上的——算了。'},
-        {speaker:'船工',text:'头，风向变了。再不出港，季风一过这批货得在船上烂半年。'},
-        {speaker:'陈海生',text:'郑家的旗还挂着吗。'},
-        {speaker:'船工',text:'旗还在。但岸上消息说清兵已经到了福建。旗还管不管用，不知道。'},
-      ],
-      choices:[
-        {text:'带货运去台湾，找郑家的人',next:1,world:{bChoice:'taiwan'}},
-        {text:'把货运回泉州港，回家',next:2,world:{bChoice:'home'}},
-      ]
-    },
-    {
-      bg:'stormy_sea', char:'captain', epTitle:null,
-      dialogs:[
-        {speaker:'陈海生',text:'海上起了浪。船舱里有一个偷渡的小孩，我发现了，但没出声。'},
-        {speaker:'陈海生',text:'让他躲着吧。'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-    {
-      bg:'port_dusk', char:'captain', epTitle:null,
-      dialogs:[
-        {speaker:'陈海生',text:'泉州港不像以前了。码头上的旗换成了我没见过的。'},
-        {speaker:'陈海生',text:'家里还亮着灯。但我不知道自己还算不算陈家的人。'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-  ],
-  C: [
-    {
-      bg:'camp_fire', char:'bannerman', epTitle:{num:'第一章',name:'哪边的',line:'C 线 · 隐 · 盛京'},
-      dialogs:[
-        {speaker:'佟阿林',text:'（望着火堆出神）'},
-        {speaker:'旗兵兄弟',text:'喂，阿林。想啥呢？'},
-        {speaker:'佟阿林',text:'我在想我们家以前过年杀猪。'},
-        {speaker:'旗兵兄弟',text:'（笑）明天南下，有的是猪给你杀。'},
-        {speaker:'佟阿林',text:'（嘴角动了一下，但没笑出来）'},
-      ],
-      choices:[
-        {text:'把手里的干粮塞给旁边的汉人俘虏',next:1,world:{cChoice:'kind'}},
-        {text:'站起来，走向长官的帐，申请明天的前锋位置',next:2,world:{cChoice:'advance'}},
-      ]
-    },
-    {
-      bg:'camp_night', char:'bannerman', epTitle:null,
-      dialogs:[
-        {speaker:'佟阿林',text:'那个俘虏愣了一下，接过干粮，什么都没说。'},
-        {speaker:'佟阿林',text:'他可能以为我要害他。也可能他知道不是。我们没再说一句话。'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-    {
-      bg:'camp_dawn', char:'bannerman', epTitle:null,
-      dialogs:[
-        {speaker:'佟阿林',text:'长官看了我一眼。他什么也没说，在纸上写了我的名字。'},
-        {speaker:'佟阿林',text:'我也不知道为什么想冲前面。大概是证明点什么。大概是——证明我是真的。'},
-      ],
-      choices:[ {text:'[第一章 终]',next:'end_chapter1'} ]
-    },
-  ],
+const scenes={
+A:[{bg:'city_wall_dusk',ep:{num:'第一章',name:'留发不留头',line:'A 线 · 士 · 南京'},ambient:'wind',
+  dialogs:[{s:'沈临川',t:'城墙上的风，今天格外冷。'},{s:'沈临川',t:'崇祯十七年，三月十九。陛下在煤山……不说了。'},{s:'沈临川',t:'（远处有马蹄声）'},{s:'老仆',t:'公子，快回府吧。李自成的兵已经过了淮安，南京城里人人自危。'},{s:'沈临川',t:'我还能在这城墙上站多久。'}],
+  choices:[{text:'回府收拾行李，带家人出城',next:1,w:{a1:'flee'}},{text:'去国子监，看看还有谁在',next:2,w:{a1:'stay'}}]},
+{bg:'courtyard_night',ep:null,ambient:'wind',
+  dialogs:[{s:'沈临川',t:'府里一片狼藉。下人们已经跑了一半。'},{s:'妻',t:'相公，真的要走了吗。南京可是我们的家。'},{s:'沈临川',t:'（攥着手里的碎银）这些够我们走到扬州。到了扬州再想办法。'},{s:'沈临川',t:'我把剩下的碎银分给了邻居们。他们走不走，各安天命吧。'}],
+  choices:[{text:'连夜出城',next:3,w:{fled:true}}]},
+{bg:'academy_dusk',ep:null,ambient:'bell',
+  dialogs:[{s:'沈临川',t:'国子监里烛火还在亮。几个同年还在抄书。'},{s:'同年',t:'临川兄，你怎么还没走？'},{s:'沈临川',t:'我也不知道我为什么要来。大概是想看看——还有没有人记得这是什么地方。'},{s:'同年',t:'（沉默片刻）出城的最后一批船，明早卯时。'}],
+  choices:[{text:'上船，跟同年一起走',next:3,w:{fled:true}},{text:'留下，去衙门看看出了什么事',next:4,w:{fled:false}}]},
+{bg:'river_dawn',ep:null,ambient:'waves',
+  dialogs:[{s:'沈临川',t:'江面上风很大。回头看，南京的城墙像一道剪影。'},{s:'沈临川',t:'我不知道这辈子还能不能回来。'},{s:'沈临川',t:'（手里还有一封没写完的家书，收信人是亡妻）'}],
+  choices:[{text:'[第一章 终]',next:'end'}]},
+{bg:'yamen_dusk',ep:null,ambient:'wind',
+  dialogs:[{s:'沈临川',t:'衙门里空了。公案上落了一层灰。'},{s:'沈临川',t:'墙上还有一张没来得及撤下来的海捕文书。上面画的人，像我的一个老师。'},{s:'沈临川',t:'（风穿堂而过，文书被吹到地上）'}],
+  choices:[{text:'[第一章 终]',next:'end'}]}],
+B:[{bg:'sea_sunset',ep:{num:'第一章',name:'两头不靠岸',line:'B 线 · 海 · 料罗湾'},ambient:'waves',
+  dialogs:[{s:'陈海生',t:'又一天。海上的日落跟岸上的——算了。'},{s:'船工',t:'头，风向变了。再不出港，季风一过这批货得在船上烂半年。'},{s:'陈海生',t:'郑家的旗还挂着吗。'},{s:'船工',t:'旗还在。但岸上消息说清兵已经到了福建。旗还管不管用，不知道。'}],
+  choices:[{text:'带货运去台湾，找郑家的人',next:1,w:{b1:'taiwan'}},{text:'把货运回泉州港，回家',next:2,w:{b1:'home'}}]},
+{bg:'stormy_sea',ep:null,ambient:'waves',
+  dialogs:[{s:'陈海生',t:'海上起了浪。船舱里有一个偷渡的小孩，我发现了，但没出声。'},{s:'陈海生',t:'让他躲着吧。'}],
+  choices:[{text:'[第一章 终]',next:'end'}]},
+{bg:'port_dusk',ep:null,ambient:'wind',
+  dialogs:[{s:'陈海生',t:'泉州港不像以前了。码头上的旗换成了我没见过的。'},{s:'陈海生',t:'家里还亮着灯。但我不知道自己还算不算陈家的人。'}],
+  choices:[{text:'[第一章 终]',next:'end'}]}],
+C:[{bg:'camp_fire',ep:{num:'第一章',name:'哪边的',line:'C 线 · 隐 · 盛京'},ambient:'fire',
+  dialogs:[{s:'佟阿林',t:'（望着火堆出神）'},{s:'旗兵兄弟',t:'喂，阿林。想啥呢？'},{s:'佟阿林',t:'我在想我们家以前过年杀猪。'},{s:'旗兵兄弟',t:'（笑）明天南下，有的是猪给你杀。'},{s:'佟阿林',t:'（嘴角动了一下，但没笑出来）'}],
+  choices:[{text:'把手里的干粮塞给旁边的汉人俘虏',next:1,w:{c1:'kind'}},{text:'站起来，走向长官的帐，申请明天的前锋位置',next:2,w:{c1:'advance'}}]},
+{bg:'camp_night',ep:null,ambient:'wind',
+  dialogs:[{s:'佟阿林',t:'那个俘虏愣了一下，接过干粮，什么都没说。'},{s:'佟阿林',t:'他可能以为我要害他。也可能他知道不是。我们没再说一句话。'}],
+  choices:[{text:'[第一章 终]',next:'end'}]},
+{bg:'camp_dawn',ep:null,ambient:'wind',
+  dialogs:[{s:'佟阿林',t:'长官看了我一眼。他什么也没说，在纸上写了我的名字。'},{s:'佟阿林',t:'我也不知道为什么想冲前面。大概是证明点什么。大概是——证明我是真的。'}],
+  choices:[{text:'[第一章 终]',next:'end'}]}]
 };
-
-// ==================== RENDERER ====================
-function drawBackground(bgId) {
-  const w = canvas.width, h = canvas.height;
-  const grad = ctx.createLinearGradient(0,0,0,h);
-
-  switch(bgId) {
-    case 'city_wall_dusk':
-      grad.addColorStop(0,'#2a2520'); grad.addColorStop(0.5,'#3d3025'); grad.addColorStop(1,'#1a1510');
-      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#1a1510'; ctx.fillRect(0,h*0.55,w,h*0.45);
-      for(let i=0;i<12;i++) ctx.fillRect(i*w/12,h*0.5,8,30);
-      ctx.fillStyle='#252018'; ctx.beginPath();ctx.moveTo(0,h*0.5);for(let i=0;i<=w;i+=30)ctx.lineTo(i,h*0.45+Math.sin(i*0.01)*25);ctx.lineTo(w,h*0.55);ctx.fill();
-      ctx.fillStyle='rgba(180,120,60,0.15)'; ctx.fillRect(w*0.4,0,w*0.3,h*0.5);
-      break;
-    case 'courtyard_night':
-      grad.addColorStop(0,'#0f0e12'); grad.addColorStop(0.5,'#1a1620'); grad.addColorStop(1,'#0a090f');
-      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#131018'; ctx.fillRect(w*0.1,h*0.2,w*0.8,h*0.6);
-      ctx.fillStyle='#1a1522'; for(let i=3;i<=8;i++)ctx.fillRect(w*0.05*i,h*0.15,3,12);
-      ctx.fillStyle='rgba(200,180,140,0.2)'; ctx.beginPath();ctx.arc(w*0.75,h*0.2,30,0,Math.PI*2);ctx.fill();
-      break;
-    case 'academy_dusk':
-      grad.addColorStop(0,'#1a1815'); grad.addColorStop(1,'#0f0e0c');
-      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#252018'; ctx.fillRect(w*0.2,h*0.35,w*0.6,h*0.5);
-      ctx.fillStyle='rgba(200,160,80,0.25)'; ctx.fillRect(w*0.4,h*0.4,8,15);
-      break;
-    case 'river_dawn':
-      grad.addColorStop(0,'#1a1a20'); grad.addColorStop(0.6,'#2a3035'); grad.addColorStop(1,'#1a2020');
-      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#0a0a15'; ctx.fillRect(0,h*0.6,w,h*0.4);
-      ctx.fillStyle='rgba(180,160,120,0.15)'; ctx.fillRect(w*0.2,h*0.1,w*0.6,h*0.15);
-      break;
-    case 'sea_sunset':
-      grad.addColorStop(0,'#1a1820');grad.addColorStop(0.3,'#2a2540');grad.addColorStop(0.6,'#3a3040');grad.addColorStop(1,'#0a0a15');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#0a0a18';ctx.fillRect(0,h*0.6,w,h*0.4);
-      ctx.fillStyle='rgba(200,140,80,0.2)';ctx.beginPath();ctx.arc(w*0.65,h*0.55,50,0,Math.PI*2);ctx.fill();
-      break;
-    case 'port_dusk':
-      grad.addColorStop(0,'#1a1610');grad.addColorStop(1,'#0f0c08');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#151210';ctx.fillRect(0,h*0.55,w,h*0.45);
-      for(let i=0;i<6;i++){ctx.fillStyle='#1a1510';ctx.fillRect(w*0.1+i*w*0.15,h*0.5,4,40)}
-      break;
-    case 'camp_fire':
-      grad.addColorStop(0,'#0f0e12');grad.addColorStop(1,'#1a1410');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#0a090f';for(let i=0;i<40;i++)ctx.fillRect(Math.random()*w,Math.random()*h,2,8);
-      ctx.fillStyle='rgba(200,120,40,0.3)';ctx.beginPath();ctx.arc(w*0.5,h*0.5,20,0,Math.PI*2);ctx.fill();
-      for(let i=0;i<8;i++){ctx.fillStyle='rgba(220,160,60,'+(0.5-Math.random()*0.3)+')';ctx.fillRect(w*0.48+Math.random()*w*0.04,h*0.4+Math.random()*h*0.1,2,6)}
-      break;
-    case 'camp_night':
-      grad.addColorStop(0,'#0a0a12');grad.addColorStop(1,'#0f0c0a');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='rgba(180,140,80,0.08)';ctx.beginPath();ctx.arc(w*0.7,h*0.3,25,0,Math.PI*2);ctx.fill();
-      break;
-    case 'camp_dawn':
-      grad.addColorStop(0,'#151820');grad.addColorStop(1,'#1a1510');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='rgba(200,160,100,0.1)';ctx.fillRect(w*0.3,0,w*0.4,h*0.5);
-      break;
-    case 'stormy_sea':
-      grad.addColorStop(0,'#0f1018');grad.addColorStop(0.5,'#1a2530');grad.addColorStop(1,'#0a0e15');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#0a0e18';ctx.fillRect(0,h*0.6,w,h*0.4);
-      for(let i=0;i<15;i++){ctx.fillStyle='rgba(180,200,220,0.3)';ctx.fillRect(w*0.15+Math.random()*w*0.7,h*0.5+Math.random()*h*0.3,1,8)}
-      break;
-    case 'yamen_dusk':
-      grad.addColorStop(0,'#1a1615');grad.addColorStop(1,'#0f0e0c');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#201815';ctx.fillRect(w*0.1,h*0.3,w*0.8,h*0.5);
-      ctx.fillStyle='#1a1210';ctx.fillRect(w*0.45,h*0.35,2,25);
-      break;
-    default:
-      grad.addColorStop(0,'#1a1810');grad.addColorStop(1,'#0a0908');
-      ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-  }
-}
-
-function drawCharacter(charId) {
-  const w=canvas.width, h=canvas.height;
-  ctx.globalAlpha = 0.85;
-  if (charId==='scholar') {
-    ctx.fillStyle='#0a0808';
-    ctx.beginPath();ctx.ellipse(w*0.45,h*0.42,14,22,0,0,Math.PI*2);ctx.fill();
-    ctx.fillRect(w*0.44,h*0.46,18,38);
-    ctx.fillRect(w*0.44,h*0.52,18,6); ctx.fillRect(w*0.43,h*0.52,22,3);
-    ctx.fillStyle='rgba(120,100,80,0.4)';ctx.fillRect(w*0.445,h*0.55,17,2);
-  } else if (charId==='boat') {
-    ctx.fillStyle='#0a0808';
-    ctx.beginPath();ctx.moveTo(w*0.3,h*0.7);ctx.lineTo(w*0.7,h*0.7);ctx.lineTo(w*0.6,h*0.75);ctx.lineTo(w*0.4,h*0.75);ctx.fill();
-    ctx.fillStyle='#1a1510';ctx.fillRect(w*0.47,h*0.55,3,40);
-  } else if (charId==='captain') {
-    ctx.fillStyle='#0a0808';
-    ctx.beginPath();ctx.ellipse(w*0.48,h*0.4,16,24,0,0,Math.PI*2);ctx.fill();
-    ctx.fillRect(w*0.46,h*0.44,22,42);
-    ctx.fillRect(w*0.445,h*0.52,26,4);
-  } else if (charId==='bannerman') {
-    ctx.fillStyle='#0a0808';
-    ctx.beginPath();ctx.ellipse(w*0.47,h*0.38,16,22,0,0,Math.PI*2);ctx.fill();
-    ctx.fillRect(w*0.455,h*0.42,20,40);
-    ctx.fillRect(w*0.44,h*0.38,26,5);
-    ctx.fillStyle='#1a1210';ctx.fillRect(w*0.455,h*0.5,20,3);
-  }
-  ctx.globalAlpha = 1;
-  if (['city_wall_dusk','academy_dusk','camp_fire'].includes(game.currentScene?.bg)) {
-    for(let i=0;i<3;i++) {
-      ctx.fillStyle='rgba(200,180,150,'+(0.3+Math.random()*0.2)+')';
-      ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h*0.5,1.5,0,Math.PI*2);ctx.fill();
-    }
-  }
-}
 
 // ==================== GAMEPLAY ====================
-let currentSceneIdx = 0;
-let currentDialogIdx = 0;
-let isPlaying = false;
-
-titleEl.onclick = () => {
-  titleEl.style.display='none';
-  lineSelectEl.classList.add('visible');
-};
-
-function startGame(line) {
-  game.line = line;
-  currentSceneIdx = 0;
-  currentDialogIdx = 0;
-  isPlaying = true;
-  lineSelectEl.classList.remove('visible');
+titleEl.onclick=()=>{titleEl.style.display='none';lineSel.classList.add('on')};
+function startGame(line){
+  game.line=line;sceneIdx=0;di=0;playing=true;lineSel.classList.remove('on');
+  if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   showScene(0);
 }
-
-function showScene(idx) {
-  currentSceneIdx = idx;
-  currentDialogIdx = 0;
-  const sceneList = scenes[game.line];
-  if (!sceneList || idx >= sceneList.length) { showEnd(); return; }
-  const scene = sceneList[idx];
-  game.currentScene = scene;
-
-  drawBackground(scene.bg);
-  drawCharacter(scene.char);
-
-  if (scene.epTitle) {
-    const ep = scene.epTitle;
-    epTitleEl.querySelector('.ep-num').textContent = ep.num;
-    epTitleEl.querySelector('.ep-name').textContent = ep.name;
-    epTitleEl.querySelector('.ep-line').textContent = ep.line;
-    epTitleEl.classList.add('visible');
-    setTimeout(() => { epTitleEl.classList.remove('visible'); showDialog(); }, 2500);
-  } else {
-    showDialog();
-  }
+function showScene(idx){
+  sceneIdx=idx;di=0;
+  const sl=scenes[game.line];if(!sl||idx>=sl.length){endGame();return}
+  const sc=sl[idx];game.currentScene=sc;
+  particles=[];setAmbient(sc.ambient);
+  if(sc.ep){
+    const e=sc.ep;epEl.querySelector('.en').textContent=e.num;epEl.querySelector('.em').textContent=e.name;epEl.querySelector('.el').textContent=e.line;
+    epEl.classList.add('on');setTimeout(()=>{epEl.classList.remove('on');showDlg()},2500);
+  }else{showDlg()}
+  if(!animFrame) animFrame=requestAnimationFrame(gameLoop);
 }
+function gameLoop(){renderFrame();if(playing||particles.length>0) animFrame=requestAnimationFrame(gameLoop);else animFrame=null}
 
-function showDialog() {
-  const scene = scenes[game.line][currentSceneIdx];
-  if (currentDialogIdx >= scene.dialogs.length) {
-    showChoices(scene.choices);
-    return;
-  }
-  const d = scene.dialogs[currentDialogIdx];
-  dlgSpeaker.textContent = d.speaker;
-  dlgText.textContent = d.text;
-  dlg.classList.add('visible');
-  choicesEl.classList.remove('visible');
+function showDlg(){
+  const sc=scenes[game.line][sceneIdx];
+  if(di>=sc.dialogs.length){showCh(sc.choices);return}
+  const d=sc.dialogs[di];dlgS.textContent=d.s;dlgT.textContent=d.t;dlg.classList.add('on');choicesEl.classList.remove('on');
 }
-
-dlg.onclick = () => {
-  currentDialogIdx++;
-  showDialog();
-};
-
-function showChoices(choices) {
-  dlg.classList.remove('visible');
-  choicesEl.innerHTML = '';
-  choices.forEach(ch => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = ch.text;
-    btn.onclick = () => {
-      if (ch.world) Object.entries(ch.world).forEach(([k,v]) => setWorld(k,v));
-      choicesEl.classList.remove('visible');
-      dlg.classList.remove('visible');
-      if (ch.next === 'end_chapter1') {
-        showEnd();
-      } else if (typeof ch.next === 'number') {
-        showScene(ch.next);
-      }
-    };
-    choicesEl.appendChild(btn);
-  });
-  choicesEl.classList.add('visible');
+dlg.onclick=()=>{di++;showDlg()};
+function showCh(chs){
+  dlg.classList.remove('on');choicesEl.innerHTML='';
+  chs.forEach(ch=>{const b=document.createElement('button');b.className='ch';b.textContent=ch.text;b.onclick=()=>{
+    if(ch.w) Object.entries(ch.w).forEach(([k,v])=>setW(k,v));
+    choicesEl.classList.remove('on');dlg.classList.remove('on');
+    if(ch.next==='end') endGame();else if(typeof ch.next==='number') showScene(ch.next);
+  };choicesEl.appendChild(b)});
+  choicesEl.classList.add('on');
 }
-
-function showEnd() {
-  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  dlg.classList.remove('visible');
-  choicesEl.classList.remove('visible');
-  dlgSpeaker.textContent = '';
-  dlgText.textContent = '第一章 完';
-  dlg.querySelector('.next-hint').style.display = 'none';
-  dlg.classList.add('visible');
-  isPlaying = false;
-  setTimeout(() => {
-    dlg.classList.remove('visible');
-    dlg.querySelector('.next-hint').style.display = '';
-    lineSelectEl.classList.add('visible');
-    currentSceneIdx = 0;
-    currentDialogIdx = 0;
-  }, 3000);
+function endGame(){
+  setAmbient(null);particles=[];playing=false;
+  dlg.classList.remove('on');choicesEl.classList.remove('on');dlgS.textContent='';dlgT.textContent='第一章 完';dlg.classList.add('on');
+  setTimeout(()=>{dlg.classList.remove('on');lineSel.classList.add('on');sceneIdx=0;di=0},3000);
 }
-
-// Initial render
-drawBackground('default');
+renderFrame();
+setInterval(()=>{if(!playing&&particles.length>0)renderFrame()},100);
 </script>
 </body>
 </html>
