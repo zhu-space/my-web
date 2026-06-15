@@ -198,8 +198,8 @@ async function openUnit(idx) {
 
   document.getElementById('mainView').style.display = 'none';
   var dv = document.getElementById('drillView');
-  dv.classList.add('show');
   dv.style.display = 'flex';
+  dv.style.flexDirection = 'column';
   document.getElementById('drillUnitTitle').textContent = 'Unit ' + u.num + ' · ' + u.name;
   document.getElementById('drillUnitStats').textContent = '';
   document.getElementById('drillContent').innerHTML = '';
@@ -301,7 +301,7 @@ function speakDrill() {
 }
 
 function closeDrill() {
-  document.getElementById('drillView').classList.remove('show');
+  document.getElementById('drillView').style.display = 'none';
   document.getElementById('mainView').style.display = '';
   curUnit = -1;
 }
