@@ -105,16 +105,16 @@ h1{font-size:1.2rem;margin-bottom:2px}
   </div>
 </div>
 
-<div id="drillView">
-  <div class="header">
-    <button class="back" onclick="closeDrill()">← Back</button>
-    <span class="unit-title" id="drillUnitTitle"></span>
-    <span class="unit-stats" id="drillUnitStats"></span>
+<div id="drillPanel" style="display:none;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:20px;margin-top:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span style="font-weight:600;font-size:0.9rem" id="drillUnitTitle"></span>
+    <div>
+      <span style="font-size:0.7rem;color:var(--dim);margin-right:12px" id="drillUnitStats"></span>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--dim);padding:2px 10px;border-radius:8px;font-size:0.7rem;cursor:pointer" onclick="document.getElementById('drillPanel').style.display='none';curUnit=-1">✕ Close</button>
+    </div>
   </div>
-  <div class="body" id="drillBody">
-    <div class="loading" id="drillLoading">Generating exercises...</div>
-    <div id="drillContent"></div>
-  </div>
+  <div id="drillContent"></div>
+  <div class="loading" id="drillLoading" style="display:none;text-align:center;padding:20px;color:var(--dim)">Loading...</div>
 </div>
 
 <script>
@@ -194,39 +194,23 @@ document.querySelectorAll('.phase-tab').forEach(btn => {
 // ==================== OPEN UNIT ====================
 async function openUnit(idx) {
   curUnit = idx; drillIdx = 0; correctCount = 0; totalCount = 0;
-  const u = units[idx];
-
-  document.getElementById('mainView').style.display = 'none';
-  var dv = document.getElementById('drillView');
-  dv.style.display = 'flex';
-  dv.style.flexDirection = 'column';
+  var u = units[idx];
+  var panel = document.getElementById('drillPanel');
+  panel.style.display = 'block';
   document.getElementById('drillUnitTitle').textContent = 'Unit ' + u.num + ' · ' + u.name;
-  document.getElementById('drillUnitStats').textContent = '';
+  document.getElementById('drillUnitStats').textContent = 'Generating...';
   document.getElementById('drillContent').innerHTML = '';
   document.getElementById('drillLoading').style.display = 'block';
+  panel.scrollIntoView({behavior:'smooth'});
 
-  // Try API - but don't block
   var generated = null;
   if (apiKey) {
     try {
-      var res = await fetch('https://api.deepseek.com/chat/completions', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500})
-      });
-      if (res.ok) {
-        var d = await res.json();
-        var text = d.choices[0].message.content.trim();
-        var match = text.match(/\[[\s\S]*\]/);
-        if (match) generated = JSON.parse(match[0]);
-      }
+      var res = await fetch('https://api.deepseek.com/chat/completions', {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500})});
+      if (res.ok) { var d = await res.json(); var text = d.choices[0].message.content.trim(); var match = text.match(/\[[\s\S]*\]/); if (match) generated = JSON.parse(match[0]); }
     } catch(e) {}
   }
-
-  if (!generated || !generated.length) {
-    generated = generateFallback(idx);
-  }
-
+  if (!generated || !generated.length) generated = generateFallback(idx);
   drills = generated;
   document.getElementById('drillLoading').style.display = 'none';
   renderDrill();
@@ -301,8 +285,7 @@ function speakDrill() {
 }
 
 function closeDrill() {
-  document.getElementById('drillView').style.display = 'none';
-  document.getElementById('mainView').style.display = '';
+  document.getElementById('drillPanel').style.display = 'none';
   curUnit = -1;
 }
 
