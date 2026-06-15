@@ -3,369 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>语链英训 · FSI 30 Units</title>
+<title>句型训练 · FSI Pattern Drills</title>
 <style>
-:root{--bg:#0a0a0a;--card:#141414;--border:#2a2a2a;--text:#eaeaea;--dim:#8b8b8b;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--surface:#1c1c1c;--gold:#b8943e}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
-.app{width:100%;max-width:620px;padding:20px}
-
-h1{font-size:1.2rem;margin-bottom:2px}
-.sub{font-size:0.72rem;color:var(--dim);margin-bottom:16px}
-
-/* Phase tabs */
-.phase-tabs{display:flex;gap:4px;margin-bottom:12px}
-.phase-tab{padding:6px 12px;border-radius:14px;font-size:0.7rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);transition:all 0.2s}
-.phase-tab.active{background:var(--accent);color:#000;border-color:var(--accent)}
-.phase-tab:not(.active):hover{border-color:var(--gold)}
-
-/* Unit grid */
-.unit-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.unit{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center}
-.unit:hover{border-color:var(--accent)}
-.unit.active{border-color:var(--accent);background:rgba(16,185,129,0.06)}
-.unit .u-num{font-size:0.65rem;color:var(--dim);width:40px}
-.unit .u-name{flex:1;font-size:0.85rem}
-.unit .u-desc{font-size:0.65rem;color:var(--dim)}
-.unit .u-badge{font-size:0.6rem;padding:2px 8px;border-radius:8px;background:rgba(16,185,129,0.1);color:var(--accent)}
-
-/* Bottom bar */
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px 24px;z-index:50}
-
-/* Settings */
-.settings{display:flex;gap:8px;margin-bottom:8px}
-.settings input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.72rem}
-.settings input:focus{outline:none;border-color:var(--accent)}
-.btn-sm{padding:8px 14px;border-radius:8px;border:none;font-size:0.72rem;cursor:pointer;background:var(--accent);color:#000;font-weight:600}
-
-/* Drill view (modal) */
-#drillView{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:rgba(0,0,0,0.96)}
-#drillView.show{display:flex;flex-direction:column}
-#drillView .header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
-#drillView .header .back{background:transparent;border:none;color:var(--dim);font-size:0.85rem;cursor:pointer}
-#drillView .header .unit-title{font-size:0.85rem;font-weight:600}
-#drillView .header .unit-stats{font-size:0.7rem;color:var(--dim);margin-left:auto}
-#drillView .body{flex:1;overflow-y:auto;padding:20px}
-#drillView .pattern{font-size:1.1rem;color:var(--text);margin-bottom:6px;line-height:1.7}
-#drillView .pattern em{color:var(--warn);font-style:normal;font-weight:600;border-bottom:2px dashed var(--warn)}
-#drillView .instruction{font-size:0.78rem;color:var(--dim);margin-bottom:16px}
-#drillView .input-row{display:flex;gap:8px}
-#drillView .input-row input{flex:1;padding:13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.95rem}
-#drillView .input-row input:focus{outline:none;border-color:var(--accent)}
-#drillView .input-row input.correct{border-color:var(--accent);background:rgba(16,185,129,0.1)}
-#drillView .input-row input.wrong{border-color:var(--danger);background:rgba(239,68,68,0.08)}
-.feedback{padding:10px 14px;border-radius:10px;font-size:0.82rem;margin-top:8px;display:none}
-.feedback.show{display:block}
-.feedback.good{background:rgba(16,185,129,0.1);color:var(--accent)}
-.feedback.bad{background:rgba(239,68,68,0.06);color:var(--danger)}
-.btn-drill{padding:12px;border-radius:10px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;width:100%;margin-top:8px;transition:all 0.2s}
-.btn-check{background:var(--accent);color:#000}
-.btn-check:active{opacity:0.8}
-.btn-next{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
-.btn-speak{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px;border-radius:10px;font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%}
-
-.loading{text-align:center;padding:40px;color:var(--dim);font-size:0.85rem}
-.error{color:var(--danger);font-size:0.78rem;margin-top:8px}
-
-@media(max-width:480px){.app{padding:12px}.bottom{padding:12px 12px 20px}}
+body{font-family:Arial,sans-serif;background:#111;color:#eee;padding:16px;max-width:500px;margin:0 auto}
+h2{font-size:1.1rem;margin:0 0 16px;color:#10b981}
+.card{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:16px;margin-bottom:12px}
+.card .label{font-size:0.7rem;color:#888;margin-bottom:4px}
+.card .sentence{font-size:1.05rem;margin-bottom:8px;line-height:1.6}
+.card .sentence b{color:#f59e0b}
+.card .task{font-size:0.78rem;color:#888;margin-bottom:10px}
+.card .hint{font-size:0.7rem;color:#666;margin-bottom:8px;padding:6px 10px;background:#222;border-radius:6px}
+input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#222;color:#eee;font-size:0.9rem;margin-bottom:8px;box-sizing:border-box}
+input:focus{outline:none;border-color:#10b981}
+button{border:none;border-radius:8px;padding:10px;font-size:0.85rem;cursor:pointer;font-weight:600;width:100%;margin-bottom:6px}
+.btn-check{background:#10b981;color:#000}
+.btn-next{background:#222;color:#10b981;border:1px solid #10b981;display:none}
+.btn-speak{background:transparent;border:1px solid #333;color:#888;font-size:0.75rem}
+.feedback{padding:8px 12px;border-radius:8px;font-size:0.8rem;margin:8px 0;display:none}
+.feedback.good{display:block;background:rgba(16,185,129,0.1);color:#10b981}
+.feedback.bad{display:block;background:rgba(239,68,68,0.08);color:#f87171}
+.scorebar{display:flex;justify-content:space-between;font-size:0.7rem;color:#888;margin-bottom:12px}
+select{padding:8px;border-radius:8px;border:1px solid #333;background:#222;color:#eee;font-size:0.8rem;margin-bottom:12px;width:100%}
 </style>
 </head>
 <body>
-<div class="app" id="mainView">
-  <h1>语链英训 · FSI Drills</h1>
-  <div class="sub">30 套语言训练模块 · 外交官同款训练法</div>
+<h2>FSI Pattern Drills</h2>
 
-  <div class="tabs" style="display:flex;gap:6px;margin-bottom:12px">
-    <button class="tab-btn active" data-tab="units" onclick="switchTab('units')">📝 FSI Units</button>
-    <button class="tab-btn" data-tab="vocab" onclick="switchTab('vocab')">📖 Ogden 850</button>
-  </div>
-
-  <div id="vocabPanel" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input id="vocabSearch" placeholder="Search 850 words..." style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.82rem" oninput="filterVocab()">
-      <button class="btn-sm" onclick="speakVocab()" style="padding:6px 12px">🔊</button>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px" id="vocabLetters"></div>
-    <div id="vocabList" style="display:flex;flex-wrap:wrap;gap:6px;font-size:0.85rem;max-height:50vh;overflow-y:auto"></div>
-  </div>
-
-  <div id="unitsPanel">
-  <div class="phase-tabs" id="phaseTabs">
-    <button class="phase-tab active" data-phase="0">🔫 Phase 1 · 装弹</button>
-    <button class="phase-tab" data-phase="1">🔵 Phase 2 · 连射</button>
-    <button class="phase-tab" data-phase="2">🟡 Phase 3 · 实战</button>
-  </div>
-  <div class="unit-grid" id="unitGrid"></div>
-
-  <div class="bottom">
-    <div class="settings">
-      <input id="apiKey" type="password" placeholder="DeepSeek API Key (optional)" style="flex:1">
-      <button class="btn-sm" onclick="saveKey()">Save</button>
-    </div>
-  </div>
+<div class="scorebar">
+  <span>Score: <b id="score" style="color:#10b981">0</b></span>
+  <span>Streak: <b id="streak" style="color:#f59e0b">0</b></span>
+  <span id="progress"></span>
 </div>
 
-<div id="drillPanel" style="display:none;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:20px;margin-top:12px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <span style="font-weight:600;font-size:0.9rem" id="drillUnitTitle"></span>
-    <div>
-      <span style="font-size:0.7rem;color:var(--dim);margin-right:12px" id="drillUnitStats"></span>
-      <button style="background:transparent;border:1px solid var(--border);color:var(--dim);padding:2px 10px;border-radius:8px;font-size:0.7rem;cursor:pointer" onclick="document.getElementById('drillPanel').style.display='none';curUnit=-1">✕ Close</button>
-    </div>
-  </div>
-  <div id="drillContent"></div>
-  <div class="loading" id="drillLoading" style="display:none;text-align:center;padding:20px;color:var(--dim)">Loading...</div>
+<select id="levelSelect" onchange="changeLevel(this.value)">
+  <option value="0">Stage 1 · 基础句型</option>
+  <option value="1">Stage 2 · 时态与逻辑</option>
+  <option value="2">Stage 3 · 复杂结构</option>
+</select>
+
+<div class="card" id="card">
+  <div class="label" id="unitName">Unit 1</div>
+  <div class="sentence" id="pattern">---</div>
+  <div class="task" id="task">---</div>
+  <div class="hint" id="hint">💡 ---</div>
+  <input type="text" id="answer" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkAnswer()">
+  <button class="btn-check" onclick="checkAnswer()" id="btnCheck">Check</button>
+  <button class="btn-speak" onclick="listen()">Listen</button>
+  <button class="btn-speak" onclick="speakAnswer()" style="border-color:#10b981;color:#10b981">Speak</button>
+  <div class="feedback" id="fb"></div>
+  <button class="btn-next" onclick="nextDrill()" id="btnNext">Next</button>
 </div>
 
 <script>
-// ==================== UNIT DATA ====================
-const units = [
-  // Phase 1 (0-9)
-  {phase:0,num:1,name:'身份建立',desc:'系动词与身份认同',prompt:'你是一位FSI语言教官。请用JSON数组返回10组身份建立替换练习。每组包含pattern(句型模板用___标出替换位)、instruction(替换说明)、answer(完整正确答案)、hint(提示)。场景设定为外交场合。只返回JSON数组。格式：[{"pattern":"I ___ a ___.","instruction":"Replace ___ with \"am/diplomat\"","answer":"I am a diplomat.","hint":"I am a ___."}]'},
-  {phase:0,num:2,name:'社交确认',desc:'一般疑问句与确认反馈',prompt:'你是一位FSI语言教官。请用JSON数组返回10组社交确认问答练习。每组包含pattern(问句模板)、instruction(替换说明)、answer(完整正确答案)、hint(提示)。场景设定为大使馆接待。只返回JSON。格式：[{"pattern":"___ you ___?","instruction":"Replace ___ with \"Are/a diplomat\"","answer":"Are you a diplomat?","hint":"___ you a ___?"}]'},
-  {phase:0,num:3,name:'空间定位',desc:'存在感与方位反射',prompt:'你是一位FSI语言教官。请用JSON数组返回10组空间定位练习。每组包含pattern(用___标替换位)、instruction、answer、hint。场景设定为办公室与城市导航。只返回JSON。'},
-  {phase:0,num:4,name:'数量感知',desc:'基数词与名词复数',prompt:'你是一位FSI语言教官。请用JSON数组返回10组数量感知练习。场景为物资清点与预算报告。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:5,name:'所属关系',desc:'物主代词与财产边界',prompt:'你是一位FSI语言教官。请用JSON数组返回10组所属关系练习(物主代词)。场景外交财产与文件归属。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:6,name:'意志表达',desc:'助动词与基本需求',prompt:'你是一位FSI语言教官。请用JSON数组返回10组意志表达练习(I want to/need to/would like to)。场景外交谈判需求沟通。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:7,name:'职业习惯',desc:'一般现在时与日常行为',prompt:'你是一位FSI语言教官。请用JSON数组返回10组一般现在时职业习惯练习。场景外交官日常作息。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:8,name:'社交博弈',desc:'祈使句与礼貌请求',prompt:'你是一位FSI语言教官。请用JSON数组返回10组祈使句与礼貌请求练习。场景外交礼宾与会议安排。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:9,name:'否定防御',desc:'否定结构与委婉拒绝',prompt:'你是一位FSI语言教官。请用JSON数组返回10组否定结构练习(I don\'t/He isn\'t/We can\'t)。场景外交委婉拒绝。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:0,num:10,name:'经验回顾',desc:'一般过去时与任务汇报',prompt:'你是一位FSI语言教官。请用JSON数组返回10组一般过去时规则动词练习。场景外交任务汇报。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  // Phase 2 (10-19)
-  {phase:1,num:11,name:'未来投射',desc:'将来时与行程规划',prompt:'你是一位FSI语言教官。请用JSON数组返回10组将来时练习(I will/I\'m going to)。场景外交行程规划。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:12,name:'描述性感知',desc:'形容词与程度修饰',prompt:'你是一位FSI语言教官。请用JSON数组返回10组形容词搭配程度副词(very/quite/extremely)练习。场景国家形势描述。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:13,name:'因果链条',desc:'连词与逻辑反射',prompt:'你是一位FSI语言教官。请用JSON数组返回10组逻辑连词(because/so/therefore/however)练习。场景外交政策分析。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:14,name:'行为频率',desc:'频度副词与规律',prompt:'你是一位FSI语言教官。请用JSON数组返回10组频度副词(always/usually/sometimes/never)练习。场景外交工作模式。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:15,name:'动作进行',desc:'现在进行时与实时叙述',prompt:'你是一位FSI语言教官。请用JSON数组返回10组现在进行时练习。场景国际峰会现场实况。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:16,name:'工具使用',desc:'介词手段与方法',prompt:'你是一位FSI语言教官。请用JSON数组返回10组介手段方式练习(with/by/through/in)。场景外交工具方法。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:17,name:'比较竞争',desc:'比较级与最高级',prompt:'你是一位FSI语言教官。请用JSON数组返回10组比较级与最高级练习。场景国家实力政策比较。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:18,name:'义务责任',desc:'情态动词 Must/Should',prompt:'你是一位FSI语言教官。请用JSON数组返回10组义务责任练习(must/should/have to)。场景外交协议义务。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:19,name:'许可博弈',desc:'情态动词 May/Can',prompt:'你是一位FSI语言教官。请用JSON数组返回10组许可练习(may/can/could/be allowed to)。场景外交许可权限。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:1,num:20,name:'感官体验',desc:'感官动词与直接反馈',prompt:'你是一位FSI语言教官。请用JSON数组返回10组感官动词练习(look/sound/feel/taste/smell)。场景海外驻派生活。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  // Phase 3 (20-29)
-  {phase:2,num:21,name:'完成状态',desc:'现在完成时与任务结果',prompt:'你是一位FSI语言教官。请用JSON数组返回10组现在完成时练习。场景外交任务汇报。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:22,name:'社交委婉',desc:'虚拟语气与假设提案',prompt:'你是一位FSI语言教官。请用JSON数组返回10组虚拟语气练习(If I were/I would)。场景外交斡旋假设提案。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:23,name:'被动承受',desc:'被动语态与结果导向',prompt:'你是一位FSI语言教官。请用JSON数组返回10组被动语态练习。场景国际条约与决议。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:24,name:'复杂从句',desc:'定语从句与定义',prompt:'你是一位FSI语言教官。请用JSON数组返回10组定语从句练习(who/which/that)。场景外交人物事件描述。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:25,name:'时间跨度',desc:'过去完成时与历史回顾',prompt:'你是一位FSI语言教官。请用JSON数组返回10组过去完成时练习(had done/had been)。场景外交历史事件。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:26,name:'自我指涉',desc:'反身代词与自动行为',prompt:'你是一位FSI语言教官。请用JSON数组返回10组反身代词练习(myself/himself/themselves)。场景外交官自我管理。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:27,name:'意向深度',desc:'动名词与分词',prompt:'你是一位FSI语言教官。请用JSON数组返回10组动名词与分词练习。场景外交政策讨论。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:28,name:'社会关系',desc:'交互动词与团队',prompt:'你是一位FSI语言教官。请用JSON数组返回10组交互表达练习(each other/cooperate/negotiate)。场景多国外交合作。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:29,name:'决策辩论',desc:'高阶逻辑连词',prompt:'你是一位FSI语言教官。请用JSON数组返回10组高阶逻辑连词练习(although/nevertheless/on the other hand)。场景联合国议题辩论。每组含pattern/instruction/answer/hint。只返回JSON。'},
-  {phase:2,num:30,name:'叙事流',desc:'综合时态转换与叙事',prompt:'你是一位FSI语言教官。请用JSON数组返回10组叙事流练习，每组包含至少3种时态转换。场景外交官职涯故事。每组含pattern/instruction/answer/hint。只返回JSON。'},
+// ==================== DRILLS ====================
+var allDrills = [
+  // Stage 0: Basic
+  [["I <b>am</b> a <b>student</b>.","Change student → teacher","I am a teacher.","I am a ___."],
+   ["She <b>is</b> <b>tall</b>.","Change tall → short","She is short.","She is ___."],
+   ["I <b>have</b> a <b>book</b>.","Change book → pen","I have a pen.","I have a ___."],
+   ["He <b>likes</b> to <b>run</b>.","Change run → swim","He likes to swim.","He likes to ___."],
+   ["There <b>is</b> a <b>cat</b> in the room.","Change cat → dog","There is a dog in the room.","There is a dog in the ___."],
+   ["They <b>are</b> <b>playing</b>.","Change playing → working","They are working.","They are ___."],
+   ["This <b>is</b> my <b>house</b>.","Change house → school","This is my school.","This is my ___."],
+   ["I <b>want</b> to <b>eat</b>.","Change eat → cook","I want to cook.","I want to ___."],
+   ["We <b>go</b> to <b>school</b> every day.","Change school → park","We go to park every day.","We go to ___ every day."],
+   ["She <b>can</b> <b>sing</b> very well.","Change sing → dance","She can dance very well.","She can ___ very well."]],
+  // Stage 1: Tenses & Logic
+  [["I <b>will</b> go to <b>school</b> tomorrow.","Change school → hospital","I will go to hospital tomorrow.","I will go to ___ tomorrow."],
+   ["She <b>has finished</b> her <b>work</b>.","Change work → homework","She has finished her homework.","She has finished her ___."],
+   ["He <b>was reading</b> when I <b>arrived</b>.","Change reading → cooking","He was cooking when I arrived.","He was ___ when I arrived."],
+   ["If it <b>rains</b>, we <b>will stay</b> home.","Change rains → snows","If it snows, we will stay home.","If it ___, we will stay home."],
+   ["I <b>have been</b> studying <b>for two hours</b>.","Change two hours → three days","I have been studying for three days.","I have been studying for ___."],
+   ["She <b>used to</b> live in <b>London</b>.","Change London → Paris","She used to live in Paris.","She used to live in ___."],
+   ["<b>Although</b> it was late, <b>she kept working</b>.","Change she kept working → he went out","Although it was late, he went out.","Although it was late, ___."],
+   ["I <b>should</b> <b>finish</b> this today.","Change should → must","I must finish this today.","I ___ finish this today."],
+   ["We <b>have</b> lunch <b>at noon</b> every day.","Change at noon → at 12","We have lunch at 12 every day.","We have lunch ___ every day."],
+   ["She <b>was</b> very <b>tired</b> after work.","Change tired → happy","She was very happy after work.","She was very ___ after work."]],
+  // Stage 2: Complex
+  [["<b>Had I known</b>, I <b>would have come</b>.","Change would have come → would have called","Had I known, I would have called.","Had I known, I ___."],
+   ["The book, <b>which I bought yesterday</b>, is <b>very good</b>.","Change very good → very interesting","The book, which I bought yesterday, is very interesting.","The book... is very ___."],
+   ["<b>Not only</b> did she arrive early, <b>but she also</b> helped.","Change she → he","Not only did he arrive early, but he also helped.","Not only did he arrive early, but he also ___."],
+   ["<b>It is important that</b> every student <b>attend</b>.","Change attend → be present","It is important that every student be present.","It is important that every student ___."],
+   ["<b>Barely</b> had I <b>started</b> when it <b>ended</b>.","Change started → sat down","Barely had I sat down when it ended.","Barely had I ___ when it ended."],
+   ["<b>Were I</b> in your position, I <b>would think twice</b>.","Change would think twice → would accept","Were I in your position, I would accept.","Were I in your position, I ___."],
+   ["<b>Much as</b> I like it, I <b>cannot afford</b> it.","Change cannot afford → must refuse","Much as I like it, I must refuse it.","Much as I like it, I ___ it."],
+   ["The results <b>turned out</b> to be <b>wrong</b>.","Change wrong → correct","The results turned out to be correct.","The results turned out to be ___."],
+   ["<b>So loud was</b> the noise that <b>nobody could sleep</b>.","Change nobody could sleep → everyone woke up","So loud was the noise that everyone woke up.","So loud was the noise that ___."],
+   ["<b>By the time</b> we got there, it <b>had already closed</b>.","Change had already closed → was too late","By the time we got there, it was too late.","By the time we got there, it ___."]]
 ];
 
-// ==================== OGDEN 850 WORD LIST ====================
-const ogden850 = 'a,able,about,account,acid,across,act,addition,adjustment,advertisement,after,again,against,agreement,air,all,almost,among,amount,amusement,and,angle,angry,animal,answer,ant,any,apparatus,apple,approval,arch,argument,arm,army,art,as,at,attack,attempt,attention,attraction,authority,automatic,awake,baby,back,bad,bag,balance,ball,band,base,basin,basket,bath,be,beautiful,because,bed,bee,before,behavior,belief,bell,bent,berry,between,bird,birth,bit,bite,bitter,black,blade,blood,blow,blue,board,boat,body,boiling,bone,book,boot,bottle,box,boy,brain,brake,branch,brass,bread,breath,brick,bridge,bright,broken,brother,brown,brush,bucket,building,bulb,burn,burst,business,but,butter,button,by,cake,camera,canvas,card,care,carriage,cart,cat,cause,certain,chain,chalk,chance,change,cheap,cheese,chemical,chest,chief,chin,church,circle,clean,clear,clock,cloth,cloud,coal,coat,cold,collar,color,comb,come,comfort,committee,common,company,comparison,competition,complete,complex,condition,connection,conscious,control,cook,copper,copy,cord,cork,cotton,cough,country,cover,cow,crack,credit,crime,cruel,crush,cry,cup,current,curtain,curve,cushion,cut,damage,danger,dark,daughter,day,dead,dear,death,debt,decision,deep,degree,delicate,dependent,design,desire,destruction,detail,development,different,digestion,direction,dirty,discovery,discussion,disease,disgust,distance,distribution,division,do,dog,door,doubt,down,drain,drawer,dress,drink,driving,drop,dry,dust,ear,early,earth,east,edge,education,effect,egg,elastic,electric,end,engine,enough,equal,error,even,event,ever,every,example,exchange,existence,expansion,experience,expert,eye,face,fact,fall,false,family,far,farm,fat,father,fear,feather,feeble,feeling,female,fertile,fiction,field,fight,finger,fire,first,fish,fixed,flag,flame,flat,flight,floor,flower,fly,fold,food,foolish,foot,for,force,fork,form,forward,fowl,frame,free,frequent,friend,from,front,fruit,full,future,garden,general,get,girl,give,glass,glove,go,goat,gold,good,government,grain,grass,great,green,grey, grip,group,growth,guide,gun,hair,hammer,hand,hanging,happy,harbor,hard,harmony,hat,hate,have,he,head,healthy,hearing,heart,heat,help,here,high,history,hole,hollow,hook,hope,horn,horse,hospital,hour,house,how,humor,i,ice,idea,if,ill,important,impulse,in,increase,industry,ink,insect,instrument,insurance,interest,invention,iron,island,jelly,jewel,join,journey,judge,jump,keep,kettle,key,kick,kind,kiss,knee,knife,knot,knowledge,land,language,last,late,laugh,law,lead,leaf,learning,leather,left,leg,let,letter,level,library,lift,light,like,limit,line,linen,lip,liquid,list,little,living,lock,long,look,loose,loss,loud,love,low,machine,make,male,man,manager,map,mark,market,married,match,material,mass,may,meal,measure,meat,medical,meeting,memory,metal,middle,military,milk,mind,mine,minute,mist,mixed,money,monkey,month,moon,morning,mother,motion,mountain,mouth,move,much,muscle,music,nail,name,narrow,nation,natural,near,necessary,neck,need,needle,nerve,net,new,news,night,no,noise,normal,north,nose,not,note,now,number,nut,observation,of,off,offer,office,oil,old,on,only,open,operation,opinion,opposite,or,orange,order,organization,ornament,other,out,oven,over,owner,page,pain,paint,paper,parallel,parcel,part,past,paste,payment,peace,pen,pencil,person,physical,picture,pig,pin,pipe,place,plane,plant,plate,play,please,pleasure,plough,pocket,point,poison,polish,political,poor,porter,position,possible,pot,potato,powder,power,present,price,print,prison,private,probable,process,produce,profit,property,prose,protest,public,pull,pump,punishment,purpose,push,put,quality,question,quick,quiet,quite,rail,rain,range,rat,rate,ray,reaction,reading,ready,reason,receipt,record,red,regret,regular,relation,religion,representative,request,respect,responsible,rest,reward,rhythm,rice,right,ring,river,road,rod,roll,roof,room,root,rough,round,rub,rule,run,sad,safe,sail,salt,same,sand,say,scale,school,science,scissors,screw,sea,seat,second,secret,secretary,see,seed,seem,selection,self,send,sense,separate,serious,servant,sex,shade,shake,shame,sharp,sheep,shelf,ship,shirt,shock,shoe,short,shut,side,sign,silk,silver,simple,sister,size,skin,skirt,sky,sleep,slip,slope,slow,small,smash,smell,smile,smoke,smooth,snake,sneeze,snow,so,soap,society,sock,soft,solid,some,son,song,sort,sound,soup,south,space,spade,special,sponge,spoon,spring,square,stamp,stage,star,start,statement,station,steam,steel,stem,step,stick,sticky,stiff,still,stitch,stocking,stomach,stone,stop,store,story,straight,strange,street,stretch,strong,structure,substance,such,sudden,sugar,suggestion,summer,sun,support,surprise,sweet,swim,system,table,tail,take,talk,tall,taste,tax,teaching,tendency,test,than,that,the,then,theory,there,thick,thin,thing,this,though,thought,thread,throat,through,thumb,thunder,ticket,tight,till,time,tin,tired,to,toe,together,tomorrow,tongue,tooth,top,touch,town,trade,train,transport,tray,tree,trick,trouble,trousers,true,turn,twist,umbrella,under,unit,up,use,value,verse,very,vessel,view,violent,voice,waiting,walk,wall,war,warm,wash,waste,watch,water,wave,wax,way,weather,week,weight,well,west,wet,wheel,when,where,while,whip,whistle,white,who,why,wide,will,wind,window,wine,wing,winter,wire,wise,with,woman,wood,wool,word,work,worm,wound,writing,wrong,year,yellow,yes,yesterday,you,young'.split(',');
-let vocabFilter = '', vocabLetter = '';
+var currentDrill = {stage:0,idx:0,score:0,streak:0,total:0,correct:0};
 
-// ==================== STATE ====================
-let apiKey = localStorage.getItem('fsi_apikey') || '';
-let curPhase = 0, curUnit = -1, drills = [], drillIdx = 0, correctCount = 0, totalCount = 0, curTab = 'units';
-
-document.getElementById('apiKey').value = apiKey;
-
-function saveKey() {
-  apiKey = document.getElementById('apiKey').value.trim();
-  localStorage.setItem('fsi_apikey', apiKey);
+function render() {
+  var d = allDrills[currentDrill.stage][currentDrill.idx];
+  document.getElementById('pattern').innerHTML = d[0];
+  document.getElementById('task').textContent = d[1];
+  document.getElementById('hint').innerHTML = '💡 ' + d[3];
+  document.getElementById('unitName').textContent = 'Stage ' + (currentDrill.stage+1) + ' · Drill ' + (currentDrill.idx+1) + '/' + allDrills[currentDrill.stage].length;
+  document.getElementById('answer').value = '';
+  document.getElementById('answer').className = '';
+  document.getElementById('fb').className = 'feedback';
+  document.getElementById('btnCheck').style.display = '';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('progress').textContent = 'Accuracy: ' + (currentDrill.total>0?Math.round(currentDrill.correct/currentDrill.total*100):0) + '%';
+  document.getElementById('score').textContent = currentDrill.score;
+  document.getElementById('streak').textContent = currentDrill.streak;
+  // Auto-read
+  setTimeout(function(){speakText(d[2])}, 500);
 }
 
-// ==================== RENDER MAIN ====================
-function renderUnits() {
-  const grid = document.getElementById('unitGrid');
-  grid.innerHTML = units.filter(u => u.phase === curPhase).map((u,i) => `
-    <div class="unit" onclick="openUnit(${units.indexOf(u)})" id="unitRow${units.indexOf(u)}">
-      <span class="u-num">Unit ${u.num}</span>
-      <span class="u-name">${u.name}<br><span class="u-desc">${u.desc}</span></span>
-      <span class="u-badge">${u.num <= 10 ? 'A1' : u.num <= 20 ? 'B1' : 'B2/C1'}</span>
-    </div>
-  `).join('');
+function changeLevel(lvl) {
+  currentDrill.stage = parseInt(lvl); currentDrill.idx = 0; currentDrill.streak = 0;
+  render();
 }
 
-document.querySelectorAll('.phase-tab').forEach(btn => {
-  btn.addEventListener('click', function() {
-    curPhase = parseInt(this.dataset.phase);
-    document.querySelectorAll('.phase-tab').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    renderUnits();
-  });
-});
-
-// ==================== OPEN UNIT ====================
-function openUnit(idx) {
-  curUnit = idx; drillIdx = 0; correctCount = 0; totalCount = 0;
-  var u = units[idx];
-  var panel = document.getElementById('drillPanel');
-  panel.style.display = 'block';
-  document.getElementById('drillUnitTitle').textContent = 'Unit ' + u.num + ' · ' + u.name;
-  document.getElementById('drillUnitStats').textContent = 'Offline drills';
-  document.getElementById('drillContent').innerHTML = '';
-  document.getElementById('drillLoading').style.display = 'none';
-
-  drills = generateFallback(idx);
-  renderDrill();
-
-  // Async: try AI generation in background
-  if (apiKey) {
-    document.getElementById('drillUnitStats').textContent = 'Generating AI drills...';
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.deepseek.com/chat/completions', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'Bearer ' + apiKey);
-    xhr.onload = function() {
-      try {
-        var resp = JSON.parse(xhr.responseText);
-        var text = resp.choices[0].message.content.trim();
-        var match = text.match(/\[[\s\S]*\]/);
-        if (match) {
-          drills = JSON.parse(match[0]);
-          document.getElementById('drillUnitStats').textContent = 'AI drills';
-          renderDrill();
-        }
-      } catch(e) {}
-    };
-    xhr.send(JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500}));
-  }
-}
-
-// Word banks for randomization
-// Simplest words from Ogden 850, RAZ C/D friendly
-var wordBanks = {
-  careers:['teacher','doctor','farmer','cook','sailor','pilot','student','worker','driver','nurse'],
-  things:['book','pen','bag','cup','ball','hat','box','bed','map','bell'],
-  places:['school','park','farm','room','house','store','road','river','garden','sea'],
-  animals:['cat','dog','bird','fish','horse','sheep','cow','pig','goat','frog'],
-  times:['morning','night','today','tomorrow','summer','winter','week','day','year','spring'],
-  adjectives:['big','small','hot','cold','good','new','old','red','blue','green'],
-  actions:['run','jump','swim','read','cook','sing','play','eat','sleep','walk'],
-  subjects:['I','She','He','We','They'],
-  verbs_be:['am','is','are'],
-};
-
-function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
-
-function generateFallback(idx) {
-  var u = units[idx], phase = u.phase;
-  // Randomize: generate 5 varied drills for any unit
-  var drills = [];
-  var subj, verb, obj, obj2;
-
-  for (var i = 0; i < 5; i++) {
-    if (idx === 0) {
-      subj = pick(wordBanks.subjects); verb = pick(wordBanks.verbs_be); obj = pick(wordBanks.careers);
-      drills.push({pattern:subj+' <em>'+verb+'</em> a <em>'+obj+'</em>.',instruction:'Change "'+obj+'" to another career',answer:subj+' '+verb+' a '+obj+'.',hint:subj+' '+verb+' a ___.'});
-    } else if (idx === 1) {
-      subj = pick(wordBanks.subjects); obj = pick(wordBanks.careers);
-      verb = (subj==='I'||subj==='You'||subj==='We'||subj==='They')?'Are':'Is';
-      drills.push({pattern:verb+' <em>'+subj+'</em> a <em>'+obj+'</em>?',instruction:'Form a question asking if '+subj+' is a '+obj,answer:verb+' '+subj+' a '+obj+'?',hint:verb+' '+subj+' a ___?'});
-    } else if (idx === 2) {
-      obj = pick(wordBanks.places); obj2 = pick(wordBanks.things);
-      drills.push({pattern:'There <em>is</em> a <em>'+obj2+'</em> in the <em>'+obj+'</em>.',instruction:'Describe a '+obj2+' in the '+obj,answer:'There is a '+obj2+' in the '+obj+'.',hint:'There is a ___ in the ___.'});
-    } else if (idx === 3) {
-      obj = pick(wordBanks.things);
-      drills.push({pattern:'I have <em>three</em> <em>'+obj+'s</em>.',instruction:'Count '+obj+'s (use a number)',answer:'I have three '+obj+'s.',hint:'I have ___ ___s.'});
-    } else if (idx >= 4 && idx <= 5) {
-      subj = pick(wordBanks.subjects); obj = pick(wordBanks.things);
-      drills.push({pattern:subj+' <em>'+pick(['has','owns','keeps'])+'</em> a <em>'+obj+'</em>.',instruction:'Describe possession of a '+obj,answer:subj+' has a '+obj+'.',hint:subj+' ___ a ___.'});
-    } else if (idx >= 6 && idx <= 7) {
-      subj = pick(wordBanks.subjects); obj = pick(wordBanks.actions);
-      drills.push({pattern:subj+' <em>'+pick(['likes','wants','needs'])+' to</em> <em>'+obj+'</em>.',instruction:'Talk about wanting to '+obj,answer:subj+' wants to '+obj+'.',hint:subj+' ___ to ___.'});
-    } else {
-      subj = pick(wordBanks.subjects); obj = pick(wordBanks.things); obj2 = pick(wordBanks.places);
-      drills.push({pattern:subj+' <em>'+pick(['is','was','will be'])+'</em> at the <em>'+obj2+'</em>.',instruction:'Say where '+subj+' is',answer:subj+' is at the '+obj2+'.',hint:subj+' is at the ___.'});
-    }
-  }
-  return drills;
-}
-
-// ==================== DRILL UI ====================
-function renderDrill() {
-  var content = document.getElementById('drillContent');
-  var stats = document.getElementById('drillUnitStats');
-  if (!content || !stats) return;
-  if (drillIdx >= drills.length) {
-    content.innerHTML = '<div style="text-align:center;padding:40px"><div style="font-size:2.5rem;margin-bottom:12px">🎯</div><div style="font-size:1.1rem;margin-bottom:6px">Unit Complete!</div><div style="color:var(--dim);font-size:0.85rem">' + correctCount + '/' + drills.length + ' correct</div><button class="btn-drill btn-next" onclick="closeDrill()" style="margin-top:20px">Back to Units</button></div>';
-    stats.textContent = correctCount + '/' + drills.length;
-    return;
-  }
-  var d = drills[drillIdx];
-  stats.textContent = (drillIdx+1) + '/' + drills.length;
-  var hintHTML = d.hint ? '<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ' + d.hint + '</div>' : '';
-  content.innerHTML = '<div class="pattern">' + d.pattern + '</div><div class="instruction">' + d.instruction + '</div>' + hintHTML + '<div class="input-row"><input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key===\"Enter\")checkDrillAnswer()"></div><button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button><button class="btn-speak" onclick="speakDrill()">🔊 Listen</button><button class="btn-speak" id="btnSpeakDrill" onclick="speakDrillAnswer()" style="margin-top:4px;color:var(--accent);border-color:var(--accent)">🎤 Speak</button><div class="feedback" id="feedback"></div><button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>';
-  setTimeout(function(){var inp=document.getElementById('answerInput');if(inp)inp.focus();},100);
-  // Auto-speak the pattern for read-along
-  setTimeout(function(){
-    try { var txt = drills[drillIdx] ? drills[drillIdx].answer : ''; if (txt) { var u = new SpeechSynthesisUtterance(txt); u.lang = 'en-US'; u.rate = 0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); } } catch(e){}
-  }, 400);
-}
-}
-
-function checkDrillAnswer(userSpoken) {
-  var inp = document.getElementById('answerInput');
-  var userAns = userSpoken || (inp ? inp.value.trim() : '');
-  if (!userAns) return;
-  var d = drills[drillIdx];
-  var norm = function(s){ return s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim(); };
-  var isCorrect = norm(userAns) === norm(d.answer);
-  totalCount++;
-  var fb = document.getElementById('feedback');
-  if (isCorrect) {
-    correctCount++;
-    if (inp) { inp.className = 'correct'; inp.value = d.answer; }
-    fb.className = 'feedback show good'; fb.textContent = '✅ Correct!';
-    try{ document.getElementById('btnCheck').style.display = 'none'; }catch(e){}
-    try{ document.getElementById('btnNext').style.display = ''; }catch(e){}
-    try{ document.getElementById('btnSpeakDrill').style.display = 'none'; }catch(e){}
+function checkAnswer() {
+  var inp = document.getElementById('answer');
+  var ans = inp.value.trim();
+  if (!ans) return;
+  var d = allDrills[currentDrill.stage][currentDrill.idx];
+  currentDrill.total++;
+  var norm = function(s){return s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/ +/g,' ').trim();};
+  var fb = document.getElementById('fb');
+  if (norm(ans) === norm(d[2])) {
+    currentDrill.correct++; currentDrill.streak++;
+    currentDrill.score += 10 + currentDrill.streak * 2;
+    inp.className = ''; inp.style.borderColor = '#10b981';
+    fb.className = 'feedback good'; fb.textContent = 'Correct! +' + (10+currentDrill.streak*2);
+    document.getElementById('btnCheck').style.display = 'none';
+    document.getElementById('btnNext').style.display = '';
   } else {
-    if (inp && !userSpoken) { inp.className = 'wrong'; inp.select(); }
-    fb.className = 'feedback show bad';
-    fb.innerHTML = '❌ Expected: <strong>' + d.answer + '</strong>';
+    currentDrill.streak = 0;
+    inp.style.borderColor = '#f87171';
+    fb.className = 'feedback bad';
+    fb.innerHTML = 'Expected: <b>' + d[2] + '</b>';
+    inp.select();
   }
+  document.getElementById('score').textContent = currentDrill.score;
+  document.getElementById('streak').textContent = currentDrill.streak;
 }
 
-// Voice input
-var recognition = null;
-window.speakDrillAnswer = function() {
+function nextDrill() {
+  currentDrill.idx++;
+  if (currentDrill.idx >= allDrills[currentDrill.stage].length) currentDrill.idx = 0;
+  render();
+}
+
+function speakText(txt) {
+  var u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'en-US'; u.rate = 0.8;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function listen() {
+  var d = allDrills[currentDrill.stage][currentDrill.idx];
+  speakText(d[2]);
+}
+
+function speakAnswer() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert('Your browser does not support speech recognition. Use Chrome.'); return; }
-  if (!recognition) {
-    recognition = new SR(); recognition.lang = 'en-US'; recognition.interimResults = false; recognition.continuous = false;
-    recognition.onresult = function(event) {
-      var transcript = event.results[0][0].transcript.trim();
-      if (transcript) { document.getElementById('answerInput').value = transcript; checkDrillAnswer(transcript); }
-    };
-    recognition.onerror = function() { var btn = document.getElementById('btnSpeakDrill'); if (btn) { btn.style.background = 'transparent'; btn.textContent = '🎤 Speak'; } };
-    recognition.onend = function() { var btn = document.getElementById('btnSpeakDrill'); if (btn) { btn.style.background = 'transparent'; btn.textContent = '🎤 Speak'; } };
-  }
-  if (curUnit < 0) return;
-  var btn = document.getElementById('btnSpeakDrill');
-  if (btn) { btn.style.background = 'var(--danger)'; btn.textContent = '🎙️ Listening...'; }
-  recognition.start();
-};
-
-function nextDrill() { drillIdx++; renderDrill(); }
-function speakDrill() {
-  if (drillIdx < drills.length) {
-    const u = new SpeechSynthesisUtterance(drills[drillIdx].answer);
-    u.lang = 'en-US'; u.rate = 0.85;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
-  }
+  if (!SR) { alert('Use Chrome for voice input'); return; }
+  var r = new SR(); r.lang = 'en-US';
+  r.onresult = function(e) {
+    var txt = e.results[0][0].transcript.trim();
+    if (txt) { document.getElementById('answer').value = txt; checkAnswer(); }
+  };
+  r.start();
 }
 
-function closeDrill() {
-  document.getElementById('drillPanel').style.display = 'none';
-  curUnit = -1;
-}
-
-renderUnits();
-
-// ==================== TAB SWITCHING ====================
-function switchTab(tab){curTab=tab;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab)});document.getElementById('vocabPanel').style.display=tab==='vocab'?'':'none';document.getElementById('unitsPanel').style.display=tab==='units'?'':'none';if(tab==='vocab')renderVocab()}
-function renderVocab(){var letters=[];ogden850.forEach(function(w){var l=w[0].toUpperCase();if(letters.indexOf(l)<0)letters.push(l)});letters.sort();document.getElementById('vocabLetters').innerHTML=letters.map(function(l){return'<button class="phase-tab'+(vocabLetter===l?' active':'')+'" onclick="vocabLetter=\''+l+'\';renderVocab()" style="padding:4px 10px;font-size:0.7rem">'+l+'</button>'}).join('');var words=ogden850;if(vocabLetter)words=words.filter(function(w){return w[0].toUpperCase()===vocabLetter});var q=(document.getElementById('vocabSearch')||{}).value||'';if(q){var lq=q.toLowerCase();words=words.filter(function(w){return w.indexOf(lq)>=0})}document.getElementById('vocabList').innerHTML=words.map(function(w){return'<span style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer" onclick="speakWord(\''+w+'\')">'+w+'</span>'}).join('');if(!words.length)document.getElementById('vocabList').innerHTML='<span style="color:var(--dim);font-size:0.8rem">No words found</span>'}
-function filterVocab(){vocabLetter='';renderVocab()}
-function speakVocab(){var q=(document.getElementById('vocabSearch')||{}).value||'';var words=q?ogden850.filter(function(w){return w.indexOf(q)>=0}):ogden850;if(!words.length)return;var u=new SpeechSynthesisUtterance(words.slice(0,10).join(', '));u.lang='en-US';u.rate=0.9;speechSynthesis.cancel();speechSynthesis.speak(u)}
-function speakWord(word){var u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=0.85;speechSynthesis.cancel();speechSynthesis.speak(u)}
-var ts=document.createElement('style');ts.textContent='.tab-btn{padding:6px 14px;border-radius:16px;font-size:0.72rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);transition:all 0.2s} .tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}';document.head.appendChild(ts);
+render();
 </script>
 </body>
 </html>
