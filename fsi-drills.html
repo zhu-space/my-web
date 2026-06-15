@@ -192,28 +192,40 @@ document.querySelectorAll('.phase-tab').forEach(btn => {
 });
 
 // ==================== OPEN UNIT ====================
-async function openUnit(idx) {
+function openUnit(idx) {
   curUnit = idx; drillIdx = 0; correctCount = 0; totalCount = 0;
   var u = units[idx];
   var panel = document.getElementById('drillPanel');
   panel.style.display = 'block';
   document.getElementById('drillUnitTitle').textContent = 'Unit ' + u.num + ' · ' + u.name;
-  document.getElementById('drillUnitStats').textContent = 'Generating...';
+  document.getElementById('drillUnitStats').textContent = 'Offline drills';
   document.getElementById('drillContent').innerHTML = '';
-  document.getElementById('drillLoading').style.display = 'block';
-  panel.scrollIntoView({behavior:'smooth'});
-
-  var generated = null;
-  if (apiKey) {
-    try {
-      var res = await fetch('https://api.deepseek.com/chat/completions', {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500})});
-      if (res.ok) { var d = await res.json(); var text = d.choices[0].message.content.trim(); var match = text.match(/\[[\s\S]*\]/); if (match) generated = JSON.parse(match[0]); }
-    } catch(e) {}
-  }
-  if (!generated || !generated.length) generated = generateFallback(idx);
-  drills = generated;
   document.getElementById('drillLoading').style.display = 'none';
+
+  drills = generateFallback(idx);
   renderDrill();
+
+  // Async: try AI generation in background
+  if (apiKey) {
+    document.getElementById('drillUnitStats').textContent = 'Generating AI drills...';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.deepseek.com/chat/completions', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + apiKey);
+    xhr.onload = function() {
+      try {
+        var resp = JSON.parse(xhr.responseText);
+        var text = resp.choices[0].message.content.trim();
+        var match = text.match(/\[[\s\S]*\]/);
+        if (match) {
+          drills = JSON.parse(match[0]);
+          document.getElementById('drillUnitStats').textContent = 'AI drills';
+          renderDrill();
+        }
+      } catch(e) {}
+    };
+    xhr.send(JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500}));
+  }
 }
 
 // Word banks for randomization
