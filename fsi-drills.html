@@ -197,32 +197,33 @@ async function openUnit(idx) {
   const u = units[idx];
 
   document.getElementById('mainView').style.display = 'none';
-  document.getElementById('drillView').classList.add('show');
-  document.getElementById('drillUnitTitle').textContent = `Unit ${u.num} · ${u.name}`;
+  var dv = document.getElementById('drillView');
+  dv.classList.add('show');
+  dv.style.display = 'flex';
+  document.getElementById('drillUnitTitle').textContent = 'Unit ' + u.num + ' · ' + u.name;
   document.getElementById('drillUnitStats').textContent = '';
   document.getElementById('drillContent').innerHTML = '';
   document.getElementById('drillLoading').style.display = 'block';
 
-  // Try API
-  let generated = null;
+  // Try API - but don't block
+  var generated = null;
   if (apiKey) {
     try {
-      const res = await fetch('https://api.deepseek.com/chat/completions', {
+      var res = await fetch('https://api.deepseek.com/chat/completions', {
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
         body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500})
       });
       if (res.ok) {
-        const d = await res.json();
-        const text = d.choices[0].message.content.trim();
-        const match = text.match(/\[[\s\S]*\]/);
+        var d = await res.json();
+        var text = d.choices[0].message.content.trim();
+        var match = text.match(/\[[\s\S]*\]/);
         if (match) generated = JSON.parse(match[0]);
       }
     } catch(e) {}
   }
 
-  if (!generated) {
-    // Fallback drills for offline
+  if (!generated || !generated.length) {
     generated = generateFallback(idx);
   }
 
