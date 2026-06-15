@@ -216,22 +216,54 @@ async function openUnit(idx) {
   renderDrill();
 }
 
+// Word banks for randomization
+var wordBanks = {
+  careers:['diplomat','teacher','doctor','engineer','lawyer','journalist','soldier','banker','chef','pilot'],
+  things:['book','pen','bag','phone','key','laptop','notebook','wallet','watch','bottle'],
+  places:['office','school','hospital','airport','hotel','embassy','library','station','museum','market'],
+  languages:['French','Spanish','Japanese','German','Arabic','Korean','Italian','Russian','Chinese','Hindi'],
+  tasks:['report','presentation','email','meeting','project','assignment','proposal','briefing','memo','summary'],
+  times:['tomorrow','next week','this evening','on Monday','in two days','this afternoon','next month','tonight','on Friday','soon'],
+  adjectives:['tall','short','kind','smart','brave','honest','patient','generous','curious','diligent'],
+  actions:['run','swim','read','cook','sing','dance','write','paint','teach','build'],
+  subjects:['I','She','He','We','They'],
+  verbs_be:['am','is','are'],
+};
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
 function generateFallback(idx) {
-  const u = units[idx];
-  // Parse key sentence structure from prompt for basic substitution
-  const phase = u.phase;
-  // Provide 3 basic substitution drills per unit as fallback
-  if (idx === 0) return [
-    {pattern:'I <em>am</em> a <em>student</em>.',instruction:'Change "student" to "diplomat"',answer:'I am a diplomat.',hint:'I am a ___.'},
-    {pattern:'She <em>is</em> a <em>teacher</em>.',instruction:'Change to "he / doctor"',answer:'He is a doctor.',hint:'___ is a ___.'},
-    {pattern:'They <em>are</em> <em>engineers</em>.',instruction:'Change to "we / diplomats"',answer:'We are diplomats.',hint:'We are ___.'},
-  ];
-  // Generic pattern for other units
-  return [
-    {pattern:'I <em>want to</em> learn <em>English</em>.',instruction:'Replace "English" with a language',answer:'I want to learn English.',hint:'I want to learn ___.'},
-    {pattern:'She <em>needs to</em> finish the <em>report</em>.',instruction:'Replace "report" with a task',answer:'She needs to finish the report.',hint:'She needs to finish the ___.'},
-    {pattern:'They <em>will</em> arrive <em>tomorrow</em>.',instruction:'Change "tomorrow" to a time',answer:'They will arrive tomorrow.',hint:'They will arrive ___.'},
-  ];
+  var u = units[idx], phase = u.phase;
+  // Randomize: generate 5 varied drills for any unit
+  var drills = [];
+  var subj, verb, obj, obj2;
+
+  for (var i = 0; i < 5; i++) {
+    if (idx === 0) {
+      subj = pick(wordBanks.subjects); verb = pick(wordBanks.verbs_be); obj = pick(wordBanks.careers);
+      drills.push({pattern:subj+' <em>'+verb+'</em> a <em>'+obj+'</em>.',instruction:'Change "'+obj+'" to another career',answer:subj+' '+verb+' a '+obj+'.',hint:subj+' '+verb+' a ___.'});
+    } else if (idx === 1) {
+      subj = pick(wordBanks.subjects); obj = pick(wordBanks.careers);
+      verb = (subj==='I'||subj==='You'||subj==='We'||subj==='They')?'Are':'Is';
+      drills.push({pattern:verb+' <em>'+subj+'</em> a <em>'+obj+'</em>?',instruction:'Form a question asking if '+subj+' is a '+obj,answer:verb+' '+subj+' a '+obj+'?',hint:verb+' '+subj+' a ___?'});
+    } else if (idx === 2) {
+      obj = pick(wordBanks.places); obj2 = pick(wordBanks.things);
+      drills.push({pattern:'There <em>is</em> a <em>'+obj2+'</em> in the <em>'+obj+'</em>.',instruction:'Describe a '+obj2+' in the '+obj,answer:'There is a '+obj2+' in the '+obj+'.',hint:'There is a ___ in the ___.'});
+    } else if (idx === 3) {
+      obj = pick(wordBanks.things);
+      drills.push({pattern:'I have <em>three</em> <em>'+obj+'s</em>.',instruction:'Count '+obj+'s (use a number)',answer:'I have three '+obj+'s.',hint:'I have ___ ___s.'});
+    } else if (idx >= 4 && idx <= 5) {
+      subj = pick(wordBanks.subjects); obj = pick(wordBanks.things);
+      drills.push({pattern:subj+' <em>'+pick(['has','owns','keeps'])+'</em> a <em>'+obj+'</em>.',instruction:'Describe possession of a '+obj,answer:subj+' has a '+obj+'.',hint:subj+' ___ a ___.'});
+    } else if (idx >= 6 && idx <= 7) {
+      subj = pick(wordBanks.subjects); obj = pick(wordBanks.actions);
+      drills.push({pattern:subj+' <em>'+pick(['likes','wants','needs'])+' to</em> <em>'+obj+'</em>.',instruction:'Talk about wanting to '+obj,answer:subj+' wants to '+obj+'.',hint:subj+' ___ to ___.'});
+    } else {
+      subj = pick(wordBanks.subjects); obj = pick(wordBanks.things); obj2 = pick(wordBanks.places);
+      drills.push({pattern:subj+' <em>'+pick(['is','was','will be'])+'</em> at the <em>'+obj2+'</em>.',instruction:'Say where '+subj+' is',answer:subj+' is at the '+obj2+'.',hint:subj+' is at the ___.'});
+    }
+  }
+  return drills;
 }
 
 // ==================== DRILL UI ====================
