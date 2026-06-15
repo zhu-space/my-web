@@ -247,33 +247,52 @@ function renderDrill() {
   var d = drills[drillIdx];
   stats.textContent = (drillIdx+1) + '/' + drills.length;
   var hintHTML = d.hint ? '<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ' + d.hint + '</div>' : '';
-  content.innerHTML = '<div class="pattern">' + d.pattern + '</div><div class="instruction">' + d.instruction + '</div>' + hintHTML + '<div class="input-row"><input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key===\"Enter\")checkDrillAnswer()"></div><button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button><button class="btn-speak" onclick="speakDrill()">🔊 Listen</button><div class="feedback" id="feedback"></div><button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>';
+  content.innerHTML = '<div class="pattern">' + d.pattern + '</div><div class="instruction">' + d.instruction + '</div>' + hintHTML + '<div class="input-row"><input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key===\"Enter\")checkDrillAnswer()"></div><button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button><button class="btn-speak" onclick="speakDrill()">🔊 Listen</button><button class="btn-speak" id="btnSpeakDrill" onclick="speakDrillAnswer()" style="margin-top:4px;color:var(--accent);border-color:var(--accent)">🎤 Speak</button><div class="feedback" id="feedback"></div><button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>';
   setTimeout(function(){var inp=document.getElementById('answerInput');if(inp)inp.focus();},100);
 }
 
-function checkDrillAnswer() {
-  const inp = document.getElementById('answerInput');
-  if (!inp) return;
-  const userAns = inp.value.trim();
+function checkDrillAnswer(userSpoken) {
+  var inp = document.getElementById('answerInput');
+  var userAns = userSpoken || (inp ? inp.value.trim() : '');
   if (!userAns) return;
-  const d = drills[drillIdx];
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
-  const isCorrect = norm(userAns) === norm(d.answer);
+  var d = drills[drillIdx];
+  var norm = function(s){ return s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim(); };
+  var isCorrect = norm(userAns) === norm(d.answer);
   totalCount++;
-  const fb = document.getElementById('feedback');
+  var fb = document.getElementById('feedback');
   if (isCorrect) {
     correctCount++;
-    inp.className = 'correct';
+    if (inp) { inp.className = 'correct'; inp.value = d.answer; }
     fb.className = 'feedback show good'; fb.textContent = '✅ Correct!';
-    document.getElementById('btnCheck').style.display = 'none';
-    document.getElementById('btnNext').style.display = '';
+    try{ document.getElementById('btnCheck').style.display = 'none'; }catch(e){}
+    try{ document.getElementById('btnNext').style.display = ''; }catch(e){}
+    try{ document.getElementById('btnSpeakDrill').style.display = 'none'; }catch(e){}
   } else {
-    inp.className = 'wrong';
+    if (inp && !userSpoken) { inp.className = 'wrong'; inp.select(); }
     fb.className = 'feedback show bad';
     fb.innerHTML = '❌ Expected: <strong>' + d.answer + '</strong>';
-    inp.select();
   }
 }
+
+// Voice input
+var recognition = null;
+window.speakDrillAnswer = function() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Your browser does not support speech recognition. Use Chrome.'); return; }
+  if (!recognition) {
+    recognition = new SR(); recognition.lang = 'en-US'; recognition.interimResults = false; recognition.continuous = false;
+    recognition.onresult = function(event) {
+      var transcript = event.results[0][0].transcript.trim();
+      if (transcript) { document.getElementById('answerInput').value = transcript; checkDrillAnswer(transcript); }
+    };
+    recognition.onerror = function() { var btn = document.getElementById('btnSpeakDrill'); if (btn) { btn.style.background = 'transparent'; btn.textContent = '🎤 Speak'; } };
+    recognition.onend = function() { var btn = document.getElementById('btnSpeakDrill'); if (btn) { btn.style.background = 'transparent'; btn.textContent = '🎤 Speak'; } };
+  }
+  if (curUnit < 0) return;
+  var btn = document.getElementById('btnSpeakDrill');
+  if (btn) { btn.style.background = 'var(--danger)'; btn.textContent = '🎙️ Listening...'; }
+  recognition.start();
+};
 
 function nextDrill() { drillIdx++; renderDrill(); }
 function speakDrill() {
