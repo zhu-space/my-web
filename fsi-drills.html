@@ -48,8 +48,8 @@ select{padding:8px;border-radius:8px;border:1px solid #333;background:#222;color
   <div class="hint" id="hint">💡 ---</div>
   <input type="text" id="answer" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkAnswer()">
   <button class="btn-check" onclick="checkAnswer()" id="btnCheck">Check</button>
-  <button class="btn-speak" onclick="listen()">Listen</button>
-  <button class="btn-speak" onclick="speakAnswer()" style="border-color:#10b981;color:#10b981">Speak</button>
+  <button class="btn-speak" onclick="listen()" style="border-color:#10b981;color:#10b981;font-weight:600">Listen (click to hear)</button>
+  <button class="btn-speak" onclick="speakAnswer()">Speak your answer</button>
   <div class="feedback" id="fb"></div>
   <button class="btn-next" onclick="nextDrill()" id="btnNext">Next</button>
 </div>
@@ -108,8 +108,7 @@ function render() {
   document.getElementById('progress').textContent = 'Accuracy: ' + (currentDrill.total>0?Math.round(currentDrill.correct/currentDrill.total*100):0) + '%';
   document.getElementById('score').textContent = currentDrill.score;
   document.getElementById('streak').textContent = currentDrill.streak;
-  // Auto-read
-  setTimeout(function(){speakText(d[2])}, 500);
+  // Auto-read disabled on some browsers - use Listen button
 }
 
 function changeLevel(lvl) {
