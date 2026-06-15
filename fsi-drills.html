@@ -39,7 +39,7 @@ h1{font-size:1.2rem;margin-bottom:2px}
 .btn-sm{padding:8px 14px;border-radius:8px;border:none;font-size:0.72rem;cursor:pointer;background:var(--accent);color:#000;font-weight:600}
 
 /* Drill view (modal) */
-#drillView{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.96)}
+#drillView{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:rgba(0,0,0,0.96)}
 #drillView.show{display:flex;flex-direction:column}
 #drillView .header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
 #drillView .header .back{background:transparent;border:none;color:var(--dim);font-size:0.85rem;cursor:pointer}
@@ -252,37 +252,19 @@ function generateFallback(idx) {
 
 // ==================== DRILL UI ====================
 function renderDrill() {
+  var content = document.getElementById('drillContent');
+  var stats = document.getElementById('drillUnitStats');
+  if (!content || !stats) return;
   if (drillIdx >= drills.length) {
-    document.getElementById('drillContent').innerHTML = `
-      <div style="text-align:center;padding:40px">
-        <div style="font-size:2.5rem;margin-bottom:12px">🎯</div>
-        <div style="font-size:1.1rem;margin-bottom:6px">Unit Complete!</div>
-        <div style="color:var(--dim);font-size:0.85rem">${correctCount}/${drills.length} correct</div>
-        <button class="btn-drill btn-next" onclick="closeDrill()" style="margin-top:20px">Back to Units</button>
-      </div>
-    `;
-    document.getElementById('drillUnitStats').textContent = `${correctCount}/${drills.length}`;
+    content.innerHTML = '<div style="text-align:center;padding:40px"><div style="font-size:2.5rem;margin-bottom:12px">🎯</div><div style="font-size:1.1rem;margin-bottom:6px">Unit Complete!</div><div style="color:var(--dim);font-size:0.85rem">' + correctCount + '/' + drills.length + ' correct</div><button class="btn-drill btn-next" onclick="closeDrill()" style="margin-top:20px">Back to Units</button></div>';
+    stats.textContent = correctCount + '/' + drills.length;
     return;
   }
-
-  const d = drills[drillIdx];
-  document.getElementById('drillUnitStats').textContent = `${drillIdx+1}/${drills.length}`;
-  document.getElementById('drillContent').innerHTML = `
-    <div class="pattern">${d.pattern}</div>
-    <div class="instruction">${d.instruction}</div>
-    ${d.hint ? `<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ${d.hint}</div>` : ''}
-    <div class="input-row">
-      <input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')checkDrillAnswer()">
-    </div>
-    <button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button>
-    <button class="btn-speak" onclick="speakDrill()">🔊 Listen</button>
-    <div class="feedback" id="feedback"></div>
-    <button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>
-  `;
-  setTimeout(() => {
-    const inp = document.getElementById('answerInput');
-    if (inp) { inp.focus(); }
-  }, 100);
+  var d = drills[drillIdx];
+  stats.textContent = (drillIdx+1) + '/' + drills.length;
+  var hintHTML = d.hint ? '<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ' + d.hint + '</div>' : '';
+  content.innerHTML = '<div class="pattern">' + d.pattern + '</div><div class="instruction">' + d.instruction + '</div>' + hintHTML + '<div class="input-row"><input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key===\"Enter\")checkDrillAnswer()"></div><button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button><button class="btn-speak" onclick="speakDrill()">🔊 Listen</button><div class="feedback" id="feedback"></div><button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>';
+  setTimeout(function(){var inp=document.getElementById('answerInput');if(inp)inp.focus();},100);
 }
 
 function checkDrillAnswer() {
@@ -304,7 +286,7 @@ function checkDrillAnswer() {
   } else {
     inp.className = 'wrong';
     fb.className = 'feedback show bad';
-    fb.innerHTML = `❌ Expected: <strong>${d.answer}</strong>`;
+    fb.innerHTML = '❌ Expected: <strong>' + d.answer + '</strong>';
     inp.select();
   }
 }
