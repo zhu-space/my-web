@@ -281,6 +281,11 @@ function renderDrill() {
   var hintHTML = d.hint ? '<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ' + d.hint + '</div>' : '';
   content.innerHTML = '<div class="pattern">' + d.pattern + '</div><div class="instruction">' + d.instruction + '</div>' + hintHTML + '<div class="input-row"><input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key===\"Enter\")checkDrillAnswer()"></div><button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button><button class="btn-speak" onclick="speakDrill()">🔊 Listen</button><button class="btn-speak" id="btnSpeakDrill" onclick="speakDrillAnswer()" style="margin-top:4px;color:var(--accent);border-color:var(--accent)">🎤 Speak</button><div class="feedback" id="feedback"></div><button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>';
   setTimeout(function(){var inp=document.getElementById('answerInput');if(inp)inp.focus();},100);
+  // Auto-speak the pattern for read-along
+  setTimeout(function(){
+    try { var txt = drills[drillIdx] ? drills[drillIdx].answer : ''; if (txt) { var u = new SpeechSynthesisUtterance(txt); u.lang = 'en-US'; u.rate = 0.8; speechSynthesis.cancel(); speechSynthesis.speak(u); } } catch(e){}
+  }, 400);
+}
 }
 
 function checkDrillAnswer(userSpoken) {
