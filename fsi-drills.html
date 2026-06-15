@@ -3,253 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>语链英训 · LinguaChain FSI Drills</title>
+<title>语链英训 · FSI 30 Units</title>
 <style>
-:root{--bg:#0a0a0a;--card:#141414;--border:#2a2a2a;--text:#eaeaea;--dim:#8b8b8b;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--surface:#1c1c1c}
+:root{--bg:#0a0a0a;--card:#141414;--border:#2a2a2a;--text:#eaeaea;--dim:#8b8b8b;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--surface:#1c1c1c;--gold:#b8943e}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
-.app{width:100%;max-width:600px;padding:20px}
+.app{width:100%;max-width:620px;padding:20px}
 
-h1{font-size:1.3rem;margin-bottom:4px}
-.sub{font-size:0.75rem;color:var(--dim);margin-bottom:20px}
+h1{font-size:1.2rem;margin-bottom:2px}
+.sub{font-size:0.72rem;color:var(--dim);margin-bottom:16px}
 
-/* Level tabs */
-.levels{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
-.levels::-webkit-scrollbar{display:none}
-.lvl{padding:6px 14px;border-radius:16px;font-size:0.72rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);white-space:nowrap;transition:all 0.2s}
-.lvl.active{background:var(--accent);color:#000;border-color:var(--accent)}
-.lvl.done{background:rgba(16,185,129,0.15);color:var(--accent);border-color:rgba(16,185,129,0.3)}
+/* Phase tabs */
+.phase-tabs{display:flex;gap:4px;margin-bottom:12px}
+.phase-tab{padding:6px 12px;border-radius:14px;font-size:0.7rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--dim);transition:all 0.2s}
+.phase-tab.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.phase-tab:not(.active):hover{border-color:var(--gold)}
 
-/* Stats */
-.stats{display:flex;gap:12px;margin-bottom:16px;font-size:0.72rem;color:var(--dim)}
-.stats span{color:var(--accent);font-weight:600}
+/* Unit grid */
+.unit-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.unit{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center}
+.unit:hover{border-color:var(--accent)}
+.unit.active{border-color:var(--accent);background:rgba(16,185,129,0.06)}
+.unit .u-num{font-size:0.65rem;color:var(--dim);width:40px}
+.unit .u-name{flex:1;font-size:0.85rem}
+.unit .u-desc{font-size:0.65rem;color:var(--dim)}
+.unit .u-badge{font-size:0.6rem;padding:2px 8px;border-radius:8px;background:rgba(16,185,129,0.1);color:var(--accent)}
 
-/* Drill card */
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px}
-.card .pattern{font-size:1.15rem;color:var(--text);margin-bottom:6px;line-height:1.6;letter-spacing:0.5px}
-.card .pattern .hl{color:var(--warn);font-weight:600;border-bottom:2px dashed var(--warn)}
-.card .prompt{font-size:0.78rem;color:var(--dim);margin-bottom:14px}
-.card .hint{font-size:0.72rem;color:var(--dim);margin-bottom:10px;background:var(--surface);padding:8px 12px;border-radius:8px}
+/* Bottom bar */
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px 24px;z-index:50}
 
-/* Input area */
-.input-row{display:flex;gap:8px}
-.input-row input{flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.95rem}
-.input-row input:focus{outline:none;border-color:var(--accent)}
-.input-row input.correct{border-color:var(--accent);background:rgba(16,185,129,0.1)}
-.input-row input.wrong{border-color:var(--danger);background:rgba(239,68,68,0.08)}
-.btn{width:100%;padding:12px;border-radius:10px;border:none;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-.btn-check{background:var(--accent);color:#000;margin-top:10px}
-.btn-check:active{opacity:0.8}
-.btn-speak{background:transparent;border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:0.85rem;cursor:pointer;margin-top:8px;width:100%}
-.btn-speak:active{background:var(--surface)}
-.btn-next{background:var(--surface);color:var(--accent);border:1px solid var(--accent);margin-top:10px}
-.btn-next:active{background:rgba(16,185,129,0.1)}
+/* Settings */
+.settings{display:flex;gap:8px;margin-bottom:8px}
+.settings input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.72rem}
+.settings input:focus{outline:none;border-color:var(--accent)}
+.btn-sm{padding:8px 14px;border-radius:8px;border:none;font-size:0.72rem;cursor:pointer;background:var(--accent);color:#000;font-weight:600}
 
-/* Feedback */
-.feedback{padding:10px 14px;border-radius:10px;font-size:0.85rem;margin-top:10px;display:none}
+/* Drill view (modal) */
+#drillView{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.96)}
+#drillView.show{display:flex;flex-direction:column}
+#drillView .header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+#drillView .header .back{background:transparent;border:none;color:var(--dim);font-size:0.85rem;cursor:pointer}
+#drillView .header .unit-title{font-size:0.85rem;font-weight:600}
+#drillView .header .unit-stats{font-size:0.7rem;color:var(--dim);margin-left:auto}
+#drillView .body{flex:1;overflow-y:auto;padding:20px}
+#drillView .pattern{font-size:1.1rem;color:var(--text);margin-bottom:6px;line-height:1.7}
+#drillView .pattern em{color:var(--warn);font-style:normal;font-weight:600;border-bottom:2px dashed var(--warn)}
+#drillView .instruction{font-size:0.78rem;color:var(--dim);margin-bottom:16px}
+#drillView .input-row{display:flex;gap:8px}
+#drillView .input-row input{flex:1;padding:13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.95rem}
+#drillView .input-row input:focus{outline:none;border-color:var(--accent)}
+#drillView .input-row input.correct{border-color:var(--accent);background:rgba(16,185,129,0.1)}
+#drillView .input-row input.wrong{border-color:var(--danger);background:rgba(239,68,68,0.08)}
+.feedback{padding:10px 14px;border-radius:10px;font-size:0.82rem;margin-top:8px;display:none}
 .feedback.show{display:block}
 .feedback.good{background:rgba(16,185,129,0.1);color:var(--accent)}
-.feedback.bad{background:rgba(239,68,68,0.08);color:var(--danger)}
+.feedback.bad{background:rgba(239,68,68,0.06);color:var(--danger)}
+.btn-drill{padding:12px;border-radius:10px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;width:100%;margin-top:8px;transition:all 0.2s}
+.btn-check{background:var(--accent);color:#000}
+.btn-check:active{opacity:0.8}
+.btn-next{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+.btn-speak{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px;border-radius:10px;font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%}
 
-/* Audio btn */
-.audio-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:8px 14px;border-radius:16px;cursor:pointer;font-size:0.75rem;display:inline-flex;align-items:center;gap:4px;margin-bottom:12px}
-.audio-btn:hover{border-color:var(--accent);color:var(--accent)}
+.loading{text-align:center;padding:40px;color:var(--dim);font-size:0.85rem}
+.error{color:var(--danger);font-size:0.78rem;margin-top:8px}
 
-.progress-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:20px}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s}
+@media(max-width:480px){.app{padding:12px}.bottom{padding:12px 12px 20px}}
 </style>
 </head>
 <body>
-<div class="app">
-  <h1>语链英训 · LinguaChain</h1>
-  <div class="sub">FSI Pattern Drills — 句型反射训练</div>
+<div class="app" id="mainView">
+  <h1>语链英训 · FSI Drills</h1>
+  <div class="sub">30 套语言训练模块 · 外交官同款训练法</div>
 
-  <div class="levels" id="levels"></div>
-  <div class="stats">
-    Score: <span id="score">0</span> |
-    Streak: <span id="streak">0</span> 🔥 |
-    Accuracy: <span id="acc">0%</span>
-    <button class="audio-btn" id="audioToggle" onclick="toggleAudio()" style="margin-left:auto">🔊 Audio</button>
+  <div class="phase-tabs" id="phaseTabs">
+    <button class="phase-tab active" data-phase="0">🔫 Phase 1 · 装弹</button>
+    <button class="phase-tab" data-phase="1">🔵 Phase 2 · 连射</button>
+    <button class="phase-tab" data-phase="2">🟡 Phase 3 · 实战</button>
   </div>
-  <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+  <div class="unit-grid" id="unitGrid"></div>
 
-  <div class="card" id="drillCard">
-    <div class="pattern" id="pattern"></div>
-    <div class="prompt" id="prompt"></div>
-    <div class="hint" id="hint" style="display:none"></div>
-    <div class="input-row">
-      <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
+  <div class="bottom">
+    <div class="settings">
+      <input id="apiKey" type="password" placeholder="DeepSeek API Key (optional)" style="flex:1">
+      <button class="btn-sm" onclick="saveKey()">Save</button>
     </div>
-    <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()">Check ✓</button>
-    <button class="btn btn-speak" id="btnSpeak" onclick="speakPattern()">🔊 Listen to pattern</button>
-    <div class="feedback" id="feedback"></div>
-    <button class="btn btn-next" id="btnNext" onclick="nextDrill()" style="display:none">Next →</button>
+  </div>
+</div>
+
+<div id="drillView">
+  <div class="header">
+    <button class="back" onclick="closeDrill()">← Back</button>
+    <span class="unit-title" id="drillUnitTitle"></span>
+    <span class="unit-stats" id="drillUnitStats"></span>
+  </div>
+  <div class="body" id="drillBody">
+    <div class="loading" id="drillLoading">Generating exercises...</div>
+    <div id="drillContent"></div>
   </div>
 </div>
 
 <script>
-// ==================== DRILL DATA ====================
-const drills = {
-  beginner: [
-    {pattern:'I <hl>am</hl> a <hl>student</hl>.',prompt:'Replace "student" with "teacher"',answer:'I am a teacher.',hint:'I am a ____.',words:['teacher','doctor','worker','driver']},
-    {pattern:'She <hl>is</hl> <hl>tall</hl>.',prompt:'Replace "tall" with "short"',answer:'She is short.',hint:'She is ____.',words:['short','kind','smart','brave']},
-    {pattern:'I <hl>have</hl> a <hl>book</hl>.',prompt:'Replace "book" with "pen"',answer:'I have a pen.',hint:'I have a ____.',words:['pen','bag','phone','key']},
-    {pattern:'He <hl>likes</hl> to <hl>run</hl>.',prompt:'Replace "run" with "swim"',answer:'He likes to swim.',hint:'He likes to ____.',words:['swim','read','cook','sing']},
-    {pattern:'There <hl>is</hl> a <hl>cat</hl> in the room.',prompt:'Replace "cat" with "dog"',answer:'There is a dog in the room.',hint:'There is a ____ in the room.',words:['dog','bird','mouse','rabbit']},
-    {pattern:'They <hl>are</hl> <hl>playing</hl> outside.',prompt:'Replace "playing" with "working"',answer:'They are working outside.',hint:'They are ____ outside.',words:['working','studying','eating','talking']},
-    {pattern:'This <hl>is</hl> my <hl>house</hl>.',prompt:'Replace "house" with "office"',answer:'This is my office.',hint:'This is my ____.',words:['office','school','car','bag']},
-    {pattern:'I <hl>want</hl> to <hl>eat</hl> lunch.',prompt:'Replace "eat" with "cook"',answer:'I want to cook lunch.',hint:'I want to ____ lunch.',words:['cook','make','buy','have']},
-  ],
-  elementary: [
-    {pattern:'I <hl>have been</hl> <hl>studying</hl> English <hl>for two years</hl>.',prompt:'Change "studying" → "learning" and "for two years" → "since 2020"',answer:'I have been learning English since 2020.',hint:'I have been ____ English ____.',words:['learning|since 2020','working|for three months','living|since last year']},
-    {pattern:'If it <hl>rains</hl>, I <hl>will stay</hl> home.',prompt:'Change "rains" → "snows"',answer:'If it snows, I will stay home.',hint:'If it ____, I will stay home.',words:['snows','storms','gets cold']},
-    {pattern:'She <hl>can</hl> speak <hl>three languages</hl>.',prompt:'Change "three languages" → "French and Spanish"',answer:'She can speak French and Spanish.',hint:'She can speak ____.',words:['French and Spanish','very well','a little English']},
-    {pattern:'The book <hl>was written</hl> by <hl>Mark Twain</hl>.',prompt:'Change "Mark Twain" → "a famous author"',answer:'The book was written by a famous author.',hint:'The book was written by ____.',words:['a famous author','an unknown writer','my teacher']},
-    {pattern:'I <hl>would rather</hl> <hl>stay home</hl> than go out.',prompt:'Change "stay home" → "read a book"',answer:'I would rather read a book than go out.',hint:'I would rather ____ than go out.',words:['read a book','watch TV','cook dinner']},
-    {pattern:'<hl>Despite</hl> the rain, we <hl>went</hl> hiking.',prompt:'Change "Despite" → "In spite of"',answer:'In spite of the rain, we went hiking.',hint:'____ the rain, we went hiking.',words:['In spite of','Regardless of','Notwithstanding']},
-    {pattern:'He asked me <hl>if I could help</hl> him.',prompt:'Change "if I could help" → "whether I had seen"',answer:'He asked me whether I had seen him.',hint:'He asked me ____ him.',words:['whether I had seen','if I knew','what I thought about']},
-    {pattern:'I <hl>used to</hl> play tennis <hl>every weekend</hl>.',prompt:'Change "every weekend" → "when I was young"',answer:'I used to play tennis when I was young.',hint:'I used to play tennis ____.',words:['when I was young','in high school','at the club']},
-  ],
-  intermediate: [
-    {pattern:'<hl>Had I known</hl> about the meeting, I <hl>would have attended</hl>.',prompt:'Change to "Had she told me" / "I could have prepared"',answer:'Had she told me about the meeting, I could have prepared.',hint:'____ about the meeting, I ____.',words:['Had she told me|could have prepared','Had we been informed|might have come','Had I seen the email|would have replied']},
-    {pattern:'The project, <hl>which was completed last month</hl>, <hl>exceeded</hl> expectations.',prompt:'Change "which was completed last month" → "which took six months"',answer:'The project, which took six months, exceeded expectations.',hint:'The project, ____, exceeded expectations.',words:['which took six months','despite the delays','to my surprise']},
-    {pattern:'<hl>Not only</hl> did she finish early, <hl>but she also</hl> helped others.',prompt:'Change to start with He / "but he also"',answer:'Not only did he finish early, but he also helped others.',hint:'Not only did he finish early, ____.',words:['but he also helped others','but he stayed to clean up','and he volunteered for more']},
-    {pattern:'<hl>It is essential that</hl> every student <hl>submit</hl> the form.',prompt:'Change "submit" → "complete" (subjunctive mood)',answer:'It is essential that every student complete the form.',hint:'It is essential that every student ____ the form.',words:['complete','review','sign']},
-    {pattern:'<hl>Were I</hl> in your position, I <hl>would reconsider</hl>.',prompt:'Change "would reconsider" → "might take a different approach"',answer:'Were I in your position, I might take a different approach.',hint:'Were I in your position, I ____.',words:['might take a different approach','would think twice','could ask for advice']},
-    {pattern:'The results <hl>turned out to be</hl> <hl>more promising than anticipated</hl>.',prompt:'Change "more promising than anticipated" → "surprisingly accurate"',answer:'The results turned out to be surprisingly accurate.',hint:'The results turned out to be ____.',words:['surprisingly accurate','less reliable','exactly what we needed']},
-    {pattern:'<hl>By the time</hl> we arrived, the show <hl>had already started</hl>.',prompt:'Change "had already started" → "was nearly over"',answer:'By the time we arrived, the show was nearly over.',hint:'By the time we arrived, the show ____.',words:['was nearly over','had finished','was halfway through']},
-    {pattern:'<hl>No matter how</hl> hard I try, I <hl>can\'t seem to</hl> get it right.',prompt:'Change "can\'t seem to" → "never manage to"',answer:'No matter how hard I try, I never manage to get it right.',hint:'No matter how hard I try, I ____ get it right.',words:['never manage to','still cannot','sometimes fail to']},
-  ],
-  advanced: [
-    {pattern:'<hl>Barely</hl> had the meeting <hl>begun</hl> when the fire alarm <hl>went off</hl>.',prompt:'Change to "Hardly" / "concluded" / "the power went out"',answer:'Hardly had the meeting concluded when the power went out.',hint:'____ had the meeting ____ when ____.',words:['Hardly|concluded|the power went out','Scarcely|adjourned|someone started shouting','Rarely|ended|everyone agreed']},
-    {pattern:'<hl>Much as</hl> I admire his work, I <hl>can\'t help but</hl> question his methods.',prompt:'Change "can\'t help but" → "find it difficult not to"',answer:'Much as I admire his work, I find it difficult not to question his methods.',hint:'Much as I admire his work, I ____ question his methods.',words:['find it difficult not to','cannot help','am compelled to']},
-    {pattern:'<hl>It goes without saying that</hl> the decision <hl>was met with</hl> considerable resistance.',prompt:'Change "was met with" → "provoked" and rephrase end',answer:'It goes without saying that the decision provoked considerable resistance.',hint:'It goes without saying that the decision ____.',words:['provoked considerable resistance','generated heated debate','left many people disappointed']},
-    {pattern:'<hl>Were it not for</hl> her intervention, the deal <hl>would have fallen</hl> through.',prompt:'Change "would have fallen" → "might never have materialized"',answer:'Were it not for her intervention, the deal might never have materialized.',hint:'Were it not for her intervention, the deal ____.',words:['might never have materialized','would likely have collapsed','could have been lost']},
-    {pattern:'<hl>In light of</hl> recent events, we <hl>have no choice but to</hl> postpone indefinitely.',prompt:'Change "In light of" → "Given the gravity of"',answer:'Given the gravity of recent events, we have no choice but to postpone indefinitely.',hint:'____ recent events, we have no choice but to postpone indefinitely.',words:['Given the gravity of','In consideration of','Taking into account']},
-    {pattern:'<hl>So profound was</hl> the impact that <hl>it reshaped</hl> the entire industry.',prompt:'Change "it reshaped" → "the entire landscape was transformed"',answer:'So profound was the impact that the entire landscape was transformed.',hint:'So profound was the impact that ____.',words:['the entire landscape was transformed','nothing remained the same','every competitor had to adapt']},
-    {pattern:'<hl>Not for a moment</hl> did I believe that the plan <hl>would succeed</hl>.',prompt:'Change "would succeed" → "was feasible"',answer:'Not for a moment did I believe that the plan was feasible.',hint:'Not for a moment did I believe that the plan ____.',words:['was feasible','could work','would hold up']},
-    {pattern:'<hl>Be that as it may</hl>, the evidence <hl>speaks for</hl> itself.',prompt:'Change "speaks for" → "does not lie, and we must act accordingly"',answer:'Be that as it may, the evidence does not lie, and we must act accordingly.',hint:'Be that as it may, the evidence ____.',words:['does not lie, and we must act accordingly','is overwhelming','cannot be ignored any longer']},
-  ],
-};
+// ==================== UNIT DATA ====================
+const units = [
+  // Phase 1 (0-9)
+  {phase:0,num:1,name:'身份建立',desc:'系动词与身份认同',prompt:'你是一位FSI语言教官。请用JSON数组返回10组身份建立替换练习。每组包含pattern(句型模板用___标出替换位)、instruction(替换说明)、answer(完整正确答案)、hint(提示)。场景设定为外交场合。只返回JSON数组。格式：[{"pattern":"I ___ a ___.","instruction":"Replace ___ with \"am/diplomat\"","answer":"I am a diplomat.","hint":"I am a ___."}]'},
+  {phase:0,num:2,name:'社交确认',desc:'一般疑问句与确认反馈',prompt:'你是一位FSI语言教官。请用JSON数组返回10组社交确认问答练习。每组包含pattern(问句模板)、instruction(替换说明)、answer(完整正确答案)、hint(提示)。场景设定为大使馆接待。只返回JSON。格式：[{"pattern":"___ you ___?","instruction":"Replace ___ with \"Are/a diplomat\"","answer":"Are you a diplomat?","hint":"___ you a ___?"}]'},
+  {phase:0,num:3,name:'空间定位',desc:'存在感与方位反射',prompt:'你是一位FSI语言教官。请用JSON数组返回10组空间定位练习。每组包含pattern(用___标替换位)、instruction、answer、hint。场景设定为办公室与城市导航。只返回JSON。'},
+  {phase:0,num:4,name:'数量感知',desc:'基数词与名词复数',prompt:'你是一位FSI语言教官。请用JSON数组返回10组数量感知练习。场景为物资清点与预算报告。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:5,name:'所属关系',desc:'物主代词与财产边界',prompt:'你是一位FSI语言教官。请用JSON数组返回10组所属关系练习(物主代词)。场景外交财产与文件归属。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:6,name:'意志表达',desc:'助动词与基本需求',prompt:'你是一位FSI语言教官。请用JSON数组返回10组意志表达练习(I want to/need to/would like to)。场景外交谈判需求沟通。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:7,name:'职业习惯',desc:'一般现在时与日常行为',prompt:'你是一位FSI语言教官。请用JSON数组返回10组一般现在时职业习惯练习。场景外交官日常作息。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:8,name:'社交博弈',desc:'祈使句与礼貌请求',prompt:'你是一位FSI语言教官。请用JSON数组返回10组祈使句与礼貌请求练习。场景外交礼宾与会议安排。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:9,name:'否定防御',desc:'否定结构与委婉拒绝',prompt:'你是一位FSI语言教官。请用JSON数组返回10组否定结构练习(I don\'t/He isn\'t/We can\'t)。场景外交委婉拒绝。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:0,num:10,name:'经验回顾',desc:'一般过去时与任务汇报',prompt:'你是一位FSI语言教官。请用JSON数组返回10组一般过去时规则动词练习。场景外交任务汇报。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  // Phase 2 (10-19)
+  {phase:1,num:11,name:'未来投射',desc:'将来时与行程规划',prompt:'你是一位FSI语言教官。请用JSON数组返回10组将来时练习(I will/I\'m going to)。场景外交行程规划。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:12,name:'描述性感知',desc:'形容词与程度修饰',prompt:'你是一位FSI语言教官。请用JSON数组返回10组形容词搭配程度副词(very/quite/extremely)练习。场景国家形势描述。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:13,name:'因果链条',desc:'连词与逻辑反射',prompt:'你是一位FSI语言教官。请用JSON数组返回10组逻辑连词(because/so/therefore/however)练习。场景外交政策分析。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:14,name:'行为频率',desc:'频度副词与规律',prompt:'你是一位FSI语言教官。请用JSON数组返回10组频度副词(always/usually/sometimes/never)练习。场景外交工作模式。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:15,name:'动作进行',desc:'现在进行时与实时叙述',prompt:'你是一位FSI语言教官。请用JSON数组返回10组现在进行时练习。场景国际峰会现场实况。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:16,name:'工具使用',desc:'介词手段与方法',prompt:'你是一位FSI语言教官。请用JSON数组返回10组介手段方式练习(with/by/through/in)。场景外交工具方法。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:17,name:'比较竞争',desc:'比较级与最高级',prompt:'你是一位FSI语言教官。请用JSON数组返回10组比较级与最高级练习。场景国家实力政策比较。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:18,name:'义务责任',desc:'情态动词 Must/Should',prompt:'你是一位FSI语言教官。请用JSON数组返回10组义务责任练习(must/should/have to)。场景外交协议义务。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:19,name:'许可博弈',desc:'情态动词 May/Can',prompt:'你是一位FSI语言教官。请用JSON数组返回10组许可练习(may/can/could/be allowed to)。场景外交许可权限。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:1,num:20,name:'感官体验',desc:'感官动词与直接反馈',prompt:'你是一位FSI语言教官。请用JSON数组返回10组感官动词练习(look/sound/feel/taste/smell)。场景海外驻派生活。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  // Phase 3 (20-29)
+  {phase:2,num:21,name:'完成状态',desc:'现在完成时与任务结果',prompt:'你是一位FSI语言教官。请用JSON数组返回10组现在完成时练习。场景外交任务汇报。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:22,name:'社交委婉',desc:'虚拟语气与假设提案',prompt:'你是一位FSI语言教官。请用JSON数组返回10组虚拟语气练习(If I were/I would)。场景外交斡旋假设提案。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:23,name:'被动承受',desc:'被动语态与结果导向',prompt:'你是一位FSI语言教官。请用JSON数组返回10组被动语态练习。场景国际条约与决议。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:24,name:'复杂从句',desc:'定语从句与定义',prompt:'你是一位FSI语言教官。请用JSON数组返回10组定语从句练习(who/which/that)。场景外交人物事件描述。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:25,name:'时间跨度',desc:'过去完成时与历史回顾',prompt:'你是一位FSI语言教官。请用JSON数组返回10组过去完成时练习(had done/had been)。场景外交历史事件。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:26,name:'自我指涉',desc:'反身代词与自动行为',prompt:'你是一位FSI语言教官。请用JSON数组返回10组反身代词练习(myself/himself/themselves)。场景外交官自我管理。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:27,name:'意向深度',desc:'动名词与分词',prompt:'你是一位FSI语言教官。请用JSON数组返回10组动名词与分词练习。场景外交政策讨论。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:28,name:'社会关系',desc:'交互动词与团队',prompt:'你是一位FSI语言教官。请用JSON数组返回10组交互表达练习(each other/cooperate/negotiate)。场景多国外交合作。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:29,name:'决策辩论',desc:'高阶逻辑连词',prompt:'你是一位FSI语言教官。请用JSON数组返回10组高阶逻辑连词练习(although/nevertheless/on the other hand)。场景联合国议题辩论。每组含pattern/instruction/answer/hint。只返回JSON。'},
+  {phase:2,num:30,name:'叙事流',desc:'综合时态转换与叙事',prompt:'你是一位FSI语言教官。请用JSON数组返回10组叙事流练习，每组包含至少3种时态转换。场景外交官职涯故事。每组含pattern/instruction/answer/hint。只返回JSON。'},
+];
 
-let state = {level:'beginner',drillIdx:0,score:0,streak:0,total:0,correct:0,audioOn:true};
-const levels = Object.keys(drills);
+// ==================== STATE ====================
+let apiKey = localStorage.getItem('fsi_apikey') || '';
+let curPhase = 0, curUnit = -1, drills = [], drillIdx = 0, correctCount = 0, totalCount = 0;
 
-// ==================== INIT ====================
-function init() {
-  const levelBar = document.getElementById('levels');
-  levels.forEach((l,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'lvl' + (l === state.level ? ' active' : '');
-    btn.textContent = ['A1 入门','A2 基础','B1 中级','B2/C1 高级'][i];
-    btn.onclick = () => switchLevel(l);
-    levelBar.appendChild(btn);
+document.getElementById('apiKey').value = apiKey;
+
+function saveKey() {
+  apiKey = document.getElementById('apiKey').value.trim();
+  localStorage.setItem('fsi_apikey', apiKey);
+}
+
+// ==================== RENDER MAIN ====================
+function renderUnits() {
+  const grid = document.getElementById('unitGrid');
+  grid.innerHTML = units.filter(u => u.phase === curPhase).map((u,i) => `
+    <div class="unit" onclick="openUnit(${units.indexOf(u)})" id="unitRow${units.indexOf(u)}">
+      <span class="u-num">Unit ${u.num}</span>
+      <span class="u-name">${u.name}<br><span class="u-desc">${u.desc}</span></span>
+      <span class="u-badge">${u.num <= 10 ? 'A1' : u.num <= 20 ? 'B1' : 'B2/C1'}</span>
+    </div>
+  `).join('');
+}
+
+document.querySelectorAll('.phase-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    curPhase = parseInt(this.dataset.phase);
+    document.querySelectorAll('.phase-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderUnits();
   });
-  renderDrill();
-}
-function switchLevel(l) {
-  state.level = l; state.drillIdx = 0; state.streak = 0;
-  document.querySelectorAll('.lvl').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.lvl')[levels.indexOf(l)].classList.add('active');
-  renderDrill();
-  updateStats();
-}
-
-// ==================== RENDER ====================
-function renderDrill() {
-  const dl = drills[state.level][state.drillIdx % drills[state.level].length];
-  document.getElementById('pattern').innerHTML = dl.pattern;
-  document.getElementById('prompt').textContent = dl.prompt;
-  const hintEl = document.getElementById('hint');
-  if (dl.hint) { hintEl.style.display = 'block'; hintEl.textContent = '💡 Hint: ' + dl.hint; }
-  else hintEl.style.display = 'none';
-  const inp = document.getElementById('answerInput');
-  inp.value = ''; inp.className = ''; inp.focus();
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('btnNext').style.display = 'none';
-  document.getElementById('btnCheck').style.display = '';
-  document.getElementById('btnCheck').disabled = false;
-  animateProgress();
-}
-
-function checkAnswer() {
-  const inp = document.getElementById('answerInput');
-  const userAnswer = inp.value.trim();
-  if (!userAnswer) return;
-  const dl = drills[state.level][state.drillIdx % drills[state.level].length];
-  const expected = dl.answer;
-
-  // Normalize comparison
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
-  const isCorrect = norm(userAnswer) === norm(expected);
-
-  state.total++;
-  const fb = document.getElementById('feedback');
-  if (isCorrect) {
-    state.correct++; state.streak++; state.score += 10 + state.streak * 2;
-    inp.className = 'correct';
-    fb.className = 'feedback show good';
-    fb.textContent = `✅ Correct! +${10 + state.streak * 2} points`;
-    document.getElementById('btnCheck').style.display = 'none';
-    document.getElementById('btnNext').style.display = '';
-    document.getElementById('btnNext').focus();
-    if (state.audioOn) speak('Good.');
-  } else {
-    state.streak = 0;
-    inp.className = 'wrong';
-    fb.className = 'feedback show bad';
-    fb.innerHTML = `❌ Not quite.<br>Expected: <strong>${expected}</strong>`;
-    // Give another chance
-    inp.select();
-  }
-  updateStats();
-  animateProgress();
-}
-
-function nextDrill() {
-  state.drillIdx++;
-  renderDrill();
-}
-
-// ==================== SPEECH SYNTHESIS ====================
-function speak(text) {
-  if (!state.audioOn) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US'; u.rate = 0.85;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-function speakPattern() {
-  const dl = drills[state.level][state.drillIdx % drills[state.level].length];
-  speak(dl.answer);
-}
-
-function toggleAudio() {
-  state.audioOn = !state.audioOn;
-  document.getElementById('audioToggle').textContent = state.audioOn ? '🔊 Audio' : '🔇 Muted';
-}
-
-// ==================== STATS ====================
-function updateStats() {
-  document.getElementById('score').textContent = state.score;
-  document.getElementById('streak').textContent = state.streak;
-  document.getElementById('acc').textContent = state.total > 0 ? Math.round(state.correct / state.total * 100) + '%' : '0%';
-}
-function animateProgress() {
-  const dl = drills[state.level];
-  const pct = ((state.drillIdx % dl.length) / dl.length * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
-}
-
-// Keyboard shortcut
-document.getElementById('answerInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    checkAnswer();
-  }
 });
 
-init();
+// ==================== OPEN UNIT ====================
+async function openUnit(idx) {
+  curUnit = idx; drillIdx = 0; correctCount = 0; totalCount = 0;
+  const u = units[idx];
+
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('drillView').classList.add('show');
+  document.getElementById('drillUnitTitle').textContent = `Unit ${u.num} · ${u.name}`;
+  document.getElementById('drillUnitStats').textContent = '';
+  document.getElementById('drillContent').innerHTML = '';
+  document.getElementById('drillLoading').style.display = 'block';
+
+  // Try API
+  let generated = null;
+  if (apiKey) {
+    try {
+      const res = await fetch('https://api.deepseek.com/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:u.prompt}],temperature:0.7,max_tokens:1500})
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const text = d.choices[0].message.content.trim();
+        const match = text.match(/\[[\s\S]*\]/);
+        if (match) generated = JSON.parse(match[0]);
+      }
+    } catch(e) {}
+  }
+
+  if (!generated) {
+    // Fallback drills for offline
+    generated = generateFallback(idx);
+  }
+
+  drills = generated;
+  document.getElementById('drillLoading').style.display = 'none';
+  renderDrill();
+}
+
+function generateFallback(idx) {
+  const u = units[idx];
+  // Parse key sentence structure from prompt for basic substitution
+  const phase = u.phase;
+  // Provide 3 basic substitution drills per unit as fallback
+  if (idx === 0) return [
+    {pattern:'I <em>am</em> a <em>student</em>.',instruction:'Change "student" to "diplomat"',answer:'I am a diplomat.',hint:'I am a ___.'},
+    {pattern:'She <em>is</em> a <em>teacher</em>.',instruction:'Change to "he / doctor"',answer:'He is a doctor.',hint:'___ is a ___.'},
+    {pattern:'They <em>are</em> <em>engineers</em>.',instruction:'Change to "we / diplomats"',answer:'We are diplomats.',hint:'We are ___.'},
+  ];
+  // Generic pattern for other units
+  return [
+    {pattern:'I <em>want to</em> learn <em>English</em>.',instruction:'Replace "English" with a language',answer:'I want to learn English.',hint:'I want to learn ___.'},
+    {pattern:'She <em>needs to</em> finish the <em>report</em>.',instruction:'Replace "report" with a task',answer:'She needs to finish the report.',hint:'She needs to finish the ___.'},
+    {pattern:'They <em>will</em> arrive <em>tomorrow</em>.',instruction:'Change "tomorrow" to a time',answer:'They will arrive tomorrow.',hint:'They will arrive ___.'},
+  ];
+}
+
+// ==================== DRILL UI ====================
+function renderDrill() {
+  if (drillIdx >= drills.length) {
+    document.getElementById('drillContent').innerHTML = `
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:2.5rem;margin-bottom:12px">🎯</div>
+        <div style="font-size:1.1rem;margin-bottom:6px">Unit Complete!</div>
+        <div style="color:var(--dim);font-size:0.85rem">${correctCount}/${drills.length} correct</div>
+        <button class="btn-drill btn-next" onclick="closeDrill()" style="margin-top:20px">Back to Units</button>
+      </div>
+    `;
+    document.getElementById('drillUnitStats').textContent = `${correctCount}/${drills.length}`;
+    return;
+  }
+
+  const d = drills[drillIdx];
+  document.getElementById('drillUnitStats').textContent = `${drillIdx+1}/${drills.length}`;
+  document.getElementById('drillContent').innerHTML = `
+    <div class="pattern">${d.pattern}</div>
+    <div class="instruction">${d.instruction}</div>
+    ${d.hint ? `<div style="font-size:0.7rem;color:var(--dim);margin-bottom:14px;background:var(--surface);padding:8px 12px;border-radius:8px">💡 ${d.hint}</div>` : ''}
+    <div class="input-row">
+      <input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')checkDrillAnswer()">
+    </div>
+    <button class="btn-drill btn-check" onclick="checkDrillAnswer()" id="btnCheck">Check ✓</button>
+    <button class="btn-speak" onclick="speakDrill()">🔊 Listen</button>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-drill btn-next" id="btnNext" style="display:none" onclick="nextDrill()">Next →</button>
+  `;
+  setTimeout(() => {
+    const inp = document.getElementById('answerInput');
+    if (inp) { inp.focus(); }
+  }, 100);
+}
+
+function checkDrillAnswer() {
+  const inp = document.getElementById('answerInput');
+  if (!inp) return;
+  const userAns = inp.value.trim();
+  if (!userAns) return;
+  const d = drills[drillIdx];
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+  const isCorrect = norm(userAns) === norm(d.answer);
+  totalCount++;
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    correctCount++;
+    inp.className = 'correct';
+    fb.className = 'feedback show good'; fb.textContent = '✅ Correct!';
+    document.getElementById('btnCheck').style.display = 'none';
+    document.getElementById('btnNext').style.display = '';
+  } else {
+    inp.className = 'wrong';
+    fb.className = 'feedback show bad';
+    fb.innerHTML = `❌ Expected: <strong>${d.answer}</strong>`;
+    inp.select();
+  }
+}
+
+function nextDrill() { drillIdx++; renderDrill(); }
+function speakDrill() {
+  if (drillIdx < drills.length) {
+    const u = new SpeechSynthesisUtterance(drills[drillIdx].answer);
+    u.lang = 'en-US'; u.rate = 0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+}
+
+function closeDrill() {
+  document.getElementById('drillView').classList.remove('show');
+  document.getElementById('mainView').style.display = '';
+  curUnit = -1;
+}
+
+renderUnits();
 </script>
 </body>
 </html>
